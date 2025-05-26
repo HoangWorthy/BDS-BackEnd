@@ -1,5 +1,6 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -33,7 +35,7 @@ public class User {
     private String name;
 
     @Column
-    private int phone;
+    private String phone;
 
     @Column
     private String address;
@@ -45,14 +47,16 @@ public class User {
     private Gender gender;
 
     @Column
-    private Date dateOfBirth;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate dateOfBirth;
 
     @Column
     private Role role;
 
     @Column
-    private Date lastDonationDate;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate lastDonationDate;
 
     @Column
-    private int personalId;
+    private String personalId;
 }

@@ -3,9 +3,14 @@ package com.blooddonation.blood_donation_support_system.mapper;
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.User;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 public class UserMapper {
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
     public static UserDto mapToUserDto(User user) {
-        return new UserDto(
+        UserDto dto = new UserDto(
                 user.getId(),
                 user.getEmail(),
                 user.getPassword(),
@@ -19,10 +24,11 @@ public class UserMapper {
                 user.getLastDonationDate(),
                 user.getPersonalId()
         );
+        return dto;
     }
 
     public static User mapToUser(UserDto userDto) {
-        return new User(
+        User user = new User(
                 userDto.getId(),
                 userDto.getEmail(),
                 userDto.getPassword(),
@@ -36,5 +42,6 @@ public class UserMapper {
                 userDto.getLastDonationDate(),
                 userDto.getPersonalId()
         );
+        return user;
     }
 }

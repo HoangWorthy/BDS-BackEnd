@@ -28,6 +28,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // Set the JWT token in a cookie and redirect to the user page
         response.setHeader("Set-Cookie", "jwt-token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600");
-        response.sendRedirect("/user");
+        // Need index page with out authentication to redirect after login
+        response.sendRedirect("/user/info");
     }
 }

@@ -15,10 +15,32 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<UserDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream().map((employee) -> UserMapper.mapToUserDto(employee))
-                .collect(Collectors.toList());
+//    public List<UserDto> getAllUsers() {
+//        List<User> users = userRepository.findAll();
+//        return users.stream().map((employee) -> UserMapper.mapToUserDto(employee))
+//                .collect(Collectors.toList());
+//    }
+
+    public UserDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+        return UserMapper.mapToUserDto(user);
     }
 
+    public UserDto updateUser(UserDto currentUser, UserDto updatedUser) {
+        User userEntity = UserMapper.mapToUser(currentUser);
+
+        userEntity.setPhone(updatedUser.getPhone());
+        userEntity.setAddress(updatedUser.getAddress());
+        userEntity.setBloodType(updatedUser.getBloodType());
+        userEntity.setGender(updatedUser.getGender());
+        userEntity.setDateOfBirth(updatedUser.getDateOfBirth());
+        userEntity.setLastDonationDate(updatedUser.getLastDonationDate());
+        userEntity.setPersonalId(updatedUser.getPersonalId());
+
+        User savedUser = userRepository.save(userEntity);
+        return UserMapper.mapToUserDto(savedUser);
+    }
 }

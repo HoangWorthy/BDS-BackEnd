@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,19 +23,25 @@ public class UserController {
         this.jwtUtil = jwtUtil;
     }
 
-    // This endpoint does not require authentication
-    @GetMapping
-    public ResponseEntity<List<UserDto>> index() {
-
-        return ResponseEntity.ok(userService.getAllUsers());
-
+    // Get User Info
+    @GetMapping("/info")
+    public ResponseEntity<UserDto> info(@CookieValue(value = "jwt-token") String jwtToken) {
+        if (jwtToken != null && jwtUtil.validateToken(jwtToken)) {
+            UserDto userDto = jwtUtil.extractUser(jwtToken);
+//            UserDto userDto = userService.getUserByEmail(userEmail);
+            return ResponseEntity.ok(userDto);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    // This endpoint requires authentication
-    @GetMapping("/all")
-    public ResponseEntity<List<UserDto>> getAll(@CookieValue("jwt-token") String jwtToken) {
+    // Update User Info
+    @PutMapping("/update")
+    public ResponseEntity<UserDto> update(@CookieValue("jwt-token") String jwtToken,
+                                          @RequestBody UserDto updatedUser) {
         if (jwtToken != null && jwtUtil.validateToken(jwtToken)) {
-            return ResponseEntity.ok(userService.getAllUsers());
+            UserDto userDto = jwtUtil.extractUser(jwtToken);
+            UserDto updatedUserEntity = userService.updateUser(userDto, updatedUser);
+            return ResponseEntity.ok(updatedUserEntity);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

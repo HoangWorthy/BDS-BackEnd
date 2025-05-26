@@ -1,7 +1,9 @@
 package com.blooddonation.blood_donation_support_system.util;
 
+import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.User;
 import com.blooddonation.blood_donation_support_system.exception.OAuth2AttributeException;
+import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -44,14 +46,14 @@ public class JwtUtil {
             throw new OAuth2AttributeException("Email is required for authentication. Please ensure your OAuth2 provider shares your email.");
         }
         String name = oAuth2User.getAttribute("name");
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User newUser = new User();
-                    newUser.setEmail(email);
-                    newUser.setName(name);
-                    newUser.setRole(MEMBER);
-                    return userRepository.save(newUser);
-                });
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setName(name);
+            newUser.setRole(MEMBER);
+            userRepository.save(newUser);
+        }
         return generateToken(email);
     }
 
@@ -73,6 +75,15 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public UserDto extractUser(String token) {
+        String email = extractBody(token);
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+        return UserMapper.mapToUserDto(user);
     }
 
 

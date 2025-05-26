@@ -3,14 +3,15 @@ package com.blooddonation.blood_donation_support_system.dto;
     import com.blooddonation.blood_donation_support_system.entity.BloodType;
     import com.blooddonation.blood_donation_support_system.entity.Gender;
     import com.blooddonation.blood_donation_support_system.entity.Role;
+    import com.fasterxml.jackson.annotation.JsonFormat;
     import lombok.AllArgsConstructor;
     import lombok.Getter;
     import lombok.NoArgsConstructor;
     import lombok.Setter;
 
-    import java.util.Date;
+    import java.time.LocalDate;
 
-    @Getter
+@Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -19,12 +20,18 @@ package com.blooddonation.blood_donation_support_system.dto;
         private String email;
         private String password;
         private String name;
-        private int phone;
+        private String phone;
         private String address;
         private BloodType bloodType;
         private Gender gender;
-        private Date dateOfBirth;
+
+        @JsonFormat(pattern = "dd-MM-yyyy")
+        private LocalDate dateOfBirth;
+
         private Role role;
-        private Date lastDonationDate;
-        private int personalId;
+
+        @JsonFormat(pattern = "dd-MM-yyyy")
+        private LocalDate lastDonationDate;
+
+        private String personalId;
     }

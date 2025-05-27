@@ -1,7 +1,7 @@
 package com.blooddonation.blood_donation_support_system.service;
 
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
-import com.blooddonation.blood_donation_support_system.entity.Role;
+import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.entity.User;
 import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
 import com.blooddonation.blood_donation_support_system.repository.UserRepository;

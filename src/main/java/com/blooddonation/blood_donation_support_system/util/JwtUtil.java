@@ -2,7 +2,6 @@ package com.blooddonation.blood_donation_support_system.util;
 
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.User;
-import com.blooddonation.blood_donation_support_system.exception.OAuth2AttributeException;
 import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
-import static com.blooddonation.blood_donation_support_system.entity.Role.MEMBER;
+import static com.blooddonation.blood_donation_support_system.enums.Role.MEMBER;
 
 @Component
 public class JwtUtil {
@@ -41,10 +40,6 @@ public class JwtUtil {
     // This method is called when the user successfully logs in using OAuth2 and save the user
     public String saveOAuth2User(OAuth2User oAuth2User) {
         String email = oAuth2User.getAttribute("email");
-        //throw exception github does not share email (private email)
-        if (email == null) {
-            throw new OAuth2AttributeException("Email is required for authentication. Please ensure your OAuth2 provider shares your email.");
-        }
         String name = oAuth2User.getAttribute("name");
         User user = userRepository.findByEmail(email);
         if (user == null) {

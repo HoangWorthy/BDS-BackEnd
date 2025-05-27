@@ -15,11 +15,6 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-//    public List<UserDto> getAllUsers() {
-//        List<User> users = userRepository.findAll();
-//        return users.stream().map((employee) -> UserMapper.mapToUserDto(employee))
-//                .collect(Collectors.toList());
-//    }
 
     public UserDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email);

@@ -1,34 +1,40 @@
 package com.blooddonation.blood_donation_support_system.service;
 
-import com.blooddonation.blood_donation_support_system.util.JwtUtil;
-import io.jsonwebtoken.io.IOException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.stereotype.Component;
+        import com.blooddonation.blood_donation_support_system.exception.GithubEmailPrivateException;
+        import com.blooddonation.blood_donation_support_system.util.JwtUtil;
+        import jakarta.servlet.http.HttpServletRequest;
+        import jakarta.servlet.http.HttpServletResponse;
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.security.core.Authentication;
+        import org.springframework.security.oauth2.core.user.OAuth2User;
+        import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+        import org.springframework.stereotype.Component;
 
-@Component
-public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+        @Component
+        public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JwtUtil jwtUtil;
+            private final JwtUtil jwtUtil;
 
-    public OAuth2LoginSuccessHandler(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
+            @Autowired
+            public OAuth2LoginSuccessHandler(JwtUtil jwtUtil) {
+                this.jwtUtil = jwtUtil;
+            }
 
-    @Override
-    public void onAuthenticationSuccess(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      Authentication authentication) throws java.io.IOException {
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        System.out.println("OAuth2User: " + oAuth2User.getAttributes());
-        String token = jwtUtil.saveOAuth2User(oAuth2User);
+            @Override
+            public void onAuthenticationSuccess(HttpServletRequest request,
+                                              HttpServletResponse response,
+                                              Authentication authentication) throws java.io.IOException {
+                OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // Set the JWT token in a cookie and redirect to the user page
-        response.setHeader("Set-Cookie", "jwt-token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600");
-        // Need index page with out authentication to redirect after login
-        response.sendRedirect("/user/info");
-    }
-}
+                // Check if email is available
+                String email = oAuth2User.getAttribute("email");
+                if (email == null || email.isEmpty()) {
+                    throw new GithubEmailPrivateException("GitHub email is private. Please make your email public in your GitHub settings.");
+                }
+
+                String token = jwtUtil.saveOAuth2User(oAuth2User);
+
+                response.setHeader("Set-Cookie", "jwt-token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600");
+                response.sendRedirect("/user/info");
+            }
+        }

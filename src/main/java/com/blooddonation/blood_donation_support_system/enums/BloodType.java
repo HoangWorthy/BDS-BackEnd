@@ -1,4 +1,4 @@
-package com.blooddonation.blood_donation_support_system.entity;
+package com.blooddonation.blood_donation_support_system.enums;
 
 public enum BloodType {
     A_POSITIVE("A+"),

@@ -1,8 +1,8 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
-    import com.blooddonation.blood_donation_support_system.entity.BloodType;
-    import com.blooddonation.blood_donation_support_system.entity.Gender;
-    import com.blooddonation.blood_donation_support_system.entity.Role;
+    import com.blooddonation.blood_donation_support_system.enums.BloodType;
+    import com.blooddonation.blood_donation_support_system.enums.Gender;
+    import com.blooddonation.blood_donation_support_system.enums.Role;
     import com.fasterxml.jackson.annotation.JsonFormat;
     import lombok.AllArgsConstructor;
     import lombok.Getter;

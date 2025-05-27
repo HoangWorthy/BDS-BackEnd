@@ -10,6 +10,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
@@ -20,9 +23,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         response.sendRedirect("/login");
     }
 
-    //this need review, not sure if this is the right way to handle this exception
-    @ExceptionHandler(OAuth2AttributeException.class)
-    public ResponseEntity<Object> handleOAuth2AttributeException(OAuth2AttributeException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(GithubEmailPrivateException.class)
+    public ResponseEntity<Object> handleGithubEmailPrivateException(GithubEmailPrivateException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "GitHub Email Access Error");
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }

@@ -1,5 +1,8 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
+import com.blooddonation.blood_donation_support_system.enums.BloodType;
+import com.blooddonation.blood_donation_support_system.enums.Gender;
+import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -41,9 +43,11 @@ public class User {
     private String address;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private BloodType bloodType;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @Column
@@ -51,6 +55,7 @@ public class User {
     private LocalDate dateOfBirth;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @Column

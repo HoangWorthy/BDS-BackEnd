@@ -19,7 +19,7 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtUtil jwtUtil;    
 
 //    private final UserService userService;
 //    private final JwtUtil jwtUtil;

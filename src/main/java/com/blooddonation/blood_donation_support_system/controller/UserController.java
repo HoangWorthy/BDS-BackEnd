@@ -60,6 +60,12 @@ public class UserController {
         return userService.verifyUser(verificationCode);
     }
 
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerification(@RequestParam String email) {
+        String result = userService.resendVerificationCode(email);
+        return ResponseEntity.ok(result);
+    }
+
 //    @PostMapping("/verify")
 //    public ResponseEntity<String> verify(@RequestBody VerificationDto verificationDto) {
 //        String result = userService.verifyUser(verificationDto.getCode());

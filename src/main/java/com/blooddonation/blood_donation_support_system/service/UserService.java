@@ -6,13 +6,12 @@ import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
 import com.blooddonation.blood_donation_support_system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-
-
 
 @Service
 public class UserService {
@@ -20,10 +19,11 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final Map<String, User> temporaryUsers = new HashMap<>();
     private final Map<String, LocalDateTime> codeExpiration = new HashMap<>();
-
 
     public UserDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email);
@@ -54,18 +54,58 @@ public class UserService {
         } else if (userDto.getEmail().isEmpty() || userDto.getPassword().isEmpty()) {
             return "Email and password cannot be empty";
         }
+        // Encode the password and saving
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User userEntity = UserMapper.mapToUser(userDto);
+
+        // Remove existing temporary registration for this email if exists
+        String existingCode = temporaryUsers.entrySet().stream()
+                .filter(entry -> entry.getValue().getEmail().equals(userDto.getEmail()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+        if (existingCode != null) {
+            temporaryUsers.remove(existingCode);
+            codeExpiration.remove(existingCode);
+        }
+
+        // Generate a verification code and store it temporarily
         String verificationCode = generateVerificationCode();
         temporaryUsers.put(verificationCode, userEntity);
         codeExpiration.put(verificationCode, LocalDateTime.now().plusMinutes(10));
 
+        // Send verification email
         sendVerificationEmail(userEntity, verificationCode);
         return "verification email sent";
     }
 
-//    public  resendVerificationCode(){
-//
-//    }
+    public String resendVerificationCode(String email) {
+        User userEntity = temporaryUsers.values().stream()
+                .filter(u -> u.getEmail().equals(email))
+                .findFirst()
+                .orElse(null);
+        if (userEntity == null) {
+            return "No temporary registration found for this email";
+        }
+
+        // Remove old verification code
+        String oldCode = temporaryUsers.entrySet().stream()
+                .filter(entry -> entry.getValue().getEmail().equals(email))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+        if (oldCode != null) {
+            temporaryUsers.remove(oldCode);
+            codeExpiration.remove(oldCode);
+        }
+
+        String newVerificationCode = generateVerificationCode();
+        temporaryUsers.put(newVerificationCode, userEntity);
+        codeExpiration.put(newVerificationCode, LocalDateTime.now().plusMinutes(10));
+
+        sendVerificationEmail(userEntity, newVerificationCode);
+        return "New verification email sent";
+    }
 
     private String generateVerificationCode() {
         return String.format("%06d", (int) (Math.random() * 1000000));
@@ -89,7 +129,7 @@ public class UserService {
     }
 
     public String verifyUser(String code) {
-        if(!codeExpiration.containsKey(code)) {
+        if (!codeExpiration.containsKey(code)) {
             return "Verification code invalid";
         }
         if (LocalDateTime.now().isAfter(codeExpiration.get(code))) {

@@ -20,22 +20,36 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private JwtUtil jwtUtil;    
+    private JwtUtil jwtUtil;
 
     // Get User Info
     @GetMapping("/info")
     public ResponseEntity<UserDto> info(@CookieValue(value = "jwt-token") String jwtToken) {
-        UserDto userDto = jwtUtil.extractUser(jwtToken);
-        return ResponseEntity.ok(userDto);
+        try {
+            UserDto userDto = jwtUtil.extractUser(jwtToken);
+            if (userDto == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     // Update User Info
     @PutMapping("/update")
     public ResponseEntity<UserDto> update(@CookieValue("jwt-token") String jwtToken,
                                           @RequestBody UserDto updatedUser) {
-        UserDto userDto = jwtUtil.extractUser(jwtToken);
-        UserDto updatedUserEntity = userService.updateUser(userDto, updatedUser);
-        return ResponseEntity.ok(updatedUserEntity);
+        try {
+            UserDto userDto = jwtUtil.extractUser(jwtToken);
+            UserDto updatedUserEntity = userService.updateUser(userDto, updatedUser);
+            if (updatedUserEntity == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(updatedUserEntity);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // This endpoint use to invalidate the JWT token
@@ -51,18 +65,31 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody UserDto userDto) {
-        return userService.registerUser(userDto);
+    public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
+        String result = userService.registerUser(userDto);
+        if (result.equals("Email already exists") || result.contains("empty")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/verify")
-    public String verify(@RequestParam String verificationCode) {
-        return userService.verifyUser(verificationCode);
+    public ResponseEntity<String> verify(@RequestParam String verificationCode) {
+        String result = userService.verifyUser(verificationCode);
+        if (result.equals("Verification code invalid") ||
+                result.equals("Verification code expired") ||
+                result.equals("Invalid verification code")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/resend-verification")
     public ResponseEntity<String> resendVerification(@RequestParam String email) {
         String result = userService.resendVerificationCode(email);
+        if (result.equals("No temporary registration found for this email")) {
+            return ResponseEntity.badRequest().body(result);
+        }
         return ResponseEntity.ok(result);
     }
 

@@ -17,13 +17,6 @@ public class AdminController {
 
     @Autowired
     private JwtUtil jwtUtil;
-//    private final AdminService adminService;
-//    private final JwtUtil jwtUtil;
-//
-//    public AdminController(AdminService adminService, JwtUtil jwtUtil) {
-//        this.adminService = adminService;
-//        this.jwtUtil = jwtUtil;
-//    }
 
     // Show a list of all users
     @GetMapping("/userList")

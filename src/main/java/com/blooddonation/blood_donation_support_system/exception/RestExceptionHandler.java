@@ -23,14 +23,4 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         response.sendRedirect("/login");
     }
 
-    @ExceptionHandler(GithubEmailPrivateException.class)
-    public ResponseEntity<Object> handleGithubEmailPrivateException(GithubEmailPrivateException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", ex.getMessage());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "GitHub Email Access Error");
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
 }

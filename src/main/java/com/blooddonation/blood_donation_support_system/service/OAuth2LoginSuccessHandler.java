@@ -1,6 +1,5 @@
 package com.blooddonation.blood_donation_support_system.service;
 
-        import com.blooddonation.blood_donation_support_system.exception.GithubEmailPrivateException;
         import com.blooddonation.blood_donation_support_system.util.JwtUtil;
         import jakarta.servlet.http.HttpServletRequest;
         import jakarta.servlet.http.HttpServletResponse;
@@ -24,17 +23,12 @@ package com.blooddonation.blood_donation_support_system.service;
             public void onAuthenticationSuccess(HttpServletRequest request,
                                               HttpServletResponse response,
                                               Authentication authentication) throws java.io.IOException {
-                OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-                // Check if email is available
-                String email = oAuth2User.getAttribute("email");
-                if (email == null || email.isEmpty()) {
-                    throw new GithubEmailPrivateException("GitHub email is private. Please make your email public in your GitHub settings.");
-                }
+                OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
                 String token = jwtUtil.saveOAuth2User(oAuth2User);
 
                 response.setHeader("Set-Cookie", "jwt-token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600");
-                response.sendRedirect("/user/info");
+                response.sendRedirect("/login");
             }
         }

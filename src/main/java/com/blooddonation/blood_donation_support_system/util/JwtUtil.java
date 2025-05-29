@@ -39,6 +39,7 @@ public class JwtUtil {
 
     // This method is called when the user successfully logs in using OAuth2 and save the user
     public String saveOAuth2User(OAuth2User oAuth2User) {
+        System.out.println("Saving OAuth2 user: " + oAuth2User);
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
         User user = userRepository.findByEmail(email);

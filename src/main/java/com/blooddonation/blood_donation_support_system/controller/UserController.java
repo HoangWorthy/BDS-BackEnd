@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
+import com.blooddonation.blood_donation_support_system.dto.VerificationDto;
 import com.blooddonation.blood_donation_support_system.service.UserService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
@@ -20,14 +21,6 @@ public class UserController {
     private UserService userService;
     @Autowired
     private JwtUtil jwtUtil;    
-
-//    private final UserService userService;
-//    private final JwtUtil jwtUtil;
-//
-//    public UserController(UserService userService, JwtUtil jwtUtil) {
-//        this.userService = userService;
-//        this.jwtUtil = jwtUtil;
-//    }
 
     // Get User Info
     @GetMapping("/info")
@@ -57,4 +50,19 @@ public class UserController {
         response.sendRedirect("/login");
     }
 
+    @PostMapping("/register")
+    public String registerUser(@RequestBody UserDto userDto) {
+        return userService.registerUser(userDto);
+    }
+
+    @PostMapping("/verify")
+    public String verify(@RequestParam String verificationCode) {
+        return userService.verifyUser(verificationCode);
+    }
+
+//    @PostMapping("/verify")
+//    public ResponseEntity<String> verify(@RequestBody VerificationDto verificationDto) {
+//        String result = userService.verifyUser(verificationDto.getCode());
+//        return ResponseEntity.ok(result);
+//    }
 }

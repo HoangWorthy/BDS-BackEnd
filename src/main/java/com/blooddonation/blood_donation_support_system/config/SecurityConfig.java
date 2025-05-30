@@ -43,12 +43,15 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/info", "/user/update", "/user/logout").authenticated()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+//                        .requestMatchers("/user/info", "/user/update", "/user/logout").authenticated()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().permitAll(
+                                .requestMatchers("/user/login", "/user/register", "/user/verify", "user/resend-verification", "/user/forgot-password", "user/reset-password").permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .anyRequest().authenticated()
                 )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler())
                 );
@@ -57,3 +60,7 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
+//.requestMatchers("/user/login", "/user/register", "/user/verify", "user/resend-verification").permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated()

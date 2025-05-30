@@ -2,8 +2,10 @@ package com.blooddonation.blood_donation_support_system.service;
 
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.User;
+import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
 import com.blooddonation.blood_donation_support_system.repository.UserRepository;
+import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,32 +23,13 @@ public class UserService {
     private EmailService emailService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
+
 
     private final Map<String, User> temporaryUsers = new HashMap<>();
     private final Map<String, LocalDateTime> codeExpiration = new HashMap<>();
 
-    public UserDto getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new RuntimeException("User not found with email: " + email);
-        }
-        return UserMapper.mapToUserDto(user);
-    }
-
-    public UserDto updateUser(UserDto currentUser, UserDto updatedUser) {
-        User userEntity = UserMapper.mapToUser(currentUser);
-
-        userEntity.setPhone(updatedUser.getPhone());
-        userEntity.setAddress(updatedUser.getAddress());
-        userEntity.setBloodType(updatedUser.getBloodType());
-        userEntity.setGender(updatedUser.getGender());
-        userEntity.setDateOfBirth(updatedUser.getDateOfBirth());
-        userEntity.setLastDonationDate(updatedUser.getLastDonationDate());
-        userEntity.setPersonalId(updatedUser.getPersonalId());
-
-        User savedUser = userRepository.save(userEntity);
-        return UserMapper.mapToUserDto(savedUser);
-    }
 
     public String registerUser(UserDto userDto) {
         if (userRepository.findByEmail(userDto.getEmail()) != null) {
@@ -56,18 +39,10 @@ public class UserService {
         }
         // Encode the password and saving
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        userDto.setRole(Role.MEMBER);
         User userEntity = UserMapper.mapToUser(userDto);
 
-        // Remove existing temporary registration for this email if exists
-        String existingCode = temporaryUsers.entrySet().stream()
-                .filter(entry -> entry.getValue().getEmail().equals(userDto.getEmail()))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElse(null);
-        if (existingCode != null) {
-            temporaryUsers.remove(existingCode);
-            codeExpiration.remove(existingCode);
-        }
+        removeOldCode(userDto.getEmail());
 
         // Generate a verification code and store it temporarily
         String verificationCode = generateVerificationCode();
@@ -89,15 +64,7 @@ public class UserService {
         }
 
         // Remove old verification code
-        String oldCode = temporaryUsers.entrySet().stream()
-                .filter(entry -> entry.getValue().getEmail().equals(email))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElse(null);
-        if (oldCode != null) {
-            temporaryUsers.remove(oldCode);
-            codeExpiration.remove(oldCode);
-        }
+        removeOldCode(email);
 
         String newVerificationCode = generateVerificationCode();
         temporaryUsers.put(newVerificationCode, userEntity);
@@ -107,8 +74,110 @@ public class UserService {
         return "New verification email sent";
     }
 
+    public String verifyUser(String code) {
+        if (!codeExpiration.containsKey(code)) {
+            return "Verification code invalid";
+        }
+        if (LocalDateTime.now().isAfter(codeExpiration.get(code))) {
+            return "Verification code expired";
+        }
+        User user = temporaryUsers.get(code);
+        if (user != null) {
+            userRepository.save(user);
+            temporaryUsers.remove(code);
+            codeExpiration.remove(code);
+            return "User registered successfully";
+
+        }
+        return "Invalid verification code";
+    }
+
+    public String login(UserDto userDto) {
+        User user = userRepository.findByEmail(userDto.getEmail());
+        if (user == null || !passwordEncoder.matches(userDto.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        return jwtUtil.generateToken(userDto.getEmail());
+    }
+
+    public String initiatePasswordReset(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return "Email not found";
+        }
+
+        removeOldCode(email);
+
+        String resetCode = generateVerificationCode();
+        codeExpiration.put(resetCode, LocalDateTime.now().plusMinutes(10));
+        temporaryUsers.put(resetCode, user);
+        sendResetPassword(user, resetCode);
+        return "New password reset code sent";
+    }
+
+    public String resetPassword(String resetCode, String newPassword) {
+        if (!codeExpiration.containsKey(resetCode)) {
+            return "Reset code invalid";
+        }
+        if (LocalDateTime.now().isAfter(codeExpiration.get(resetCode))) {
+            return "Reset code expired";
+        }
+
+        User user = temporaryUsers.get(resetCode);
+        if (user == null) {
+            return "Invalid reset code";
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Clean up temporary data
+        temporaryUsers.remove(resetCode);
+        codeExpiration.remove(resetCode);
+
+        return "Password reset successfully";
+    }
+
+
+    public UserDto updateUser(UserDto currentUser, UserDto updatedUser) {
+        User userEntity = UserMapper.mapToUser(currentUser);
+
+        userEntity.setPhone(updatedUser.getPhone());
+        userEntity.setAddress(updatedUser.getAddress());
+        userEntity.setBloodType(updatedUser.getBloodType());
+        userEntity.setGender(updatedUser.getGender());
+        userEntity.setDateOfBirth(updatedUser.getDateOfBirth());
+        userEntity.setLastDonationDate(updatedUser.getLastDonationDate());
+        userEntity.setPersonalId(updatedUser.getPersonalId());
+
+        User savedUser = userRepository.save(userEntity);
+        return UserMapper.mapToUserDto(savedUser);
+    }
+
+
+    public UserDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+        return UserMapper.mapToUserDto(user);
+    }
+
     private String generateVerificationCode() {
         return String.format("%06d", (int) (Math.random() * 1000000));
+    }
+
+    private void removeOldCode(String email) {
+        String oldCode = temporaryUsers.entrySet().stream()
+                .filter(entry -> entry.getValue().getEmail().equals(email))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+
+        if (oldCode != null) {
+            temporaryUsers.remove(oldCode);
+            codeExpiration.remove(oldCode);
+        }
     }
 
     private void sendVerificationEmail(User user, String verificationCode) {
@@ -128,22 +197,22 @@ public class UserService {
         }
     }
 
-    public String verifyUser(String code) {
-        if (!codeExpiration.containsKey(code)) {
-            return "Verification code invalid";
-        }
-        if (LocalDateTime.now().isAfter(codeExpiration.get(code))) {
-            return "Verification code expired";
-        }
-        User user = temporaryUsers.get(code);
-        if (user != null) {
-            userRepository.save(user);
-            temporaryUsers.remove(code);
-            codeExpiration.remove(code);
-            return "User registered successfully";
+    private void sendResetPassword(User user, String resetCode) {
+        String subject = "Password Reset Request";
+        String htmlMessage = "<html>"
+                + "<body>"
+                + "<h2>Password Reset Request</h2>"
+                + "<p>Your password reset code is:</p>"
+                + "<h3>" + resetCode + "</h3>"
+                + "<p>This code will expire in 10 minutes.</p>"
+                + "</body>"
+                + "</html>";
 
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return "Invalid verification code";
     }
 
     @Scheduled(fixedDelay = 600000)

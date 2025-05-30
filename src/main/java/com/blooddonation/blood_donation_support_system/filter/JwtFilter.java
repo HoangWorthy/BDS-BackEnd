@@ -1,6 +1,8 @@
 package com.blooddonation.blood_donation_support_system.filter;
 
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
+import com.blooddonation.blood_donation_support_system.enums.Role;
+import com.blooddonation.blood_donation_support_system.service.TokenBlacklistService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import io.jsonwebtoken.Jwt;
 import jakarta.servlet.FilterChain;
@@ -23,26 +25,44 @@ import java.util.Collections;
 public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
-//    private final JwtUtil jwtUtil;
-//
-//    public JwtFilter(JwtUtil jwtUtil) {
-//        this.jwtUtil = jwtUtil;
-//    }
+
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/user/login") ||
+                path.startsWith("/user/register") ||
+                path.startsWith("/user/verify") ||
+                path.startsWith("/user/resend-verification") ||
+                path.startsWith("/oauth2") ||
+                path.startsWith("/login/oauth2");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String jwt = extractJwtFromCookie(request);
 
+        if (jwt == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (tokenBlacklistService.isTokenBlacklisted(jwt)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
         if (jwt != null && jwtUtil.validateToken(jwt) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDto userDto = jwtUtil.extractUser(jwt);
-
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + userDto.getRole().name());
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                userDto,
-                null,
-                Collections.singleton(authority)
+                    userDto,
+                    null,
+                    Collections.singleton(authority)
             );
 
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

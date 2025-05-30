@@ -53,6 +53,8 @@ public class JwtUtil {
         return generateToken(email);
     }
 
+
+
     public boolean isTokenExpired(String token) {
         final Date expiration = Jwts.parser()
                 .verifyWith(secretKey)

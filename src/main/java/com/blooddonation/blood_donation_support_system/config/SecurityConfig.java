@@ -10,6 +10,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,13 +28,10 @@ public class SecurityConfig {
     @Autowired
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
-//    private final JwtUtil jwtUtil;
-//    private final JwtFilter jwtFilter;
-//
-//    public SecurityConfig(JwtUtil jwtUtil, JwtFilter jwtFilter) {
-//        this.jwtUtil = jwtUtil;
-//        this.jwtFilter = jwtFilter;
-//    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
+    }
 
     @Bean
     public OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler() {
@@ -44,13 +43,15 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/info", "/user/update").authenticated()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+//                        .requestMatchers("/user/info", "/user/update", "/user/logout").authenticated()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().permitAll(
+                                .requestMatchers("/user/login", "/user/register", "/user/verify", "user/resend-verification", "/user/forgot-password", "user/reset-password").permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .anyRequest().authenticated()
                 )
-                //test login at http://localhost:8080/login
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler())
                 );
@@ -59,3 +60,7 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
+//.requestMatchers("/user/login", "/user/register", "/user/verify", "user/resend-verification").permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated()

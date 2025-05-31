@@ -26,17 +26,21 @@ public class UserController {
 
     //Login
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDto userDto) {
+    public ResponseEntity<String> login(@RequestBody UserDto userDto, HttpServletResponse response) {
         String jwtToken = userService.login(userDto);
-        if (jwtToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        if (jwtToken == null || jwtToken.equals("Invalid email or password")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
         }
+
         Cookie cookie = new Cookie("jwt-token", jwtToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false); // HTTPS only — use false for localhost HTTP dev
         cookie.setPath("/");
-        cookie.setMaxAge(3600); // 1 hour
-        return ResponseEntity.ok().header("Set-Cookie", "jwt-token=" + jwtToken + "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600").body("Login successful");
+        cookie.setMaxAge(3600);
+        cookie.setDomain("localhost"); // Optional, but helps in some setups
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok("Login successful");
     }
 
     // Logout

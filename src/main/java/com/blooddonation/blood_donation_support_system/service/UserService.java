@@ -95,7 +95,7 @@ public class UserService {
     public String login(UserDto userDto) {
         User user = userRepository.findByEmail(userDto.getEmail());
         if (user == null || !passwordEncoder.matches(userDto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            return "Invalid email or password";
         }
         return jwtUtil.generateToken(userDto.getEmail());
     }

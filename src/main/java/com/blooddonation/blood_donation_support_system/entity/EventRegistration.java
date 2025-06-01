@@ -43,4 +43,48 @@ public class EventRegistration {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+
+@PrePersist
+public void prePersist() {
+    // Set default registration date if not provided
+    if (registrationDate == null) {
+        registrationDate = LocalDate.now();
+    }
+    // Set default status if not provided
+    if (status == null) {
+        status = Status.PENDING;
+    }
+
+    // Update registered member count in donation event
+    if (event != null) {
+        Integer currentRegisteredCount = event.getRegisteredMemberCount();
+        int newCount;
+
+        if (currentRegisteredCount == null) {
+            newCount = 1;
+        } else {
+            newCount = currentRegisteredCount + 1;
+        }
+
+        event.setRegisteredMemberCount(newCount);
+    }
+}
+
+@PreRemove
+public void preRemove() {
+    // Decrease registered member count in donation event
+    if (event != null) {
+        Integer currentRegisteredCount = event.getRegisteredMemberCount();
+        int newCount;
+
+        if (currentRegisteredCount == null) {
+            newCount = 0;
+        } else {
+            newCount = currentRegisteredCount - 1;
+        }
+
+        // Ensure count never goes below 0
+        event.setRegisteredMemberCount(Math.max(0, newCount));
+    }
+}
 }

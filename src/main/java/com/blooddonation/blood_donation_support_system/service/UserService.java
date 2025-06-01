@@ -154,6 +154,23 @@ public class UserService {
         return UserMapper.mapToUserDto(savedUser);
     }
 
+    public UserDto updateUserPassword(String email, String oldPassword, String newPassword) {
+        User userEntity = userRepository.findByEmail(email);
+        if (userEntity == null) {
+            throw new RuntimeException("User not found");
+        }
+        if (!passwordEncoder.matches(oldPassword, userEntity.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+        if (newPassword.isEmpty()) {
+            throw new RuntimeException("New password cannot be empty");
+        }
+        userEntity.setPassword(passwordEncoder.encode(newPassword));
+
+        User savedUser = userRepository.save(userEntity);
+        return UserMapper.mapToUserDto(savedUser);
+    }
+
 
     public UserDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email);

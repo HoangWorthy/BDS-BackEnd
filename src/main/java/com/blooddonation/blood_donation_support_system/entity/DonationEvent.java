@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -25,6 +26,12 @@ public class DonationEvent {
     private Long id;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String location;
+
+    @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate donationDate;
 
@@ -37,7 +44,16 @@ public class DonationEvent {
     private LocalTime endTime;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<BloodUnit> bloodUnits;
+    private List<EventRegistration> registrations = new ArrayList<>();
+
+    @Column(name = "registered_member_count")
+    private Integer registeredMemberCount = 0;
+
+    @Column(nullable = false)
+    private Integer totalMemberCount;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BloodUnit> bloodUnits = new ArrayList<>();
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

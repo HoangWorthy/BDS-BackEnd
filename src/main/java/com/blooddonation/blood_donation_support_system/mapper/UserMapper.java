@@ -2,10 +2,12 @@ package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.User;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+@Component
 public class UserMapper {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 

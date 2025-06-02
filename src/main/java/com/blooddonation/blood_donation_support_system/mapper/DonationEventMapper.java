@@ -3,8 +3,11 @@ package com.blooddonation.blood_donation_support_system.mapper;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DonationEventMapper {
+
 
     public static DonationEventDto toDto(DonationEvent event) {
         if (event == null) return null;

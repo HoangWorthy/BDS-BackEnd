@@ -23,10 +23,17 @@ public class BloodUnit {
     @JoinColumn(name = "event_id", nullable = false)
     private DonationEvent event;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "donor_id", nullable = false)
+    private User donor;
+
+
     @Column(nullable = false)
     private Double volume;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
+
+
 }

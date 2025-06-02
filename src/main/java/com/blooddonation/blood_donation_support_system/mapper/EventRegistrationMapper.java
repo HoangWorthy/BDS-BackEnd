@@ -4,7 +4,9 @@ import com.blooddonation.blood_donation_support_system.dto.EventRegistrationDto;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
 import com.blooddonation.blood_donation_support_system.entity.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EventRegistrationMapper {
 
     public static EventRegistrationDto toDto(EventRegistration registration) {

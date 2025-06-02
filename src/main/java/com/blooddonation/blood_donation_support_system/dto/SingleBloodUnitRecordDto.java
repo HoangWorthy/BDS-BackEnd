@@ -1,17 +1,16 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
-import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MedicalFacilityStockDto {
-    private Long id;
+public class SingleBloodUnitRecordDto {
+    private Long userId;
     private Double volume;
-    private BloodType bloodType;
-    private ComponentType componentType;
 }

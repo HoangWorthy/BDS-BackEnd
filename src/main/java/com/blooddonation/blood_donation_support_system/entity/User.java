@@ -23,42 +23,32 @@ public class User {
     private Long id;
 
     @NotBlank
-    @Column
     private String email;
 
     @NotBlank
-    @Column
     private String password;
 
-    @Column
     private String name;
 
-    @Column
     private String phone;
 
-    @Column
     private String address;
 
-    @Column
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
 
-    @Column
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateOfBirth;
 
-    @Column
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate lastDonationDate;
 
-    @Column
     private String personalId;
+
 }

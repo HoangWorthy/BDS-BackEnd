@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
+import com.blooddonation.blood_donation_support_system.enums.DonationType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -43,48 +44,58 @@ public class EventRegistration {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_slot_id")
+    private DonationTimeSlot timeSlot;
 
-@PrePersist
-public void prePersist() {
-    // Set default registration date if not provided
-    if (registrationDate == null) {
-        registrationDate = LocalDate.now();
-    }
-    // Set default status if not provided
-    if (status == null) {
-        status = Status.PENDING;
-    }
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DonationType donationType;
 
-    // Update registered member count in donation event
-    if (event != null) {
-        Integer currentRegisteredCount = event.getRegisteredMemberCount();
-        int newCount;
 
-        if (currentRegisteredCount == null) {
-            newCount = 1;
-        } else {
-            newCount = currentRegisteredCount + 1;
+    @PrePersist
+    public void prePersist() {
+        // Set default registration date if not provided
+        if (registrationDate == null) {
+            registrationDate = LocalDate.now();
+        }
+        // Set default status if not provided
+        if (status == null) {
+            status = Status.PENDING;
         }
 
-        event.setRegisteredMemberCount(newCount);
-    }
-}
+        // Update registered member count in donation event
+        if (event != null) {
+            Integer currentRegisteredCount = event.getRegisteredMemberCount();
+            event.setRegisteredMemberCount(currentRegisteredCount + 1);
 
-@PreRemove
-public void preRemove() {
-    // Decrease registered member count in donation event
-    if (event != null) {
-        Integer currentRegisteredCount = event.getRegisteredMemberCount();
-        int newCount;
-
-        if (currentRegisteredCount == null) {
-            newCount = 0;
-        } else {
-            newCount = currentRegisteredCount - 1;
+            if (event.getRegisteredMemberCount() > event.getTotalMemberCount()) {
+                throw new RuntimeException("Event is full");
+            }
         }
+        // Update current registrations in the time slot
+        if (timeSlot != null) {
+            Integer currentCount = timeSlot.getCurrentRegistrations();
+            timeSlot.setCurrentRegistrations(currentCount + 1);
 
-        // Ensure count never goes below 0
-        event.setRegisteredMemberCount(Math.max(0, newCount));
+            // Ensure current registrations do not exceed max capacity
+            if (timeSlot.getCurrentRegistrations() > timeSlot.getMaxCapacity()) {
+                throw new RuntimeException("Time slot is full");
+            }
+        }
     }
-}
+
+    @PreRemove
+    public void preRemove() {
+        // Decrease registered member count in donation event
+        if (event != null) {
+            Integer currentRegisteredCount = event.getRegisteredMemberCount();
+            // Ensure count never goes below 0
+            event.setRegisteredMemberCount(Math.max(0, currentRegisteredCount - 1));
+        }
+        if (timeSlot != null) {
+            Integer currentCount = timeSlot.getCurrentRegistrations();
+            event.setRegisteredMemberCount(Math.max(0, currentCount - 1));
+        }
+    }
 }

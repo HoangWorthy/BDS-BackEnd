@@ -30,5 +30,8 @@ public class UserDto {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate lastDonationDate;
 
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate nextEligibleDonationDate;
+
     private String personalId;
 }

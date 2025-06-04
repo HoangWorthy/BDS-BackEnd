@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
+import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,6 +35,10 @@ public class BloodUnit {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ComponentType componentType;
 
 
 }

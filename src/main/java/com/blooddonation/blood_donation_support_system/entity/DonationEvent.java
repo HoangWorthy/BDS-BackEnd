@@ -1,5 +1,6 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
+import com.blooddonation.blood_donation_support_system.enums.DonationType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -35,13 +36,8 @@ public class DonationEvent {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate donationDate;
 
-    @Column(nullable = false)
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime startTime;
-
-    @Column(nullable = false)
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime endTime;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<DonationTimeSlot> timeSlots = new ArrayList<>();
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<EventRegistration> registrations = new ArrayList<>();
@@ -59,6 +55,10 @@ public class DonationEvent {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DonationType donationType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User user;
@@ -67,5 +67,4 @@ public class DonationEvent {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate createdDate;
 
-//    CheckinQR
 }

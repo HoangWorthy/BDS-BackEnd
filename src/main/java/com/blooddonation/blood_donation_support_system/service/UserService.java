@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,8 @@ public class UserService {
         // Encode the password and saving
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userDto.setRole(Role.MEMBER);
+        userDto.setLastDonationDate(LocalDate.now());
+        userDto.setNextEligibleDonationDate(LocalDate.now());
         User userEntity = UserMapper.mapToUser(userDto);
 
         removeOldCode(userDto.getEmail());
@@ -141,13 +144,13 @@ public class UserService {
 
     public UserDto updateUser(UserDto currentUser, UserDto updatedUser) {
         User userEntity = UserMapper.mapToUser(currentUser);
-
+        userEntity.setName(updatedUser.getName());
         userEntity.setPhone(updatedUser.getPhone());
         userEntity.setAddress(updatedUser.getAddress());
         userEntity.setBloodType(updatedUser.getBloodType());
         userEntity.setGender(updatedUser.getGender());
         userEntity.setDateOfBirth(updatedUser.getDateOfBirth());
-        userEntity.setLastDonationDate(updatedUser.getLastDonationDate());
+//        userEntity.setLastDonationDate(updatedUser.getLastDonationDate());
         userEntity.setPersonalId(updatedUser.getPersonalId());
 
         User savedUser = userRepository.save(userEntity);

@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
+import com.blooddonation.blood_donation_support_system.enums.DonationType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,9 @@ public class EventRegistrationDto {
     private Long id;
     private Long userId;         // Representing user by ID
     private Long eventId;        // Representing event by ID
+    private Long timeSlotId;     // Representing time slot by ID
     private BloodType bloodType;
+    private DonationType donationType;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate registrationDate;

@@ -56,12 +56,13 @@ public class DonationEventController {
         }
     }
 
-    @PostMapping("/{eventId}/register")
+    @PostMapping("/{eventId}/{timeSlotId}/register")
     public ResponseEntity<String> registerForEvent(@PathVariable Long eventId,
+                                                   @PathVariable Long timeSlotId,
                                                    @CookieValue("jwt-token") String token) {
         try {
             UserDto userDto = jwtUtil.extractUser(token);
-            String result = donationEventService.registerForEvent(eventId, userDto.getEmail());
+            String result = donationEventService.registerForEvent(eventId,timeSlotId,userDto.getEmail());
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -94,7 +95,7 @@ public class DonationEventController {
             @CookieValue("jwt-token") String token) {
         try {
             UserDto staff = jwtUtil.extractUser(token);
-            return ResponseEntity.ok(donationEventService.recordMultipleBloodDonations(eventId, bulkRecordDto.getSingleBloodUnitRecords()));
+            return ResponseEntity.ok(donationEventService.recordMultipleBloodDonations(eventId, bulkRecordDto.getSingleBloodUnitRecords(), staff.getEmail()));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -103,9 +104,12 @@ public class DonationEventController {
         }
     }
 
-    @GetMapping("/{eventId}/donors")
-    public ResponseEntity<List<UserDto>> getEventDonors(@PathVariable Long eventId) {
-        return ResponseEntity.ok(donationEventService.getEventDonors(eventId));
+    @GetMapping("/{eventId}/{timeSlotId}/donors")
+    public ResponseEntity<List<UserDto>> getEventDonors(@PathVariable Long eventId,
+                                                        @PathVariable Long timeSlotId,
+                                                        @CookieValue("jwt-token") String token) {
+        UserDto staff = jwtUtil.extractUser(token);
+        return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, staff.getEmail()));
     }
 }
 

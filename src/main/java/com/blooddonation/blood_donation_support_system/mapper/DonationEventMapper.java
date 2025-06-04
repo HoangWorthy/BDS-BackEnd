@@ -17,11 +17,10 @@ public class DonationEventMapper {
         dto.setName(event.getName());
         dto.setLocation(event.getLocation());
         dto.setDonationDate(event.getDonationDate());
-        dto.setStartTime(event.getStartTime());
-        dto.setEndTime(event.getEndTime());
         dto.setRegisteredMemberCount(event.getRegisteredMemberCount());
         dto.setTotalMemberCount(event.getTotalMemberCount());
         dto.setStatus(event.getStatus());
+        dto.setDonationType(event.getDonationType());
         dto.setUserId(event.getUser() != null ? event.getUser().getId() : null);
         dto.setCreatedDate(event.getCreatedDate());
 
@@ -36,11 +35,10 @@ public class DonationEventMapper {
         event.setName(dto.getName());
         event.setLocation(dto.getLocation());
         event.setDonationDate(dto.getDonationDate());
-        event.setStartTime(dto.getStartTime());
-        event.setEndTime(dto.getEndTime());
         event.setRegisteredMemberCount(dto.getRegisteredMemberCount());
         event.setTotalMemberCount(dto.getTotalMemberCount());
         event.setStatus(dto.getStatus());
+        event.setDonationType(dto.getDonationType());
         event.setUser(user); // Must be resolved from service before mapping
         event.setCreatedDate(dto.getCreatedDate());
 

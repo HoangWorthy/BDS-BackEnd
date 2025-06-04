@@ -60,5 +60,9 @@ public class User {
     private LocalDate lastDonationDate;
 
     @Column
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate nextEligibleDonationDate;
+
+    @Column
     private String personalId;
 }

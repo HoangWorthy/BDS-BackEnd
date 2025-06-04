@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.repository;
 
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
+import com.blooddonation.blood_donation_support_system.entity.DonationTimeSlot;
 import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
 import com.blooddonation.blood_donation_support_system.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,8 @@ import java.util.Optional;
 public interface EventRegistrationRepository extends JpaRepository<EventRegistration, Long> {
     List<EventRegistration> findByEvent(DonationEvent event);
     Optional<EventRegistration> findByEventAndUser(DonationEvent event, User user);
+
+    List<EventRegistration> findByEventAndTimeSlot(DonationEvent event, DonationTimeSlot timeSlot);
+
+    boolean existsByUserAndEvent(User user, DonationEvent event);
 }

@@ -9,41 +9,46 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class UserMapper {
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public static UserDto mapToUserDto(User user) {
-        UserDto dto = new UserDto(
-                user.getId(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getName(),
-                user.getPhone(),
-                user.getAddress(),
-                user.getBloodType(),
-                user.getGender(),
-                user.getDateOfBirth(),
-                user.getRole(),
-                user.getLastDonationDate(),
-                user.getPersonalId()
-        );
+        if (user == null) return null;
+
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setPassword(user.getPassword());
+        dto.setName(user.getName());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
+        dto.setBloodType(user.getBloodType());
+        dto.setGender(user.getGender());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        dto.setRole(user.getRole());
+        dto.setLastDonationDate(user.getLastDonationDate());
+        dto.setNextEligibleDonationDate(user.getNextEligibleDonationDate());
+        dto.setPersonalId(user.getPersonalId());
+
         return dto;
     }
 
-    public static User mapToUser(UserDto userDto) {
-        User user = new User(
-                userDto.getId(),
-                userDto.getEmail(),
-                userDto.getPassword(),
-                userDto.getName(),
-                userDto.getPhone(),
-                userDto.getAddress(),
-                userDto.getBloodType(),
-                userDto.getGender(),
-                userDto.getDateOfBirth(),
-                userDto.getRole(),
-                userDto.getLastDonationDate(),
-                userDto.getPersonalId()
-        );
+    public static User mapToUser(UserDto dto) {
+        if (dto == null) return null;
+
+        User user = new User();
+        user.setId(dto.getId());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setName(dto.getName());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+        user.setBloodType(dto.getBloodType());
+        user.setGender(dto.getGender());
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setRole(dto.getRole());
+        user.setLastDonationDate(dto.getLastDonationDate());
+        user.setNextEligibleDonationDate(dto.getNextEligibleDonationDate());
+        user.setPersonalId(dto.getPersonalId());
+
         return user;
     }
 }

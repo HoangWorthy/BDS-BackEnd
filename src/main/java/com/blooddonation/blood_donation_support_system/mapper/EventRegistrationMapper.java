@@ -17,6 +17,7 @@ public class EventRegistrationMapper {
         dto.setUserId(registration.getUser() != null ? registration.getUser().getId() : null);
         dto.setEventId(registration.getEvent() != null ? registration.getEvent().getId() : null);
         dto.setBloodType(registration.getBloodType());
+        dto.setDonationType(registration.getDonationType());
         dto.setRegistrationDate(registration.getRegistrationDate());
         dto.setStatus(registration.getStatus());
 
@@ -31,6 +32,7 @@ public class EventRegistrationMapper {
         registration.setUser(user);   // Must be fetched before mapping
         registration.setEvent(event); // Must be fetched before mapping
         registration.setBloodType(dto.getBloodType());
+        registration.setDonationType(dto.getDonationType());
         registration.setRegistrationDate(dto.getRegistrationDate());
         registration.setStatus(dto.getStatus());
 

@@ -2,13 +2,12 @@ package com.blooddonation.blood_donation_support_system.service;
 
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
-import com.blooddonation.blood_donation_support_system.entity.User;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
-import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
 import com.blooddonation.blood_donation_support_system.repository.MedicalFacilityStockRepository;
 import com.blooddonation.blood_donation_support_system.repository.UserRepository;
+import com.blooddonation.blood_donation_support_system.validator.MedicalFacilityStockValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,67 +23,46 @@ public class MedicalFacilityStockService {
     private BloodUnitRepository bloodUnitRepository;
     @Autowired
     private UserRepository userRepository;
-
-
+    @Autowired
+    private MedicalFacilityStockValidator validator;
 
     @Transactional
     public String addBloodUnitsToStockByEventId(Long eventId, String userEmail) {
-        User staff = userRepository.findByEmail(userEmail);
-        if (staff == null) {
-            throw new RuntimeException("Staff does not exist");
-        }
-        if (!staff.getRole().equals(Role.STAFF)) {
-            throw new RuntimeException("Only staff can add blood units to stock");
-        }
-        List<BloodUnit> bloodUnits = bloodUnitRepository.findByEventId(eventId);
-        if (bloodUnits == null || bloodUnits.isEmpty()) {
-            return "No blood units found for the given event ID.";
-        }
+        // Validate Input
+        validator.validateStaffAccess(userEmail);
+
+        // Fetch Data
+        List<BloodUnit> bloodUnits = validator.validateAndGetBloodUnits(eventId);
 
         for (BloodUnit bloodUnit : bloodUnits) {
-                MedicalFacilityStock stock = new MedicalFacilityStock();
-                stock.setBloodType(bloodUnit.getBloodType());
-                stock.setVolume(bloodUnit.getVolume());
-                stock.setComponentType(bloodUnit.getComponentType());
-                updateOrCreateStock(stock);
+            MedicalFacilityStock stock = new MedicalFacilityStock();
+            stock.setBloodType(bloodUnit.getBloodType());
+            stock.setVolume(bloodUnit.getVolume());
+            stock.setComponentType(bloodUnit.getComponentType());
+            updateOrCreateStock(stock);
         }
-        return "Blood units added to stock successfully.";
+        return String.format("Successfully added %d blood units to stock", bloodUnits.size());
     }
 
     @Transactional
     public String divideWholeBloodInStock(BloodType bloodType, Double amount, String userEmail) {
-        User staff = userRepository.findByEmail(userEmail);
-        if (staff == null) {
-            throw new RuntimeException("Staff does not exist");
-        }
-        if (!staff.getRole().equals(Role.STAFF)) {
-            throw new RuntimeException("Only staff can divide whole blood into components");
-        }
-        if (bloodType == null || amount == null || amount <= 0) {
-            return "Invalid blood type or amount.";
-        }
+        // Validate Input
+        validator.validateStaffAccess(userEmail);
+        validator.validateBloodDivisionInput(bloodType, amount);
 
-        MedicalFacilityStock wholeBloodStock = medicalFacilityStockRepository
-                .findByBloodTypeAndComponentType(bloodType, ComponentType.WHOLE_BLOOD)
-                .orElseThrow(() -> new RuntimeException("No whole blood stock found for the given blood type."));
+        // Fetch Data
+        MedicalFacilityStock wholeBloodStock = validator.validateAndGetWholeBloodStock(bloodType, amount);
 
-        if (wholeBloodStock.getVolume() < amount) {
-            return "Insufficient whole blood stock to divide.";
-        }
-
-        // Create a temporary stock object with the requested amount
         MedicalFacilityStock tempStock = new MedicalFacilityStock();
         tempStock.setBloodType(bloodType);
         tempStock.setComponentType(ComponentType.WHOLE_BLOOD);
         tempStock.setVolume(amount);
 
-        // Divide into components and update stock
         List<MedicalFacilityStock> components = divideWholeBloodIntoComponents(tempStock);
         for (MedicalFacilityStock component : components) {
             updateOrCreateStock(component);
         }
 
-        // Reduce whole blood stock
         wholeBloodStock.setVolume(wholeBloodStock.getVolume() - amount);
         medicalFacilityStockRepository.save(wholeBloodStock);
 

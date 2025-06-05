@@ -1,11 +1,8 @@
 package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.BulkBloodUnitRecordDto;
-import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
-import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
-import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
 import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.UserService;
@@ -26,8 +23,6 @@ import java.util.List;
 public class DonationEventController {
     @Autowired
     private DonationEventService donationEventService;
-    @Autowired
-    private UserService userService;
     @Autowired
     private JwtUtil jwtUtil;
 

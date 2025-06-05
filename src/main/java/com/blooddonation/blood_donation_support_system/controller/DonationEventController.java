@@ -4,14 +4,20 @@ import com.blooddonation.blood_donation_support_system.dto.BulkBloodUnitRecordDt
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
+import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
+import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
+import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.UserService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -62,7 +68,7 @@ public class DonationEventController {
                                                    @CookieValue("jwt-token") String token) {
         try {
             UserDto userDto = jwtUtil.extractUser(token);
-            String result = donationEventService.registerForEvent(eventId,timeSlotId,userDto.getEmail());
+            String result = donationEventService.registerForEvent(eventId, timeSlotId, userDto.getEmail());
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -85,6 +91,14 @@ public class DonationEventController {
     @GetMapping("/donationList")
     public ResponseEntity<List<DonationEventDto>> getAllDonationEvents() {
         List<DonationEventDto> donationEvents = donationEventService.getAllDonationEvents();
+        return ResponseEntity.ok(donationEvents);
+    }
+
+    @GetMapping("/{startDate}/{endDate}/donationList")
+    public ResponseEntity<List<DonationEventDto>> getDonationEventsByDateRange(
+            @PathVariable LocalDate startDate,
+            @PathVariable LocalDate endDate) {
+        List<DonationEventDto> donationEvents = donationEventService.getEventByBetweenDates(startDate, endDate);
         return ResponseEntity.ok(donationEvents);
     }
 
@@ -111,5 +125,45 @@ public class DonationEventController {
         UserDto staff = jwtUtil.extractUser(token);
         return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, staff.getEmail()));
     }
+
+    @GetMapping("/{eventId}/qr-code")
+    public ResponseEntity<byte[]> getEventQRCode(@PathVariable Long eventId,
+                                                 @CookieValue("jwt-token") String token) {
+        try {
+            UserDto staff = jwtUtil.extractUser(token);
+            if (!staff.getRole().equals(Role.STAFF)) {
+                throw new RuntimeException("Unauthorized access");
+            }
+            DonationEventDto event = donationEventService.getDonationEventById(eventId);
+            if (event.getQrCode() == null) {
+                throw new RuntimeException("QR code not found for event: " + eventId);
+            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(event.getQrCode());
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    //need a frontend to test this
+    @PostMapping("/check-in/{eventId}")
+    public ResponseEntity<String> checkInToEvent(
+            @PathVariable Long eventId,
+            @RequestParam String registrationId,
+            @CookieValue("jwt-token") String token) {
+        try {
+            UserDto userDto = jwtUtil.extractUser(token);
+            String result = donationEventService.checkInMember(eventId, registrationId, userDto.getEmail());
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while checking-in the donation event: " + e.getMessage());
+        }
+    }
+
 }
+
 

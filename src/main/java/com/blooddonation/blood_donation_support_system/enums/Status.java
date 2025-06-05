@@ -5,7 +5,8 @@ public enum Status {
     CANCELED("Canceled"),
     COMPLETED("Completed"),
     APPROVED("Approved"),
-    REJECTED("Rejected");
+    REJECTED("Rejected"),
+    CHECKED_IN("Checked In");
 
     private final String status;
 

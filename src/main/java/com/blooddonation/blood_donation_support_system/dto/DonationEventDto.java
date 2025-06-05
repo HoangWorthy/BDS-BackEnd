@@ -18,21 +18,20 @@ public class DonationEventDto {
     private Long id;
     private String name;
     private String location;
-
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDate donationDate;
-
     private Integer registeredMemberCount;
     private Integer totalMemberCount;
     private Status status;
     private DonationType donationType;
     private Long userId; // Assuming we only need the ID for the DTO
-
+    private List<DonationTimeSlotDto> timeSlotDtos;
+    private byte[] qrCode;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate createdDate;
 
-//    private List<DonationEventDto> donationEvents;
-    private List<DonationTimeSlotDto> timeSlotDtos;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate donationDate;
+
+
 
 }

@@ -18,6 +18,7 @@ public class BloodUnitMapper {
         dto.setBloodType(entity.getBloodType());
         dto.setComponentType(entity.getComponentType());
         dto.setVolume(entity.getVolume());
+        dto.setStatus(entity.getStatus());
         return dto;
     }
 
@@ -31,6 +32,7 @@ public class BloodUnitMapper {
         entity.setBloodType(dto.getBloodType());
         entity.setComponentType(dto.getComponentType());
         entity.setVolume(dto.getVolume());
+        entity.setStatus(dto.getStatus());
         return entity;
     }
 }

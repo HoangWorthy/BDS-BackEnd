@@ -15,10 +15,12 @@ import com.blooddonation.blood_donation_support_system.repository.DonationEventR
 import com.blooddonation.blood_donation_support_system.repository.EventRegistrationRepository;
 import com.blooddonation.blood_donation_support_system.repository.DonationTimeSlotRepository;
 import com.blooddonation.blood_donation_support_system.repository.UserRepository;
+import com.blooddonation.blood_donation_support_system.validator.DonationEventValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,12 @@ public class DonationEventService {
     @Autowired
     private DonationTimeSlotRepository donationTimeSlotRepository;
 
+    @Autowired
+    private QRCodeService qrCodeService;
+
+    @Autowired
+    private DonationEventValidator validator;
+
     @Transactional
     public String createDonation(DonationEventDto donationEventDto, String staffEmail) {
         User staff = userRepository.findByEmail(staffEmail);
@@ -52,6 +60,9 @@ public class DonationEventService {
         }
         if (!staff.getRole().equals(Role.STAFF)) {
             throw new RuntimeException("Only staff members can create donation events");
+        }
+        if (donationEventDto.getDonationDate().isBefore(LocalDate.now())) {
+            throw new RuntimeException("Donation date cannot be in the past");
         }
         DonationEvent donationEvent = new DonationEvent();
         donationEvent.setName(donationEventDto.getName());
@@ -65,11 +76,56 @@ public class DonationEventService {
 
         DonationEvent savedDonationEvent = donationEventRepository.save(donationEvent);
 
+        //Create QR code for the event
+        try {
+            String qrContent = String.format("http://localhost:8080/donation-events/%d/check-in", savedDonationEvent.getId());
+            byte[] qrCodeImage = qrCodeService.generateQRCode(qrContent);
+            savedDonationEvent.setQrCode(qrCodeImage);
+            donationEventRepository.save(savedDonationEvent);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate QR code " + e.getMessage());
+        }
+
         // Create time slots for the event
         List<DonationTimeSlot> timeSlots = donationTimeSlotService.createTimeSlotsForEvent(donationEventDto.getTimeSlotDtos(), savedDonationEvent);
         savedDonationEvent.setTimeSlots(timeSlots);
         return "Donation event created successfully";
     }
+
+//    @Transactional
+//    public String createDonation(DonationEventDto donationEventDto, String staffEmail) {
+//        // Validate Input
+//        User staff = userRepository.findByEmail(staffEmail);
+//        validator.validateStaffAccess(staffEmail, "create donation events");
+//        validator.validateEventCreation(donationEventDto);
+//
+//        // Create And Save Donation Event
+//        DonationEvent donationEvent = new DonationEvent();
+//        donationEvent.setName(donationEventDto.getName());
+//        donationEvent.setLocation(donationEventDto.getLocation());
+//        donationEvent.setDonationDate(donationEventDto.getDonationDate());
+//        donationEvent.setTotalMemberCount(donationEventDto.getTotalMemberCount());
+//        donationEvent.setStatus(donationEventDto.getStatus());
+//        donationEvent.setDonationType(donationEventDto.getDonationType());
+//        donationEvent.setUser(staff);
+//        donationEvent.setCreatedDate(LocalDate.now());
+//        DonationEvent savedDonationEvent = donationEventRepository.save(donationEvent);
+//
+////        Create QR code for the event
+//        try {
+//            String qrContent = String.format("http://localhost:8080/donation-events/%d/check-in", savedDonationEvent.getId());
+//            byte[] qrCodeImage = qrCodeService.generateQRCode(qrContent);
+//            savedDonationEvent.setQrCode(qrCodeImage);
+//            donationEventRepository.save(savedDonationEvent);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to generate QR code " + e.getMessage());
+//        }
+//
+////         Create time slots for the event
+//        List<DonationTimeSlot> timeSlots = donationTimeSlotService.createTimeSlotsForEvent(donationEventDto.getTimeSlotDtos(), savedDonationEvent);
+//        savedDonationEvent.setTimeSlots(timeSlots);
+//        return "Donation event created successfully";
+//    }
 
     public String verifyDonationEvent(Long eventId, String adminEmail, String action) {
         User admin = userRepository.findByEmail(adminEmail);
@@ -133,8 +189,8 @@ public class DonationEventService {
         }
 
         // Check if user is eligible to donate
-        if(user.getNextEligibleDonationDate() != null &&
-           user.getNextEligibleDonationDate().isAfter(donationEvent.getDonationDate())) {
+        if (user.getNextEligibleDonationDate() != null &&
+                user.getNextEligibleDonationDate().isAfter(donationEvent.getDonationDate())) {
             throw new RuntimeException("You are not eligible to donate on this date. Please check your next eligible donation date.");
         }
 
@@ -164,6 +220,13 @@ public class DonationEventService {
                 .toList();
     }
 
+    public List<DonationEventDto> getEventByBetweenDates(LocalDate startDate, LocalDate endDate) {
+        List<DonationEvent> donationEvents = donationEventRepository.findByDonationDateBetween(startDate, endDate);
+        return donationEvents.stream()
+                .map(DonationEventMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public String recordMultipleBloodDonations(Long eventId, List<SingleBloodUnitRecordDto> records, String userEmail) {
         User staff = userRepository.findByEmail(userEmail);
@@ -175,59 +238,18 @@ public class DonationEventService {
         }
 
         DonationEvent event = donationEventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Donation event not found with id: " + eventId));
+                .orElseThrow(() -> new RuntimeException("Donation event not found"));
 
         if (event.getStatus().equals(Status.COMPLETED)) {
             throw new RuntimeException("Event is already recorded");
         }
-        // Validate all records first
-        List<String> errors = new ArrayList<>();
+
         for (SingleBloodUnitRecordDto record : records) {
-            try {
-                User donor = userRepository.findById(record.getUserId())
-                        .orElseThrow(() -> new RuntimeException("Donor not found with id: "));
-
-                EventRegistration registration = eventRegistrationRepository.findByEventAndUser(event, donor)
-                        .orElseThrow(() -> new RuntimeException("User not registered for this event"));
-            } catch (RuntimeException e) {
-                errors.add(String.format("Donor #%d - %s", record.getUserId(), e.getMessage()));
-            }
+            User donor = userRepository.findById(record.getUserId())
+                    .orElseThrow(() -> new RuntimeException("Donor not found with id: " + record.getUserId()));
+            recordSingleBloodDonation(record, event, donor);
         }
 
-        // If there are any errors, throw exception to rollback transaction
-        if (!errors.isEmpty()) {
-            StringBuilder result = new StringBuilder();
-            result.append("Cannot record donations due to following errors:");
-            for (String error : errors) {
-                result.append("\n• ").append(error);
-            }
-            throw new RuntimeException(result.toString());
-        }
-
-        // If no errors, proceed with all records
-        for (SingleBloodUnitRecordDto record : records) {
-            User donor = userRepository.findById(record.getUserId()).get();
-            EventRegistration registration = eventRegistrationRepository.findByEventAndUser(event, donor).get();
-
-            BloodUnit bloodUnit = new BloodUnit();
-            bloodUnit.setEvent(event);
-            bloodUnit.setDonor(donor);
-            bloodUnit.setVolume(record.getVolume());
-            bloodUnit.setBloodType(donor.getBloodType());
-            if (event.getDonationType().equals(DonationType.WHOLE_BLOOD)) {
-                bloodUnit.setComponentType(ComponentType.WHOLE_BLOOD);
-                donor.setNextEligibleDonationDate(event.getDonationDate().plusWeeks(12));
-            } else {
-                bloodUnit.setComponentType(ComponentType.PLATELETS);
-                donor.setNextEligibleDonationDate(event.getDonationDate().plusWeeks(3));
-            }
-            donor.setLastDonationDate(event.getDonationDate());
-            userRepository.save(donor);
-
-            bloodUnitRepository.save(bloodUnit);
-            registration.setStatus(Status.COMPLETED);
-            eventRegistrationRepository.save(registration);
-        }
         event.setStatus(Status.COMPLETED);
         donationEventRepository.save(event);
         return String.format("Successfully recorded %d blood donation(s)", records.size());
@@ -252,5 +274,64 @@ public class DonationEventService {
                 .map(EventRegistration::getUser)     // Get User from each registration
                 .map(UserMapper::mapToUserDto)       // Convert each User to UserDto
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public String checkInMember(Long eventId, String registrationId, String userEmail) {
+        User member = userRepository.findByEmail(userEmail);
+        if (member == null) {
+            throw new RuntimeException("User does not exist");
+        }
+
+        DonationEvent event = donationEventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Donation event not found with id: " + eventId));
+
+        EventRegistration registration = eventRegistrationRepository.findById(Long.parseLong(registrationId))
+                .orElseThrow(() -> new RuntimeException("Registration not found with id: " + registrationId));
+
+        if (!registration.getEvent().getId().equals(eventId)) {
+            throw new RuntimeException("Registration does not belong to this event");
+        }
+        if (!registration.getUser().getId().equals(member.getId())) {
+            throw new RuntimeException("Registration does not belong to this user");
+        }
+        if (registration.getStatus() == Status.CHECKED_IN) {
+            throw new RuntimeException("User is already checked-in for this event");
+        }
+
+        registration.setStatus(Status.CHECKED_IN);
+        eventRegistrationRepository.save(registration);
+        return "Checked-in successfully";
+    }
+
+    private void recordSingleBloodDonation(SingleBloodUnitRecordDto record, DonationEvent event, User donor) {
+        EventRegistration registration = eventRegistrationRepository.findByEventAndUser(event, donor)
+                .orElseThrow(() -> new RuntimeException("User not registered for this event"));
+
+        if (registration.getStatus() != Status.CHECKED_IN) {
+            throw new RuntimeException("User is not checked in for this event");
+        }
+
+        BloodUnit bloodUnit = new BloodUnit();
+        bloodUnit.setEvent(event);
+        bloodUnit.setDonor(donor);
+        bloodUnit.setVolume(record.getVolume());
+        bloodUnit.setBloodType(donor.getBloodType());
+        bloodUnit.setStatus(Status.PENDING);
+
+        if (event.getDonationType().equals(DonationType.WHOLE_BLOOD)) {
+            bloodUnit.setComponentType(ComponentType.WHOLE_BLOOD);
+            donor.setNextEligibleDonationDate(event.getDonationDate().plusWeeks(12));
+        } else {
+            bloodUnit.setComponentType(ComponentType.PLATELETS);
+            donor.setNextEligibleDonationDate(event.getDonationDate().plusWeeks(3));
+        }
+
+        donor.setLastDonationDate(event.getDonationDate());
+        userRepository.save(donor);
+        bloodUnitRepository.save(bloodUnit);
+
+        registration.setStatus(Status.COMPLETED);
+        eventRegistrationRepository.save(registration);
     }
 }

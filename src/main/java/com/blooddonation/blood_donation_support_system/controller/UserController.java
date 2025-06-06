@@ -1,19 +1,16 @@
 package com.blooddonation.blood_donation_support_system.controller;
 
-import com.blooddonation.blood_donation_support_system.dto.ResetPasswordDto;
-import com.blooddonation.blood_donation_support_system.dto.UpdatePasswordDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDto;
+import com.blooddonation.blood_donation_support_system.dto.*;
 import com.blooddonation.blood_donation_support_system.service.TokenBlacklistService;
 import com.blooddonation.blood_donation_support_system.service.UserService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
+import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/user")
@@ -27,8 +24,8 @@ public class UserController {
 
     //Login
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDto userDto, HttpServletResponse response) {
-        String jwtToken = userService.login(userDto);
+    public ResponseEntity<String> login(@RequestBody AccountDto accountDto, HttpServletResponse response) {
+        String jwtToken = userService.login(accountDto);
         if (jwtToken == null || jwtToken.equals("Invalid email or password")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
         }
@@ -46,7 +43,7 @@ public class UserController {
 
     // Logout
     @GetMapping("/logout")
-    public void logout(@CookieValue("jwt-token") String token, HttpServletResponse response) throws IOException {
+    public void logout(@CookieValue("jwt-token") String token, HttpServletResponse response) throws IOException, java.io.IOException {
         tokenBlacklistService.blacklistToken(token);
         Cookie cookie = new Cookie("jwt-token", null);
         cookie.setMaxAge(0);
@@ -59,8 +56,8 @@ public class UserController {
 
     // Register User
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDto userDto) {
-        String result = userService.registerUser(userDto);
+    public ResponseEntity<String> registerUser(@RequestBody AccountDto accountDto) {
+        String result = userService.registerUser(accountDto);
         if (result.equals("Email already exists") || result.contains("empty")) {
             return ResponseEntity.badRequest().body(result);
         }
@@ -89,6 +86,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
+    // Initialize Forgot Password
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         String result = userService.initiatePasswordReset(email);
@@ -98,6 +96,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
+    // Reset Password using the code sent to the email
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
         String result = userService.resetPassword(resetPasswordDto.getCode(), resetPasswordDto.getNewPassword());
@@ -109,12 +108,48 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    // Get User Info
-    @GetMapping("/info")
-    public ResponseEntity<Object> info(@CookieValue(value = "jwt-token") String jwtToken) {
+    // Update User Profile
+    @PutMapping("/update")
+    public ResponseEntity<Object> update(@CookieValue("jwt-token") String jwtToken,
+                                       @RequestBody ProfileDto profileDto) {
         try {
-            UserDto userDto = jwtUtil.extractUser(jwtToken);
-            return ResponseEntity.ok(userDto);
+            AccountDto accountDto = jwtUtil.extractUser(jwtToken);
+            ProfileDto updatedAccount = userService.updateUser(accountDto, profileDto);
+            if (updatedAccount == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(updatedAccount);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while updating user information");
+        }
+    }
+    // Update Account Password
+    @PutMapping("/update-password")
+    public ResponseEntity<Object> updatePassword(@CookieValue("jwt-token") String jwtToken,
+                                                 @RequestBody UpdatePasswordDto updatePasswordDto) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(jwtToken);
+            AccountDto updatedAccount = userService.updateUserPassword(accountDto,
+                    updatePasswordDto.getOldPassword(),
+                    updatePasswordDto.getNewPassword());
+            return ResponseEntity.ok(updatedAccount);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while updating password");
+        }
+    }
+
+    // Get User Account Info
+    @GetMapping("/account")
+    public ResponseEntity<Object> account(@CookieValue(value = "jwt-token") String jwtToken) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(jwtToken);
+            return ResponseEntity.ok(accountDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -123,39 +158,18 @@ public class UserController {
         }
     }
 
-    // Update User Info
-    @PutMapping("/update")
-    public ResponseEntity<Object> update(@CookieValue("jwt-token") String jwtToken,
-                                         @RequestBody UserDto updatedUser) {
+    // Get User Profile Info
+    @GetMapping("/profile")
+    public ResponseEntity<Object> profile(@CookieValue(value = "jwt-token") String jwtToken) {
         try {
-            UserDto userDto = jwtUtil.extractUser(jwtToken);
-            UserDto updatedUserEntity = userService.updateUser(userDto, updatedUser);
-            if (updatedUserEntity == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            return ResponseEntity.ok(updatedUserEntity);
+            AccountDto accountDto = jwtUtil.extractUser(jwtToken);
+            ProfileDto profileDto = userService.getProfileByEmail(accountDto.getEmail());
+            return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while updating user information");
-        }
-    }
-
-    @PutMapping("/update-password")
-    public ResponseEntity<Object> updatePassword(@CookieValue("jwt-token") String jwtToken,
-                                                 @RequestBody UpdatePasswordDto updatePasswordDto) {
-        try {
-            UserDto userDto = jwtUtil.extractUser(jwtToken);
-            UserDto updatedUser = userService.updateUserPassword(userDto.getEmail(),
-                    updatePasswordDto.getOldPassword(),
-                    updatePasswordDto.getNewPassword());
-            return ResponseEntity.ok(updatedUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while updating password");
+                    .body("An error occurred while retrieving profile information");
         }
     }
 }

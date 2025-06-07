@@ -1,8 +1,12 @@
 package com.blooddonation.blood_donation_support_system.util;
 
+import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
+import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.User;
+import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
+import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -20,11 +24,15 @@ import static com.blooddonation.blood_donation_support_system.enums.Role.MEMBER;
 public class JwtUtil {
 
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final SecretKey secretKey;
     private final long tokenAge = 1000 * 60 * 60;
 
-    public JwtUtil(UserRepository userRepository, @Value("${jwt.secret}") String secret) {
+    public JwtUtil(UserRepository userRepository,
+                   AccountRepository accountRepository,
+                   @Value("${jwt.secret}") String secret) {
         this.userRepository = userRepository;
+        this.accountRepository = accountRepository;
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
@@ -74,13 +82,13 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    public UserDto extractUser(String token) {
+    public AccountDto extractUser(String token) {
         String email = extractBody(token);
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
             throw new RuntimeException("User not found with email: " + email);
         }
-        return UserMapper.mapToUserDto(user);
+        return AccountMapper.toDto(account);
     }
 
 

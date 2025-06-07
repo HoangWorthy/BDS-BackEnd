@@ -1,6 +1,8 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
+import com.blooddonation.blood_donation_support_system.enums.ComponentType;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,10 +25,25 @@ public class BloodUnit {
     @JoinColumn(name = "event_id", nullable = false)
     private DonationEvent event;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "donor_id", nullable = false)
+    private Account donor;
+
+
     @Column(nullable = false)
     private Double volume;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ComponentType componentType;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+
 }

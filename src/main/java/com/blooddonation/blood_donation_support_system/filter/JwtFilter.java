@@ -1,5 +1,6 @@
 package com.blooddonation.blood_donation_support_system.filter;
 
+import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.service.TokenBlacklistService;
@@ -56,11 +57,11 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (jwt != null && jwtUtil.validateToken(jwt) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDto userDto = jwtUtil.extractUser(jwt);
-            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + userDto.getRole().name());
+            AccountDto accountDto = jwtUtil.extractUser(jwt);
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + accountDto.getRole().name());
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDto,
+                    accountDto,
                     null,
                     Collections.singleton(authority)
             );

@@ -1,17 +1,11 @@
 package com.blooddonation.blood_donation_support_system.validator;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.entity.Account;
-import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
-import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
-import com.blooddonation.blood_donation_support_system.entity.User;
+import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Role;
-import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
-import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
-import com.blooddonation.blood_donation_support_system.repository.MedicalFacilityStockRepository;
-import com.blooddonation.blood_donation_support_system.repository.UserRepository;
+import com.blooddonation.blood_donation_support_system.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +23,8 @@ public class MedicalFacilityStockValidator {
     private UserRepository userRepository;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private DonationEventRepository donationEventRepository;
 
     public void validateStaffAccess(String userEmail) {
         Account staff = accountRepository.findByEmail(userEmail);
@@ -48,12 +44,6 @@ public class MedicalFacilityStockValidator {
         return bloodUnits;
     }
 
-    public void validateBloodDivisionInput(BloodType bloodType, Double amount) {
-        if (bloodType == null || amount == null || amount <= 0) {
-            throw new RuntimeException("Invalid blood type or amount");
-        }
-    }
-
     public MedicalFacilityStock validateAndGetWholeBloodStock(BloodType bloodType, Double amount) {
         MedicalFacilityStock wholeBloodStock = medicalFacilityStockRepository
                 .findByBloodTypeAndComponentType(bloodType, ComponentType.WHOLE_BLOOD)
@@ -64,5 +54,10 @@ public class MedicalFacilityStockValidator {
                     amount, wholeBloodStock.getVolume()));
         }
         return wholeBloodStock;
+    }
+
+    public DonationEvent getEventOrThrow(Long eventId) {
+        return donationEventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Donation event not found with id: " + eventId));
     }
 }

@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
+import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
@@ -14,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +40,26 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
 
         // Add Blood Units to Stock
         for (BloodUnit bloodUnit : bloodUnits) {
-            MedicalFacilityStock stock = new MedicalFacilityStock();
-            stock.setBloodType(bloodUnit.getBloodType());
-            stock.setVolume(bloodUnit.getVolume());
-            stock.setComponentType(bloodUnit.getComponentType());
-            updateOrCreateStock(stock);
+            if (bloodUnit.getComponentType() == ComponentType.WHOLE_BLOOD) {
+                // Create temporary stock for division
+                MedicalFacilityStock wholeBloodStock = new MedicalFacilityStock();
+                wholeBloodStock.setBloodType(bloodUnit.getBloodType());
+                wholeBloodStock.setComponentType(ComponentType.WHOLE_BLOOD);
+                wholeBloodStock.setVolume(bloodUnit.getVolume());
+
+                // Divide and add components
+                List<MedicalFacilityStock> components = divideWholeBloodIntoComponents(wholeBloodStock, eventId);
+                for (MedicalFacilityStock component : components) {
+                    updateOrCreateStock(component);
+                }
+            } else {
+                // For non-whole blood units, add directly
+                MedicalFacilityStock stock = new MedicalFacilityStock();
+                stock.setBloodType(bloodUnit.getBloodType());
+                stock.setVolume(bloodUnit.getVolume());
+                stock.setComponentType(bloodUnit.getComponentType());
+                updateOrCreateStock(stock);
+            }
 
             // Update Blood Unit status to COMPLETED
             bloodUnit.setStatus(Status.COMPLETED);
@@ -52,28 +69,92 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
     }
 
     @Transactional
-    public String divideWholeBloodInStock(BloodType bloodType, Double amount, String userEmail) {
+    public List<MedicalFacilityStock> withdrawBloodFromStock(BloodType bloodType, ComponentType componentType, double requestedVolume, String userEmail) {
         // Validate Input
         validator.validateStaffAccess(userEmail);
-        validator.validateBloodDivisionInput(bloodType, amount);
 
-        // Fetch Data
-        MedicalFacilityStock wholeBloodStock = validator.validateAndGetWholeBloodStock(bloodType, amount);
+        List<MedicalFacilityStock> stocksToWithdraw = new ArrayList<>();
+        double remainingVolume = requestedVolume;
 
-        MedicalFacilityStock tempStock = new MedicalFacilityStock();
-        tempStock.setBloodType(bloodType);
-        tempStock.setComponentType(ComponentType.WHOLE_BLOOD);
-        tempStock.setVolume(amount);
+        // Get all matching stocks ordered by expiry date ascending
+        List<MedicalFacilityStock> availableStocks = medicalFacilityStockRepository
+            .findByBloodTypeAndComponentTypeOrderByExpiryDateAsc(bloodType, componentType);
 
-        List<MedicalFacilityStock> components = divideWholeBloodIntoComponents(tempStock);
-        for (MedicalFacilityStock component : components) {
-            updateOrCreateStock(component);
+        if (availableStocks.isEmpty()) {
+            throw new RuntimeException("No matching blood stock available");
         }
 
-        wholeBloodStock.setVolume(wholeBloodStock.getVolume() - amount);
-        medicalFacilityStockRepository.save(wholeBloodStock);
+        // Calculate total available volume
+        double totalAvailableVolume = availableStocks.stream()
+            .mapToDouble(MedicalFacilityStock::getVolume)
+            .sum();
 
-        return String.format("Successfully divided %.2f ml of %s whole blood into components", amount, bloodType);
+        if (totalAvailableVolume < requestedVolume) {
+            throw new RuntimeException("Insufficient blood stock available only has " + totalAvailableVolume + " available");
+        }
+
+        // Withdraw from stocks starting with earliest expiry date
+        for (MedicalFacilityStock stock : availableStocks) {
+            if (remainingVolume <= 0) break;
+
+            if (stock.getVolume() <= remainingVolume) {
+                // Use entire stock
+                remainingVolume -= stock.getVolume();
+                stocksToWithdraw.add(stock);
+                medicalFacilityStockRepository.delete(stock);
+            } else {
+                // Use partial stock
+                MedicalFacilityStock updatedStock = new MedicalFacilityStock();
+                updatedStock.setId(stock.getId());
+                updatedStock.setBloodType(stock.getBloodType());
+                updatedStock.setComponentType(stock.getComponentType());
+                updatedStock.setVolume(stock.getVolume() - remainingVolume);
+                updatedStock.setExpiryDate(stock.getExpiryDate());
+
+                MedicalFacilityStock withdrawnStock = new MedicalFacilityStock();
+                withdrawnStock.setBloodType(stock.getBloodType());
+                withdrawnStock.setComponentType(stock.getComponentType());
+                withdrawnStock.setVolume(remainingVolume);
+                withdrawnStock.setExpiryDate(stock.getExpiryDate());
+
+                medicalFacilityStockRepository.save(updatedStock);
+                stocksToWithdraw.add(withdrawnStock);
+                remainingVolume = 0;
+            }
+        }
+
+        return stocksToWithdraw;
+    }
+
+    public String updateBeforeWithdraw(String userEmail) {
+        List<MedicalFacilityStock> stocks = medicalFacilityStockRepository.findAll();
+        StringBuilder removedStock = new StringBuilder();
+        int count = 0;
+
+        for (MedicalFacilityStock stock : stocks) {
+            if (stock.getExpiryDate().isBefore(LocalDate.now())) {
+                removedStock.append("Please removed expired stock at your facility: ID=")
+                        .append(stock.getId())
+                        .append(", Type=")
+                        .append(stock.getBloodType())
+                        .append(", Component=")
+                        .append(stock.getComponentType())
+                        .append(", Volume=")
+                        .append(stock.getVolume())
+                        .append(", Expiry=")
+                        .append(stock.getExpiryDate())
+                        .append("\n");
+
+                medicalFacilityStockRepository.delete(stock);
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            return "No expired stocks found";
+        }
+
+        return String.format("Removed %d expired stocks:\n%s", count, removedStock.toString());
     }
 
     private void updateOrCreateStock(MedicalFacilityStock newStock) {
@@ -90,9 +171,10 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
     }
 
     @Transactional
-    protected List<MedicalFacilityStock> divideWholeBloodIntoComponents(MedicalFacilityStock wholeBloodStock) {
-        List<MedicalFacilityStock> components = new ArrayList<>();
+    protected List<MedicalFacilityStock> divideWholeBloodIntoComponents(MedicalFacilityStock wholeBloodStock, Long eventId) {
 
+        List<MedicalFacilityStock> components = new ArrayList<>();
+        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
         double originalVolume = wholeBloodStock.getVolume();
 
         // Create Plasma component (55%)
@@ -100,6 +182,7 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         plasma.setBloodType(wholeBloodStock.getBloodType());
         plasma.setComponentType(ComponentType.PLASMA);
         plasma.setVolume(originalVolume * 0.55);
+        plasma.setExpiryDate(donationEvent.getDonationDate().plusYears(1));
         components.add(plasma);
 
         // Create RBC component (44%)
@@ -107,6 +190,7 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         rbc.setBloodType(wholeBloodStock.getBloodType());
         rbc.setComponentType(ComponentType.RED_BLOOD_CELLS);
         rbc.setVolume(originalVolume * 0.44);
+        rbc.setExpiryDate(donationEvent.getDonationDate().plusDays(42));
         components.add(rbc);
 
         // Create Platelet component (1%)
@@ -114,6 +198,7 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         platelet.setBloodType(wholeBloodStock.getBloodType());
         platelet.setComponentType(ComponentType.PLATELETS);
         platelet.setVolume(originalVolume * 0.01);
+        platelet.setExpiryDate(donationEvent.getDonationDate().plusWeeks(1));
         components.add(platelet);
 
         return components;

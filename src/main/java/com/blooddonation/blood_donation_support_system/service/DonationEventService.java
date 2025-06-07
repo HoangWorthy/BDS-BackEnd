@@ -2,6 +2,7 @@ package com.blooddonation.blood_donation_support_system.service;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ public interface DonationEventService {
     String verifyDonationEvent(Long eventId, String adminEmail, String action);
     String registerForEventOnline(Long eventId, Long timeSlotId, String userEmail);
     String registerForEventOffline(Long eventId, String personalId, String userEmail);
+    ProfileDto registerForGuest(Long eventId, ProfileDto profileDto, String userEmail);
     DonationEventDto getDonationEventById(Long eventId);
     List<DonationEventDto> getAllDonationEvents();
     List<DonationEventDto> getEventByBetweenDates(LocalDate startDate, LocalDate endDate);

@@ -32,4 +32,8 @@ public class MedicalFacilityStock {
     @Enumerated(EnumType.STRING)
     private ComponentType componentType;
 
+    @Column(nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate expiryDate;
+
 }

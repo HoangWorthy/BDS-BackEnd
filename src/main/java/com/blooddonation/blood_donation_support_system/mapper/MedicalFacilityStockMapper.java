@@ -15,6 +15,7 @@ public class MedicalFacilityStockMapper {
         dto.setVolume(stock.getVolume());
         dto.setBloodType(stock.getBloodType());
         dto.setComponentType(stock.getComponentType());
+        dto.setExpiryDate(stock.getExpiryDate());
 
         return dto;
     }
@@ -27,6 +28,7 @@ public class MedicalFacilityStockMapper {
         stock.setVolume(dto.getVolume());
         stock.setBloodType(dto.getBloodType());
         stock.setComponentType(dto.getComponentType());
+        stock.setExpiryDate(dto.getExpiryDate());
 
         return stock;
     }

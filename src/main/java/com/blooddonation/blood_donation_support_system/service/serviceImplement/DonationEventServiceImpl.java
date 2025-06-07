@@ -2,6 +2,7 @@ package com.blooddonation.blood_donation_support_system.service.serviceImplement
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
@@ -9,6 +10,7 @@ import com.blooddonation.blood_donation_support_system.enums.DonationType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.mapper.DonationEventMapper;
+import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.*;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.DonationTimeSlotService;
@@ -51,6 +53,8 @@ public class DonationEventServiceImpl implements DonationEventService {
 
     @Autowired
     private DonationTimeSlotRepository donationTimeSlotRepository;
+    @Autowired
+    private ProfileMapper profileMapper;
 
     @Transactional
     public String createDonation(DonationEventDto donationEventDto, String staffEmail) {
@@ -153,6 +157,45 @@ public class DonationEventServiceImpl implements DonationEventService {
         EventRegistration newRegistration = validator.createRegistration(member, event);
         eventRegistrationRepository.save(newRegistration);
         return "Member registered and checked in successfully";
+    }
+
+    @Transactional
+    public ProfileDto registerForGuest(Long eventId, ProfileDto profileDto, String userEmail) {
+        // Validate Input
+        validator.validateStaffAccess(userEmail, "register for donation events");
+
+        // Fetch Data
+        Account staff = accountRepository.findByEmail(userEmail);
+        DonationEvent event = validator.getEventOrThrow(eventId);
+
+        // Check if profile with personalId already exists
+        Optional<Profile> existingProfile = profileRepository.findByPersonalId(profileDto.getPersonalId());
+        if (existingProfile.isPresent()) {
+            throw new RuntimeException("Profile with this Personal ID already exists");
+        }
+
+        // Create and save profile
+        Profile profile = new Profile();
+        profile.setName(profileDto.getName());
+        profile.setDateOfBirth(profileDto.getDateOfBirth());
+        profile.setGender(profileDto.getGender());
+        profile.setAddress(profileDto.getAddress());
+        profile.setPhone(profileDto.getPhone());
+        profile.setPersonalId(profileDto.getPersonalId());
+        profile.setBloodType(profileDto.getBloodType());
+        profile.setLastDonationDate(profileDto.getLastDonationDate());
+        Profile savedProfile = profileRepository.save(profile);
+
+        // Create event registration for guest
+        EventRegistration registration = new EventRegistration();
+        registration.setEvent(event);
+        registration.setAccount(staff);
+        registration.setBloodType(profile.getBloodType());
+        registration.setDonationType(event.getDonationType());
+        registration.setStatus(Status.CHECKED_IN);
+        eventRegistrationRepository.save(registration);
+
+        return ProfileMapper.toDto(savedProfile);
     }
 
     @Transactional

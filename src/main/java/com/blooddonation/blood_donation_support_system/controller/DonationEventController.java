@@ -3,7 +3,7 @@ package com.blooddonation.blood_donation_support_system.controller;
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.BulkBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
@@ -87,6 +87,23 @@ public class DonationEventController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while registering for the event: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{eventId}/register-guest")
+    public ResponseEntity<Object> registerGuest(
+            @PathVariable Long eventId,
+            @RequestBody ProfileDto profileDto,
+            @CookieValue("jwt-token") String token) {
+        try {
+            AccountDto staff = jwtUtil.extractUser(token);
+            ProfileDto registeredProfile = donationEventService.registerForGuest(eventId, profileDto, staff.getEmail());
+            return ResponseEntity.ok(registeredProfile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error registering guest: " + e.getMessage());
         }
     }
 

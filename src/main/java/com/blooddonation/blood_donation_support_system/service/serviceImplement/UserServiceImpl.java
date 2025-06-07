@@ -40,11 +40,11 @@ public class UserServiceImpl implements UserService {
     private ProfileRepository profileRepository;
     @Autowired
     private ProfileMapper profileMapper;
+    @Autowired
+    private AccountMapper accountMapper;
 
     private final Map<String, Account> temporaryUsers = new HashMap<>();
     private final Map<String, LocalDateTime> codeExpiration = new HashMap<>();
-    @Autowired
-    private AccountMapper accountMapper;
 
     public String registerUser(AccountDto accountDto) {
         if (accountRepository.findByEmail(accountDto.getEmail()) != null) {
@@ -98,21 +98,23 @@ public class UserServiceImpl implements UserService {
             return "Verification code expired";
         }
 
-        // Create and save both User and Account entities
         Account account = temporaryUsers.get(code);
         if (account != null) {
             // Create and set profile
             Profile profile = new Profile();
             account.setProfile(profile);
 
-            // Save the account
-            accountRepository.save(account);
+            // Save account to get generated ID
+            Account savedAccount = accountRepository.save(account);
 
-            //Clean up temporary data
+            // Set the account ID in the profile and save it
+            Profile updatedProfile = savedAccount.getProfile();
+            updatedProfile.setAccountId(savedAccount.getId());
+            profileRepository.save(updatedProfile);
+
             temporaryUsers.remove(code);
             codeExpiration.remove(code);
             return "User registered successfully";
-
         }
         return "Invalid verification code";
     }
@@ -142,7 +144,7 @@ public class UserServiceImpl implements UserService {
         profile.setDateOfBirth(profileDto.getDateOfBirth());
         profile.setPersonalId(profileDto.getPersonalId());
         if (profile.getLastDonationDate() == null) {
-        profile.setLastDonationDate(profileDto.getLastDonationDate());
+            profile.setLastDonationDate(profileDto.getLastDonationDate());
         }
         if (profile.getNextEligibleDonationDate() == null) {
             profile.setNextEligibleDonationDate(profile.getLastDonationDate());
@@ -207,14 +209,6 @@ public class UserServiceImpl implements UserService {
         codeExpiration.remove(resetCode);
 
         return "Password reset successfully";
-    }
-
-    public AccountDto getAccountByEmail(String email) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            throw new RuntimeException("User not found with email: " + email);
-        }
-        return AccountMapper.toDto(account);
     }
 
     public ProfileDto getProfileByEmail(String email) {

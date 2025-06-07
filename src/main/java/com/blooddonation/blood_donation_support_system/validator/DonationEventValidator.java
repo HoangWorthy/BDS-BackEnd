@@ -5,11 +5,7 @@ import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecord
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.enums.Status;
-import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
-import com.blooddonation.blood_donation_support_system.repository.DonationEventRepository;
-import com.blooddonation.blood_donation_support_system.repository.EventRegistrationRepository;
-import com.blooddonation.blood_donation_support_system.repository.DonationTimeSlotRepository;
-import com.blooddonation.blood_donation_support_system.repository.UserRepository;
+import com.blooddonation.blood_donation_support_system.repository.*;
 import com.blooddonation.blood_donation_support_system.service.QRCodeService;
 import com.blooddonation.blood_donation_support_system.service.DonationTimeSlotService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +31,14 @@ public class DonationEventValidator {
     @Autowired
     private QRCodeService qrCodeService;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private ProfileRepository profileRepository;
+
     public void validateStaffAccess(String email, String operation) {
-        User staff = userRepository.findByEmail(email);
+        Account staff = accountRepository.findByEmail(email);
         if (staff == null) {
             throw new RuntimeException("Staff does not exist");
         }
@@ -46,17 +48,17 @@ public class DonationEventValidator {
     }
 
     public void validateMemberAccess(String email, String operation) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
             throw new RuntimeException("member does not exist");
         }
-        if (!user.getRole().equals(Role.MEMBER)) {
+        if (!account.getRole().equals(Role.MEMBER)) {
             throw new RuntimeException("Only member can " + operation);
         }
     }
 
     public void validateAdminAccess(String email, String operation) {
-        User admin = userRepository.findByEmail(email);
+        Account admin = accountRepository.findByEmail(email);
         if (admin == null) {
             throw new RuntimeException("Admin does not exist");
         }
@@ -75,14 +77,19 @@ public class DonationEventValidator {
                 .orElseThrow(() -> new RuntimeException("Time slot not found with id: " + timeSlotId));
     }
 
-    public User getDonorOrThrow(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Donor not found with id: " + userId));
+    public Account getDonorOrThrow(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Donor not found with id: " + accountId));
     }
 
-    public EventRegistration getRegistrationOrThrow(String registrationId) {
-        return eventRegistrationRepository.findById(Long.parseLong(registrationId))
-                .orElseThrow(() -> new RuntimeException("Registration not found with id: " + registrationId));
+    public EventRegistration getRegistrationOrThrow(String personalId, DonationEvent event) {
+        Profile profile = profileRepository.findByPersonalId(personalId)
+                .orElseThrow(() -> new RuntimeException("Profile not found with personal ID: " + personalId));
+
+        Account account = accountRepository.findById(profile.getAccountId())
+                .orElseThrow(() -> new RuntimeException("Account not found for personal ID: " + personalId));
+        return eventRegistrationRepository.findByAccountAndEventAndStatus(account, event, Status.PENDING)
+                .orElseThrow(() -> new RuntimeException("No pending registration found for personal ID: " + personalId));
     }
 
     public void validateEventVerification(String action) {
@@ -107,13 +114,20 @@ public class DonationEventValidator {
         }
     }
 
-    public void validateRegistrationEligibility(User user, DonationEvent event, DonationTimeSlot timeSlot) {
+    public void validateRegistrationEligibility(Account account, DonationEvent event, DonationTimeSlot timeSlot) {
+        Profile profile = account.getProfile();
         // Validate member access
-        validateMemberAccess(user.getEmail(), "register for donation events");
+        validateMemberAccess(account.getEmail(), "register for donation events");
 
         // Check event status
         if (event.getStatus() != Status.APPROVED) {
             throw new RuntimeException("Cannot register for an event that is not approved");
+        }
+
+        // Check registration deadline
+        if (event.getDonationDate().minusDays(1).isBefore(LocalDate.now()) ||
+                event.getDonationDate().minusDays(1).isEqual(LocalDate.now())) {
+            throw new RuntimeException("Registration is closed. You cannot register one day before the event.");
         }
 
         // Check event capacity
@@ -122,31 +136,76 @@ public class DonationEventValidator {
         }
 
         // Validate time slot belongs to event
-        if (!timeSlot.getEvent().getId().equals(event.getId())) {
+        if (timeSlot != null && timeSlot.getEvent() != null && !timeSlot.getEvent().getId().equals(event.getId())) {
             throw new RuntimeException("Time slot does not belong to this event");
         }
 
         // Check duplicate registration
-        if (eventRegistrationRepository.existsByUserAndEvent(user, event)) {
+        if (eventRegistrationRepository.existsByAccountAndEvent(account, event)) {
             throw new RuntimeException("You have already registered for this event");
         }
 
         // Check donation eligibility
-        if (user.getNextEligibleDonationDate() != null &&
-                user.getNextEligibleDonationDate().isAfter(event.getDonationDate())) {
+        if (profile.getNextEligibleDonationDate() != null &&
+                profile.getNextEligibleDonationDate().isAfter(event.getDonationDate())) {
             throw new RuntimeException("You are not eligible to donate on this date. Please check your next eligible donation date.");
         }
     }
 
-    public void validateCheckIn(DonationEvent event, EventRegistration registration, User member) {
+    public void validateCheckIn(DonationEvent event, EventRegistration registration, Account member) {
         if (!registration.getEvent().getId().equals(event.getId())) {
             throw new RuntimeException("Registration does not belong to this event");
         }
-        if (!registration.getUser().getId().equals(member.getId())) {
+        if (!registration.getAccount().getId().equals(member.getId())) {
             throw new RuntimeException("Registration does not belong to this user");
         }
         if (registration.getStatus() == Status.CHECKED_IN) {
             throw new RuntimeException("User is already checked-in for this event");
+        }
+    }
+
+    public Account validateAndGetMemberAccount(String personalId) {
+        Profile profile = profileRepository.findByPersonalId(personalId)
+                .orElseThrow(() -> new RuntimeException("Not a member: No profile found with personal ID " + personalId));
+
+        return accountRepository.findById(profile.getAccountId())
+                .orElseThrow(() -> new RuntimeException("Account not found for member"));
+    }
+
+    public EventRegistration validateAndGetExistingRegistration(Account member, DonationEvent event) {
+        if (eventRegistrationRepository.existsByAccountAndEvent(member, event)) {
+            return eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, Status.PENDING)
+                    .orElseThrow(() -> new RuntimeException("Registration not found"));
+        }
+        return null;
+    }
+
+    public EventRegistration createRegistration(Account member, DonationEvent event) {
+        EventRegistration registration = new EventRegistration();
+        registration.setAccount(member);
+        registration.setEvent(event);
+        registration.setRegistrationDate(LocalDate.now());
+        registration.setBloodType(member.getProfile().getBloodType());
+        registration.setDonationType(event.getDonationType());
+        registration.setStatus(Status.CHECKED_IN);
+        return registration;
+    }
+
+    public void validateCancellation(DonationEvent event, EventRegistration registration) {
+        // Can't cancel if already checked in or completed
+        if (registration.getStatus() == Status.CHECKED_IN || registration.getStatus() == Status.COMPLETED) {
+            throw new RuntimeException("Cannot cancel registration after check-in or completion");
+        }
+
+        // Can't cancel one day before the event
+        if (event.getDonationDate().minusDays(1).isBefore(LocalDate.now()) ||
+                event.getDonationDate().minusDays(1).isEqual(LocalDate.now())) {
+            throw new RuntimeException("Cannot cancel registration one day before the event");
+        }
+
+        // Can't cancel if event is completed or cancelled
+        if (event.getStatus() == Status.COMPLETED || event.getStatus() == Status.CANCELLED) {
+            throw new RuntimeException("Cannot cancel registration for a completed or cancelled event");
         }
     }
 }

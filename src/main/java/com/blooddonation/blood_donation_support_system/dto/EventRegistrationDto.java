@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class EventRegistrationDto {
     private Long id;
-    private Long userId;         // Representing user by ID
+    private Long accountId;         // Representing account by ID
     private Long eventId;        // Representing event by ID
     private Long timeSlotId;     // Representing time slot by ID
     private BloodType bloodType;

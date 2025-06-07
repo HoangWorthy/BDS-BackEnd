@@ -25,8 +25,8 @@ public class EventRegistration {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
@@ -85,17 +85,17 @@ public class EventRegistration {
         }
     }
 
-    @PreRemove
-    public void preRemove() {
-        // Decrease registered member count in donation event
-        if (event != null) {
-            Integer currentRegisteredCount = event.getRegisteredMemberCount();
-            // Ensure count never goes below 0
-            event.setRegisteredMemberCount(Math.max(0, currentRegisteredCount - 1));
-        }
-        if (timeSlot != null) {
-            Integer currentCount = timeSlot.getCurrentRegistrations();
-            event.setRegisteredMemberCount(Math.max(0, currentCount - 1));
-        }
-    }
+//    @PreRemove
+//    public void preRemove() {
+//        // Decrease registered member count in donation event
+//        if (event != null) {
+//            Integer currentRegisteredCount = event.getRegisteredMemberCount();
+//            // Ensure count never goes below 0
+//            event.setRegisteredMemberCount(Math.max(0, currentRegisteredCount - 1));
+//        }
+//        if (timeSlot != null) {
+//            Integer currentCount = timeSlot.getCurrentRegistrations();
+//            event.setRegisteredMemberCount(Math.max(0, currentCount - 1));
+//        }
+//    }
 }

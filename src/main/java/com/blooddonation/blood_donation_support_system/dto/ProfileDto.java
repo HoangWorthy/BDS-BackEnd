@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ProfileDto {
     private Long id;
+    private Long accountId;
     private String name;
     private String phone;
     private String address;

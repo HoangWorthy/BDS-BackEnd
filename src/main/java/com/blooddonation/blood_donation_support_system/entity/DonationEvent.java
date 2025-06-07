@@ -61,7 +61,7 @@ public class DonationEvent {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
-    private User user;
+    private Account account;
 
     @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")

@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.BloodUnitDto;
+import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.User;
@@ -14,7 +15,7 @@ public class BloodUnitMapper {
         BloodUnitDto dto = new BloodUnitDto();
         dto.setId(entity.getId());
         dto.setEventId(entity.getEvent() != null ? entity.getEvent().getId() : null);
-        dto.setUserId(entity.getDonor() != null ? entity.getDonor().getId() : null);
+        dto.setAccountId(entity.getDonor() != null ? entity.getDonor().getId() : null);
         dto.setBloodType(entity.getBloodType());
         dto.setComponentType(entity.getComponentType());
         dto.setVolume(entity.getVolume());
@@ -22,7 +23,7 @@ public class BloodUnitMapper {
         return dto;
     }
 
-    public static BloodUnit toEntity(BloodUnitDto dto, User donor, DonationEvent event) {
+    public static BloodUnit toEntity(BloodUnitDto dto, Account donor, DonationEvent event) {
         if (dto == null) return null;
 
         BloodUnit entity = new BloodUnit();

@@ -1,11 +1,14 @@
 package com.blooddonation.blood_donation_support_system.validator;
 
+import com.blooddonation.blood_donation_support_system.dto.AccountDto;
+import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
 import com.blooddonation.blood_donation_support_system.entity.User;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Role;
+import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
 import com.blooddonation.blood_donation_support_system.repository.MedicalFacilityStockRepository;
 import com.blooddonation.blood_donation_support_system.repository.UserRepository;
@@ -24,9 +27,11 @@ public class MedicalFacilityStockValidator {
     private BloodUnitRepository bloodUnitRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     public void validateStaffAccess(String userEmail) {
-        User staff = userRepository.findByEmail(userEmail);
+        Account staff = accountRepository.findByEmail(userEmail);
         if (staff == null) {
             throw new RuntimeException("Staff does not exist");
         }

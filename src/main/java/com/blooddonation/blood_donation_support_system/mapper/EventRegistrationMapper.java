@@ -3,6 +3,7 @@ package com.blooddonation.blood_donation_support_system.mapper;
 import com.blooddonation.blood_donation_support_system.dto.EventRegistrationDto;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
+import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ public class EventRegistrationMapper {
 
         EventRegistrationDto dto = new EventRegistrationDto();
         dto.setId(registration.getId());
-        dto.setUserId(registration.getUser() != null ? registration.getUser().getId() : null);
+        dto.setAccountId(registration.getAccount() != null ? registration.getAccount().getId() : null);
         dto.setEventId(registration.getEvent() != null ? registration.getEvent().getId() : null);
         dto.setBloodType(registration.getBloodType());
         dto.setDonationType(registration.getDonationType());
@@ -24,12 +25,12 @@ public class EventRegistrationMapper {
         return dto;
     }
 
-    public static EventRegistration toEntity(EventRegistrationDto dto, User user, DonationEvent event) {
+    public static EventRegistration toEntity(EventRegistrationDto dto, Account account, DonationEvent event) {
         if (dto == null) return null;
 
         EventRegistration registration = new EventRegistration();
         registration.setId(dto.getId());
-        registration.setUser(user);   // Must be fetched before mapping
+        registration.setAccount(account);   // Must be fetched before mapping
         registration.setEvent(event); // Must be fetched before mapping
         registration.setBloodType(dto.getBloodType());
         registration.setDonationType(dto.getDonationType());

@@ -22,7 +22,7 @@ public class DonationEventDto {
     private Integer totalMemberCount;
     private Status status;
     private DonationType donationType;
-    private Long userId; // Assuming we only need the ID for the DTO
+    private Long accountId; // Assuming we only need the ID for the DTO
     private List<DonationTimeSlotDto> timeSlotDtos;
     private byte[] qrCode;
 

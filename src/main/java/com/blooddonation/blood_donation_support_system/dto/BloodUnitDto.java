@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class BloodUnitDto {
     private Long id;
     private Long eventId;
-    private Long userId;
+    private Long accountId;
     private Double volume;
     private BloodType bloodType;
     private ComponentType componentType;

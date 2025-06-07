@@ -19,6 +19,9 @@ package com.blooddonation.blood_donation_support_system.entity;
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 
+        @Column(name = "account_id", nullable = true)
+        private Long accountId;
+
         private String name;
 
         private String phone;

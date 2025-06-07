@@ -12,6 +12,7 @@ public class ProfileMapper {
 
         return ProfileDto.builder()
                 .id(Profile.getId())
+                .accountId(Profile.getAccountId())
                 .name(Profile.getName())
                 .phone(Profile.getPhone())
                 .address(Profile.getAddress())
@@ -29,6 +30,7 @@ public class ProfileMapper {
 
         return Profile.builder()
                 .id(profileDto.getId())
+                .accountId(profileDto.getAccountId())
                 .name(profileDto.getName())
                 .phone(profileDto.getPhone())
                 .address(profileDto.getAddress())

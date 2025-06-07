@@ -27,7 +27,7 @@ public class BloodUnit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "donor_id", nullable = false)
-    private User donor;
+    private Account donor;
 
 
     @Column(nullable = false)

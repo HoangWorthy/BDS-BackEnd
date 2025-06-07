@@ -12,4 +12,6 @@ public interface BloodRequestRepository extends JpaRepository<BloodRequest, Long
     BloodRequest findByName(String name);
 
     List<BloodRequest> findAllByName(String name);
+
+    BloodRequest findById(int id);
 }

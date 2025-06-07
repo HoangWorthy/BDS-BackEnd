@@ -1,13 +1,11 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
-import com.blooddonation.blood_donation_support_system.enums.BloodType;
-import com.blooddonation.blood_donation_support_system.enums.ComponentType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
-import com.blooddonation.blood_donation_support_system.enums.Urgency;
+import com.blooddonation.blood_donation_support_system.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,15 +24,10 @@ public class BloodRequest {
 
     private String address;
 
-    private String personal_id;
+    private String personalId;
 
     @Enumerated(EnumType.STRING)
-    private ComponentType componentType;
-
-    private double volume;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    private BloodRequestStatus status;
 
     private LocalDateTime createdTime;
 
@@ -43,5 +36,10 @@ public class BloodRequest {
     @Enumerated(EnumType.STRING)
     private Urgency urgency;
 
+    @Enumerated(EnumType.STRING)
     private BloodType bloodType;
+
+    @OneToMany(mappedBy = "bloodRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ComponentRequest> componentRequests;
+
 }

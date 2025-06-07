@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.BloodRequestDto;
+import com.blooddonation.blood_donation_support_system.dto.ComponentRequestDto;
 import com.blooddonation.blood_donation_support_system.service.IBloodRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,5 +24,10 @@ public class BloodRequestController {
     @PostMapping("/create-request")
     public ResponseEntity<BloodRequestDto> createRequest(@RequestBody BloodRequestDto bloodRequestDto) {
         return new ResponseEntity<>(iBloodRequestService.createBloodRequest(bloodRequestDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BloodRequestDto> getRequestById(@PathVariable int id) {
+        return new ResponseEntity<>(iBloodRequestService.findBloodRequestById(id), HttpStatus.OK);
     }
 }

@@ -47,7 +47,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/user/info", "/user/update", "/user/logout").authenticated()
 //                        .requestMatchers("/admin/**").hasRole("ADMIN")
 //                        .anyRequest().permitAll(
-                                .requestMatchers("/user/login", "/user/register", "/user/verify", "user/resend-verification", "/user/forgot-password", "user/reset-password").permitAll()
+                                .requestMatchers("/user/login", "/user/register", "/user/verify", "/user/resend-verification", "/user/forgot-password", "/user/reset-password").permitAll()
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )

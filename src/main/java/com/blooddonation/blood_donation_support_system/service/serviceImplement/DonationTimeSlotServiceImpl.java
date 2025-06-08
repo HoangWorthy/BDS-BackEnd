@@ -3,6 +3,7 @@ package com.blooddonation.blood_donation_support_system.service.serviceImplement
 import com.blooddonation.blood_donation_support_system.dto.DonationTimeSlotDto;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.DonationTimeSlot;
+import com.blooddonation.blood_donation_support_system.mapper.DonationTimeSlotMapper;
 import com.blooddonation.blood_donation_support_system.repository.DonationTimeSlotRepository;
 import com.blooddonation.blood_donation_support_system.service.DonationTimeSlotService;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 public class DonationTimeSlotServiceImpl implements DonationTimeSlotService {
     @Autowired
     private DonationTimeSlotRepository donationTimeSlotRepository;
+    @Autowired
+    private DonationTimeSlotMapper donationTimeSlotMapper;
 
     @Transactional
     public List<DonationTimeSlot> createTimeSlotsForEvent(List<DonationTimeSlotDto> donationTimeSlotDto, DonationEvent event) {
@@ -33,19 +36,13 @@ public class DonationTimeSlotServiceImpl implements DonationTimeSlotService {
                     ") must equal event's total member count (" + event.getTotalMemberCount() + ")");
         }
 
+        // Use the mapper to convert DTOs to entities
         List<DonationTimeSlot> timeSlots = donationTimeSlotDto.stream()
-                .map(slotDto -> {
-                    DonationTimeSlot timeSlot = new DonationTimeSlot();
-                    timeSlot.setStartTime(slotDto.getStartTime());
-                    timeSlot.setEndTime(slotDto.getEndTime());
-                    timeSlot.setMaxCapacity(slotDto.getMaxCapacity());
-                    timeSlot.setCurrentRegistrations(0);
-                    timeSlot.setEvent(event);
-                    return timeSlot;
-                })
+                .map(dto -> donationTimeSlotMapper.toEntity(dto, event))
                 .collect(Collectors.toList());
 
         return donationTimeSlotRepository.saveAll(timeSlots);
     }
+
 
 }

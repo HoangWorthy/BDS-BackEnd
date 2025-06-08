@@ -10,7 +10,6 @@ import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
-import com.blooddonation.blood_donation_support_system.repository.UserRepository;
 import com.blooddonation.blood_donation_support_system.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminServiceImpl implements AdminService {
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private AccountRepository accountRepository;
     @Autowired

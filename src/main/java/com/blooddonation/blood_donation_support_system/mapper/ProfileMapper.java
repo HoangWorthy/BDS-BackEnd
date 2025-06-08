@@ -1,7 +1,6 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import org.springframework.stereotype.Component;
 
@@ -42,4 +41,25 @@ public class ProfileMapper {
                 .personalId(profileDto.getPersonalId())
                 .build();
     }
+
+    // New method to update existing entity from DTO
+    public static void updateEntityFromDto(Profile profile, ProfileDto dto) {
+        if (profile == null || dto == null) return;
+
+        profile.setName(dto.getName());
+        profile.setPhone(dto.getPhone());
+        profile.setAddress(dto.getAddress());
+        profile.setBloodType(dto.getBloodType());
+        profile.setGender(dto.getGender());
+        profile.setDateOfBirth(dto.getDateOfBirth());
+        profile.setPersonalId(dto.getPersonalId());
+
+        if (profile.getLastDonationDate() == null) {
+            profile.setLastDonationDate(dto.getLastDonationDate());
+        }
+        if (profile.getNextEligibleDonationDate() == null) {
+            profile.setNextEligibleDonationDate(dto.getLastDonationDate());
+        }
+    }
+
 }

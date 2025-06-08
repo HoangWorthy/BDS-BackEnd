@@ -1,18 +1,14 @@
 package com.blooddonation.blood_donation_support_system.util;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
-import com.blooddonation.blood_donation_support_system.entity.User;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
-import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import com.blooddonation.blood_donation_support_system.repository.UserRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 

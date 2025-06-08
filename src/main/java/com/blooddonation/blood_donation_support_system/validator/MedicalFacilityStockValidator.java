@@ -1,13 +1,11 @@
 package com.blooddonation.blood_donation_support_system.validator;
 
-import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +17,6 @@ public class MedicalFacilityStockValidator {
     private MedicalFacilityStockRepository medicalFacilityStockRepository;
     @Autowired
     private BloodUnitRepository bloodUnitRepository;
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private AccountRepository accountRepository;
     @Autowired

@@ -23,9 +23,6 @@ public class DonationEventValidator {
     private EventRegistrationRepository eventRegistrationRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private DonationTimeSlotRepository donationTimeSlotRepository;
 
     @Autowired

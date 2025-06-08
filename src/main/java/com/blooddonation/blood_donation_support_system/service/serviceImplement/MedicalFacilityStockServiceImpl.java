@@ -1,11 +1,15 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
+import com.blooddonation.blood_donation_support_system.dto.ComponentRequestDto;
+import com.blooddonation.blood_donation_support_system.dto.MedicalFacilityStockDto;
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
+import com.blooddonation.blood_donation_support_system.entity.ComponentRequest;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.mapper.MedicalFacilityStockMapper;
 import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
 import com.blooddonation.blood_donation_support_system.repository.MedicalFacilityStockRepository;
 import com.blooddonation.blood_donation_support_system.repository.UserRepository;
@@ -155,6 +159,22 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         }
 
         return String.format("Removed %d expired stocks:\n%s", count, removedStock.toString());
+    }
+
+    @Override
+    public List<MedicalFacilityStockDto> getAllAvailableBlood() {
+        List<MedicalFacilityStock> medicalFacilityStocks = medicalFacilityStockRepository.findAllAvailableBlood();
+        return medicalFacilityStocks.stream()
+                .map(MedicalFacilityStockMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<MedicalFacilityStockDto> getAvailableBloodByType(BloodType bloodType, List<ComponentType> componentTypes) {
+        List<MedicalFacilityStock> medicalFacilityStocks = medicalFacilityStockRepository.findAvailableBloodByType(bloodType, componentTypes);
+        return medicalFacilityStocks.stream()
+                .map(MedicalFacilityStockMapper::toDto)
+                .toList();
     }
 
     private void updateOrCreateStock(MedicalFacilityStock newStock) {

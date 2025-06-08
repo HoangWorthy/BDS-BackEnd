@@ -24,7 +24,7 @@ public class DonationEventMapper {
         dto.setDonationType(event.getDonationType());
         dto.setAccountId(event.getAccount() != null ? event.getAccount().getId() : null);
         dto.setCreatedDate(event.getCreatedDate());
-        dto.setQrCode(event.getQrCode());
+//        dto.setQrCode(event.getQrCode());
 
         return dto;
     }
@@ -43,7 +43,7 @@ public class DonationEventMapper {
         event.setDonationType(dto.getDonationType());
         event.setAccount(account); // Must be resolved from service before mapping
         event.setCreatedDate(dto.getCreatedDate());
-        event.setQrCode(dto.getQrCode());
+//        event.setQrCode(dto.getQrCode());
 
         return event;
     }

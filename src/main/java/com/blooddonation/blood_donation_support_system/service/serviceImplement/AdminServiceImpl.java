@@ -5,6 +5,7 @@ import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.enums.Role;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
@@ -35,6 +36,21 @@ public class AdminServiceImpl implements AdminService {
             Account updatedAccount = accountRepository.save(account);
             return AccountMapper.toDto(updatedAccount);
         }
+    }
+
+    public AccountDto updateUserStatus(String email, String status) {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+
+        if (status.equals("DISABLE")) {
+            account.setStatus(Status.DISABLE);
+        } else if (status.equals("ENABLE")) {
+            account.setStatus(Status.ENABLE);
+        }
+        Account savedAccount = accountRepository.save(account);
+        return AccountMapper.toDto(savedAccount);
     }
 
     public AccountDto getAccountByEmail(String email) {

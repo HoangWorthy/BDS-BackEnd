@@ -67,8 +67,8 @@ public class DonationEvent {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate createdDate;
 
-    @Column(name = "qr_code")
-    @Lob
-    private byte[] qrCode;
+//    @Column(name = "qr_code")
+//    @Lob
+//    private byte[] qrCode;
 
 }

@@ -1,17 +1,16 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
-import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
-import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
+import com.blooddonation.blood_donation_support_system.dto.*;
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
+import com.blooddonation.blood_donation_support_system.mapper.CheckinTokenMapper;
 import com.blooddonation.blood_donation_support_system.mapper.DonationEventMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.*;
+import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.DonationTimeSlotService;
 import com.blooddonation.blood_donation_support_system.service.QRCodeService;
@@ -55,6 +54,12 @@ public class DonationEventServiceImpl implements DonationEventService {
     private DonationTimeSlotRepository donationTimeSlotRepository;
     @Autowired
     private ProfileMapper profileMapper;
+    @Autowired
+    private CheckinTokenRepository checkinTokenRepository;
+    @Autowired
+    private CheckinTokenService checkinTokenService;
+    @Autowired
+    private CheckinTokenMapper checkinTokenMapper;
 
     @Transactional
     public String createDonation(DonationEventDto donationEventDto, String staffEmail) {
@@ -76,16 +81,6 @@ public class DonationEventServiceImpl implements DonationEventService {
         donationEvent.setAccount(staff);
         donationEvent.setCreatedDate(LocalDate.now());
         DonationEvent savedDonationEvent = donationEventRepository.save(donationEvent);
-
-        // Create QR code for the event
-        try {
-            String qrContent = String.format("http://localhost:8080/donation-events/%d/check-in", savedDonationEvent.getId());
-            byte[] qrCodeImage = qrCodeService.generateQRCode(qrContent);
-            savedDonationEvent.setQrCode(qrCodeImage);
-            donationEventRepository.save(savedDonationEvent);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate QR code " + e.getMessage());
-        }
 
         // Create time slots for the event
         List<DonationTimeSlot> timeSlots = donationTimeSlotService.createTimeSlotsForEvent(donationEventDto.getTimeSlotDtos(), savedDonationEvent);
@@ -135,6 +130,20 @@ public class DonationEventServiceImpl implements DonationEventService {
         registration.setStatus(Status.PENDING);
         eventRegistrationRepository.save(registration);
 
+        // Generate CheckinToken
+        CheckinTokenDto tokenDto = checkinTokenService.generateTokenForProfile(profile, donationEvent);
+
+        // Generate QR code URL and image
+        String qrUrl = String.format("http://localhost:8080/check-in/info/%d?token=%s", eventId, tokenDto.getToken());
+        try {
+            byte[] qrCode = qrCodeService.generateQRCode(qrUrl);
+            registration.setQrCode(qrCode);
+            CheckinToken checkinToken = CheckinTokenMapper.toEntity(tokenDto);
+            registration.setCheckinToken(checkinToken);
+            eventRegistrationRepository.save(registration);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
+        }
         return "Registration successful";
     }
 
@@ -287,18 +296,35 @@ public class DonationEventServiceImpl implements DonationEventService {
     }
 
     @Transactional
-    public String checkInMember(Long eventId, String personalId, String userEmail) {
+    public byte[] getQRCodeForUser(Long eventId, String email) {
         // Validate Input
-        validator.validateMemberAccess(userEmail, "check-in to donation events");
-        // Fetch Data
-        Account member = accountRepository.findByEmail(userEmail);
-        DonationEvent event = validator.getEventOrThrow(eventId);
-        EventRegistration registration = validator.getRegistrationOrThrow(personalId, event);
-        validator.validateCheckIn(event, registration, member);
+        validator.validateMemberAccess(email, "get QR code for user");
 
+        // Fetch Data
+        Account member = accountRepository.findByEmail(email);
+        Account member1 = validator.validateAndGetMemberAccount(member.getProfile().getPersonalId());
+        DonationEvent event = validator.getEventOrThrow(eventId);
+        EventRegistration registration = validator.validateAndGetExistingRegistration(member1, event);
+        return validator.validateQRCode(registration.getQrCode());
+    }
+
+
+    @Transactional
+    public String checkInMember(Long eventId, String action, String userEmail, ProfileDto profileDto) {
+        // Validate Input
+        validator.validateStaffAccess(userEmail, "check-in to donation events");
+        validator.validateCheckinVerification(action);
+        // Fetch Data
+        DonationEvent event = validator.getEventOrThrow(eventId);
+        EventRegistration registration = validator.getRegistrationOrThrow(profileDto.getPersonalId(), event);
+
+        if (action.equals("approve")) {
         registration.setStatus(Status.CHECKED_IN);
         eventRegistrationRepository.save(registration);
-        return "Checked-in successfully";
+        } else if (action.equals("reject")) {
+            registration.setStatus(Status.REJECTED);
+        }
+        return "Checked-in " + action + " successfully";
     }
 
     private void recordSingleBloodDonation(SingleBloodUnitRecordDto record, DonationEvent event, Account donor) {
@@ -333,4 +359,3 @@ public class DonationEventServiceImpl implements DonationEventService {
         eventRegistrationRepository.save(registration);
     }
 }
-

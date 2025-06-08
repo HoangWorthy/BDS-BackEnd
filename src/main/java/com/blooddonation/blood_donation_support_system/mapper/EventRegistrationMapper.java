@@ -21,6 +21,7 @@ public class EventRegistrationMapper {
         dto.setDonationType(registration.getDonationType());
         dto.setRegistrationDate(registration.getRegistrationDate());
         dto.setStatus(registration.getStatus());
+        dto.setQrCode(registration.getQrCode());
 
         return dto;
     }
@@ -36,6 +37,7 @@ public class EventRegistrationMapper {
         registration.setDonationType(dto.getDonationType());
         registration.setRegistrationDate(dto.getRegistrationDate());
         registration.setStatus(dto.getStatus());
+        registration.setQrCode(dto.getQrCode());
 
         return registration;
     }

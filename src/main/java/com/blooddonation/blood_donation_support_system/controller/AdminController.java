@@ -2,9 +2,7 @@ package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.service.AdminService;
-import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +38,17 @@ public class AdminController {
         try {
             AccountDto updatedAccount = adminService.updateUserRole(email, roleUpdate.getRole().name());
             return ResponseEntity.ok(updatedAccount);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/user/{email}/status")
+    public ResponseEntity<Object> updateAccountStatus(@PathVariable String email,
+                                                      @RequestBody AccountDto statusUpdate) {
+        try {
+        AccountDto updatedAccount = adminService.updateUserStatus(email, statusUpdate.getStatus().name());
+        return ResponseEntity.ok(updatedAccount);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

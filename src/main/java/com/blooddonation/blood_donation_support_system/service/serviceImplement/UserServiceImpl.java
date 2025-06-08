@@ -6,6 +6,7 @@ import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.entity.User;
 import com.blooddonation.blood_donation_support_system.enums.Role;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
@@ -48,13 +49,14 @@ public class UserServiceImpl implements UserService {
 
     public String registerUser(AccountDto accountDto) {
         if (accountRepository.findByEmail(accountDto.getEmail()) != null) {
-            return "Email already exists";
+            throw new RuntimeException("Email already exists");
         } else if (accountDto.getEmail().isEmpty() || accountDto.getPassword().isEmpty()) {
-            return "Email and password cannot be empty";
+            throw new RuntimeException("email and Password cannot be empty");
         }
         // Encode the password
         accountDto.setPassword(passwordEncoder.encode(accountDto.getPassword()));
         accountDto.setRole(Role.MEMBER);
+        accountDto.setStatus(Status.ENABLE);
         Account account = AccountMapper.toEntity(accountDto);
 
         removeOldCode(accountDto.getEmail());
@@ -120,9 +122,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public String login(AccountDto accountDto) {
-        User user = userRepository.findByEmail(accountDto.getEmail());
-        if (user == null || !passwordEncoder.matches(accountDto.getPassword(), user.getPassword())) {
-            return "Invalid email or password";
+        Account account = accountRepository.findByEmail(accountDto.getEmail());
+        if (account == null || !passwordEncoder.matches(accountDto.getPassword(), account.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        if (account.getStatus() == Status.DISABLE) {
+            throw new RuntimeException("User has been deleted");
         }
         return jwtUtil.generateToken(accountDto.getEmail());
     }
@@ -172,6 +177,7 @@ public class UserServiceImpl implements UserService {
         Account savedAccount = accountRepository.save(account);
         return AccountMapper.toDto(savedAccount);
     }
+
 
     public String initiatePasswordReset(String email) {
         Account account = accountRepository.findByEmail(email);

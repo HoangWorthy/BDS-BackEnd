@@ -14,6 +14,7 @@ public class AccountMapper {
                 .email(account.getEmail())
                 .password(account.getPassword())
                 .role(account.getRole())
+                .status(account.getStatus())
                 .build();
     }
 
@@ -25,6 +26,7 @@ public class AccountMapper {
                 .email(accountDto.getEmail())
                 .password(accountDto.getPassword())
                 .role(accountDto.getRole())
+                .status(accountDto.getStatus())
                 .build();
     }
 }

@@ -98,6 +98,12 @@ public class DonationEventValidator {
         }
     }
 
+    public void validateCheckinVerification(String action) {
+        if (!action.equals("approve") && !action.equals("reject")) {
+            throw new RuntimeException("Invalid action: " + action);
+        }
+    }
+
     public void validateEventCreation(DonationEventDto dto) {
         if (dto.getDonationDate().isBefore(LocalDate.now())) {
             throw new RuntimeException("Donation date cannot be in the past");
@@ -164,6 +170,13 @@ public class DonationEventValidator {
         }
     }
 
+    public byte[] validateQRCode(byte[] qrCode) {
+        if (qrCode == null) {
+            throw new RuntimeException("QR code not generated for this registration");
+        }
+        return qrCode;
+    }
+
     public Account validateAndGetMemberAccount(String personalId) {
         Profile profile = profileRepository.findByPersonalId(personalId)
                 .orElseThrow(() -> new RuntimeException("Not a member: No profile found with personal ID " + personalId));
@@ -174,6 +187,11 @@ public class DonationEventValidator {
 
     public EventRegistration validateAndGetExistingRegistration(Account member, DonationEvent event) {
         if (eventRegistrationRepository.existsByAccountAndEvent(member, event)) {
+            try {
+                eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, Status.PENDING);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
             return eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, Status.PENDING)
                     .orElseThrow(() -> new RuntimeException("Registration not found"));
         }

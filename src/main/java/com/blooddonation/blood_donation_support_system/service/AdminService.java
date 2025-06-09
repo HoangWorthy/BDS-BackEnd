@@ -5,13 +5,13 @@ package com.blooddonation.blood_donation_support_system.service;
     import java.util.List;
 
     public interface AdminService {
-        AccountDto updateUserRole(String userEmail, String newRole);
+        AccountDto updateUserRole(Long accountId, String newRole);
 
-        AccountDto updateUserStatus(String email, String status);
+        AccountDto updateUserStatus(Long accountId, String status);
 
-        AccountDto getAccountByEmail(String email);
+        AccountDto getAccountById(Long accountId);
 
-        ProfileDto getProfileByEmail(String email);
+        ProfileDto getProfileById(Long accountId);
 
         List<AccountDto> getAllAccounts();
 

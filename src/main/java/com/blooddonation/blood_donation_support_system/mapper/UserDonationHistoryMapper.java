@@ -2,38 +2,50 @@ package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.UserDonationHistoryDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
+import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
-import com.blooddonation.blood_donation_support_system.entity.UserDonationHistory;
+import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class UserDonationHistoryMapper {
-    public static UserDonationHistoryDto toDto(UserDonationHistory userDonationHistory) {
-        if (userDonationHistory == null) {
-            return null;
-        }
 
-        UserDonationHistoryDto dto = new UserDonationHistoryDto();
-        dto.setId(userDonationHistory.getId());
-        dto.setAccountId(userDonationHistory.getAccount() != null ? userDonationHistory.getAccount().getId() : null);
-        dto.setEventId(userDonationHistory.getEvent() != null ? userDonationHistory.getEvent().getId() : null);
-        dto.setRegistrationId(userDonationHistory.getRegistration() != null ? userDonationHistory.getRegistration().getId() : null);
+    @Autowired
+    private BloodUnitRepository bloodUnitRepository;
 
-        return dto;
+    public UserDonationHistoryDto toDto(EventRegistration eventRegistration) {
+        if (eventRegistration == null) return null;
+
+        DonationEvent donationEvent = eventRegistration.getEvent();
+        Account account = eventRegistration.getAccount();
+        BloodUnit bloodUnit = bloodUnitRepository.findByDonorIdAndEvent_Id(account.getId(), donationEvent.getId());
+
+        return UserDonationHistoryDto.builder()
+                .registrationId(eventRegistration.getId())
+                .registrationDate(eventRegistration.getRegistrationDate())
+                .registrationStatus(eventRegistration.getStatus())
+                .donationDate(donationEvent.getDonationDate())
+                .donationType(donationEvent.getDonationType())
+                .donationLocation(donationEvent.getLocation())
+                .donationName(donationEvent.getName())
+                .donationVolume(bloodUnit != null ? bloodUnit.getVolume() : null)
+                .accountId(account.getId())
+                .build();
     }
 
-    public static UserDonationHistory toEntity(UserDonationHistoryDto dto, Account account, DonationEvent event, EventRegistration registration) {
-        if (dto == null) {
-            return null;
-        }
+    public List<UserDonationHistoryDto> toDtoList(List<EventRegistration> registrations) {
+        if (registrations == null || registrations.isEmpty()) return Collections.emptyList();
 
-        UserDonationHistory userDonationHistory = new UserDonationHistory();
-        userDonationHistory.setId(dto.getId());
-        userDonationHistory.setAccount(account);
-        userDonationHistory.setEvent(event);
-        userDonationHistory.setRegistration(registration);
-
-        return userDonationHistory;
+        return registrations.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
+
 }
+

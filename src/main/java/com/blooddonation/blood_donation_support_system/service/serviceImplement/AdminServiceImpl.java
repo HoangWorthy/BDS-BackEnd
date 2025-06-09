@@ -24,22 +24,18 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private ProfileRepository profileRepository;
 
-    public AccountDto updateUserRole(String userEmail, String newRole){
-        Account account = accountRepository.findByEmail(userEmail);
-        if (account == null) {
-            throw new RuntimeException("User not found with email: " + userEmail);
-        } else {
-            account.setRole(Role.valueOf(newRole));
-            Account updatedAccount = accountRepository.save(account);
-            return AccountMapper.toDto(updatedAccount);
-        }
+    public AccountDto updateUserRole(Long accountId, String newRole) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        account.setRole(Role.valueOf(newRole));
+        Account updatedAccount = accountRepository.save(account);
+        return AccountMapper.toDto(updatedAccount);
     }
 
-    public AccountDto updateUserStatus(String email, String status) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            throw new RuntimeException("Account not found");
-        }
+
+    public AccountDto updateUserStatus(Long accountId, String status) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
         if (status.equals("DISABLE")) {
             account.setStatus(Status.DISABLE);
@@ -50,22 +46,18 @@ public class AdminServiceImpl implements AdminService {
         return AccountMapper.toDto(savedAccount);
     }
 
-    public AccountDto getAccountByEmail(String email) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            throw new RuntimeException("User not found with email: " + email);
-        }
+    public AccountDto getAccountById(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
         return AccountMapper.toDto(account);
     }
 
-    public ProfileDto getProfileByEmail(String email) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            throw new RuntimeException("User not found with email: " + email);
-        }
+    public ProfileDto getProfileById(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
         Profile profile = account.getProfile();
         if (profile == null) {
-            throw new RuntimeException("Profile not found for user: " + email);
+            throw new RuntimeException("Profile not found for user: " + accountId);
         }
         return ProfileMapper.toDto(profile);
     }

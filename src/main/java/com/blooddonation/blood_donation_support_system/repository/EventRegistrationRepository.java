@@ -14,5 +14,5 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     List<EventRegistration> findByEventAndTimeSlot(DonationEvent event, DonationTimeSlot timeSlot);
     boolean existsByAccountAndEvent(Account account, DonationEvent event);
     Optional<EventRegistration> findByAccountAndEventAndStatus(Account account, DonationEvent event, Status status);
-    Optional<EventRegistration> findByAccount(Account account);
+    List<EventRegistration> findByAccount(Account account);
 }

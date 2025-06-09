@@ -31,33 +31,33 @@ public class AdminController {
     }
 
     // Update a user's role
-    @PutMapping("/user/{email}/role")
+    @PutMapping("/user/{accountId}/role")
     public ResponseEntity<Object> updateAccountRole(
-            @PathVariable String email,
+            @PathVariable Long accountId,
             @RequestBody AccountDto roleUpdate) {
         try {
-            AccountDto updatedAccount = adminService.updateUserRole(email, roleUpdate.getRole().name());
+            AccountDto updatedAccount = adminService.updateUserRole(accountId, roleUpdate.getRole().name());
             return ResponseEntity.ok(updatedAccount);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @PutMapping("/user/{email}/status")
-    public ResponseEntity<Object> updateAccountStatus(@PathVariable String email,
+    @PutMapping("/user/{accountId}/status")
+    public ResponseEntity<Object> updateAccountStatus(@PathVariable Long accountId,
                                                       @RequestBody AccountDto statusUpdate) {
         try {
-        AccountDto updatedAccount = adminService.updateUserStatus(email, statusUpdate.getStatus().name());
+        AccountDto updatedAccount = adminService.updateUserStatus(accountId, statusUpdate.getStatus().name());
         return ResponseEntity.ok(updatedAccount);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @GetMapping("/account/{email}")
-    public ResponseEntity<Object> getAccountByEmail(@PathVariable String email) {
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<Object> getAccountById(@PathVariable Long accountId) {
         try {
-            AccountDto accountDto = adminService.getAccountByEmail(email);
+            AccountDto accountDto = adminService.getAccountById(accountId);
             return ResponseEntity.ok(accountDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -67,10 +67,10 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/profile/{email}")
-    public ResponseEntity<Object> getProfileByEmail(@PathVariable String email) {
+    @GetMapping("/profile/{accountId}")
+    public ResponseEntity<Object> getProfileById(@PathVariable Long accountId) {
         try {
-            ProfileDto profileDto = adminService.getProfileByEmail(email);
+            ProfileDto profileDto = adminService.getProfileById(accountId);
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

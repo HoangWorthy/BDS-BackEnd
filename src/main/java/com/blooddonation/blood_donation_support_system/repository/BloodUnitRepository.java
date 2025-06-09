@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface BloodUnitRepository extends JpaRepository<BloodUnit, Long> {
     List<BloodUnit> findByEventId(Long eventId);
+
+    BloodUnit findByDonorIdAndEvent_Id(Long donorId, Long eventId);
 }

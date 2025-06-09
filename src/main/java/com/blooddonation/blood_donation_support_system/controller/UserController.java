@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -170,7 +172,7 @@ public class UserController {
     public ResponseEntity<Object> profile(@CookieValue(value = "jwt-token") String jwtToken) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(jwtToken);
-            ProfileDto profileDto = userService.getProfileByEmail(accountDto.getEmail());
+            ProfileDto profileDto = userService.getProfileById(accountDto.getId());
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -179,5 +181,20 @@ public class UserController {
                     .body("An error occurred while retrieving profile information");
         }
     }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<UserDonationHistoryDto>> history(
+            @CookieValue(value = "jwt-token") String jwtToken) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(jwtToken);
+            List<UserDonationHistoryDto> history = userService.getDonationHistory(accountDto.getId());
+            return ResponseEntity.ok(history);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
 }
 

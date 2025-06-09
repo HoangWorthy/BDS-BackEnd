@@ -52,6 +52,15 @@ public class EventRegistration {
     @Enumerated(EnumType.STRING)
     private DonationType donationType;
 
+    @Column(name = "qr_code")
+    @Lob
+    private byte[] qrCode;
+
+    @OneToOne
+    @JoinColumn(name = "checkin_token_id")
+    private CheckinToken checkinToken;
+
+
 
     @PrePersist
     public void prePersist() {
@@ -85,17 +94,4 @@ public class EventRegistration {
         }
     }
 
-//    @PreRemove
-//    public void preRemove() {
-//        // Decrease registered member count in donation event
-//        if (event != null) {
-//            Integer currentRegisteredCount = event.getRegisteredMemberCount();
-//            // Ensure count never goes below 0
-//            event.setRegisteredMemberCount(Math.max(0, currentRegisteredCount - 1));
-//        }
-//        if (timeSlot != null) {
-//            Integer currentCount = timeSlot.getCurrentRegistrations();
-//            event.setRegisteredMemberCount(Math.max(0, currentCount - 1));
-//        }
-//    }
 }

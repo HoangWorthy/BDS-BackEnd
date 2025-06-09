@@ -1,17 +1,14 @@
 package com.blooddonation.blood_donation_support_system.util;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
-import com.blooddonation.blood_donation_support_system.entity.User;
+import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
-import com.blooddonation.blood_donation_support_system.mapper.UserMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import com.blooddonation.blood_donation_support_system.repository.UserRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
@@ -23,15 +20,12 @@ import static com.blooddonation.blood_donation_support_system.enums.Role.MEMBER;
 @Component
 public class JwtUtil {
 
-    private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final SecretKey secretKey;
     private final long tokenAge = 1000 * 60 * 60;
 
-    public JwtUtil(UserRepository userRepository,
-                   AccountRepository accountRepository,
+    public JwtUtil(AccountRepository accountRepository,
                    @Value("${jwt.secret}") String secret) {
-        this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
@@ -47,16 +41,14 @@ public class JwtUtil {
 
     // This method is called when the user successfully logs in using OAuth2 and save the user
     public String saveOAuth2User(OAuth2User oAuth2User) {
-        System.out.println("Saving OAuth2 user: " + oAuth2User);
         String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setName(name);
-            newUser.setRole(MEMBER);
-            userRepository.save(newUser);
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            Account newAccount = new Account();
+            newAccount.setEmail(email);
+            newAccount.setRole(MEMBER);
+            newAccount.setProfile(new Profile());
+            accountRepository.save(newAccount);
         }
         return generateToken(email);
     }

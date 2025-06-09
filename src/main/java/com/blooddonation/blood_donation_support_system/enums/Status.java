@@ -6,7 +6,10 @@ public enum Status {
     COMPLETED("Completed"),
     APPROVED("Approved"),
     REJECTED("Rejected"),
-    CHECKED_IN("Checked In");
+    CHECKED_IN("Checked In"),
+    ENABLE("Enable"),
+    DISABLE("Disable");
+
 
     private final String status;
 

@@ -24,7 +24,7 @@ public class DonationEventDto {
     private DonationType donationType;
     private Long accountId; // Assuming we only need the ID for the DTO
     private List<DonationTimeSlotDto> timeSlotDtos;
-    private byte[] qrCode;
+//    private byte[] qrCode;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate createdDate;

@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.Role;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import lombok.*;
 
 
@@ -14,5 +15,6 @@ public class AccountDto {
     private String email;
     private String password;
     private Role role;
+    private Status status;
 
 }

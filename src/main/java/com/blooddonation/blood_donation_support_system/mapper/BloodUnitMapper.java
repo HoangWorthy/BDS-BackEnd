@@ -1,10 +1,12 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.BloodUnitDto;
+import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
-import com.blooddonation.blood_donation_support_system.entity.User;
+import com.blooddonation.blood_donation_support_system.entity.Profile;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,4 +38,18 @@ public class BloodUnitMapper {
         entity.setStatus(dto.getStatus());
         return entity;
     }
+
+    public static BloodUnit toEntity1(SingleBloodUnitRecordDto dto, Account donor, DonationEvent event, Profile profile) {
+        if (dto == null) return null;
+
+        BloodUnit entity = new BloodUnit();
+        entity.setDonor(donor);
+        entity.setEvent(event);
+        entity.setVolume(dto.getVolume());
+        entity.setBloodType(profile.getBloodType());
+        entity.setStatus(Status.PENDING);
+        // Don't set bloodType or componentType here if they are derived elsewhere (e.g., from Profile)
+        return entity;
+    }
+
 }

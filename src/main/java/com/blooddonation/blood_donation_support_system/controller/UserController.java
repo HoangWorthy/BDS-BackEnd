@@ -25,6 +25,7 @@ public class UserController {
     //Login
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AccountDto accountDto, HttpServletResponse response) {
+        try {
         String jwtToken = userService.login(accountDto);
         if (jwtToken == null || jwtToken.equals("Invalid email or password")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
@@ -39,6 +40,12 @@ public class UserController {
         response.addCookie(cookie);
 
         return ResponseEntity.ok("Login successful");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while log in user information");
+        }
     }
 
     // Logout

@@ -20,6 +20,7 @@ public class EventRegistrationDto {
     private Long timeSlotId;     // Representing time slot by ID
     private BloodType bloodType;
     private DonationType donationType;
+    private byte[] qrCode;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate registrationDate;

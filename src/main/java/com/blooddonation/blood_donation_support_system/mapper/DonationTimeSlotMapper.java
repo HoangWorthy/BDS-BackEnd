@@ -29,7 +29,7 @@ public class DonationTimeSlotMapper {
         timeSlot.setStartTime(dto.getStartTime());
         timeSlot.setEndTime(dto.getEndTime());
         timeSlot.setMaxCapacity(dto.getMaxCapacity());
-        timeSlot.setCurrentRegistrations(dto.getCurrentRegistrations());
+        timeSlot.setCurrentRegistrations(0);
         timeSlot.setEvent(event);
 
         return timeSlot;

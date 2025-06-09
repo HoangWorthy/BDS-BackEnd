@@ -4,13 +4,12 @@ import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
-import com.blooddonation.blood_donation_support_system.entity.User;
 import com.blooddonation.blood_donation_support_system.enums.Role;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
-import com.blooddonation.blood_donation_support_system.repository.UserRepository;
 import com.blooddonation.blood_donation_support_system.service.EmailService;
 import com.blooddonation.blood_donation_support_system.service.UserService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
@@ -26,8 +25,6 @@ import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -48,13 +45,14 @@ public class UserServiceImpl implements UserService {
 
     public String registerUser(AccountDto accountDto) {
         if (accountRepository.findByEmail(accountDto.getEmail()) != null) {
-            return "Email already exists";
+            throw new RuntimeException("Email already exists");
         } else if (accountDto.getEmail().isEmpty() || accountDto.getPassword().isEmpty()) {
-            return "Email and password cannot be empty";
+            throw new RuntimeException("email and Password cannot be empty");
         }
         // Encode the password
         accountDto.setPassword(passwordEncoder.encode(accountDto.getPassword()));
         accountDto.setRole(Role.MEMBER);
+        accountDto.setStatus(Status.ENABLE);
         Account account = AccountMapper.toEntity(accountDto);
 
         removeOldCode(accountDto.getEmail());
@@ -120,9 +118,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public String login(AccountDto accountDto) {
-        User user = userRepository.findByEmail(accountDto.getEmail());
-        if (user == null || !passwordEncoder.matches(accountDto.getPassword(), user.getPassword())) {
-            return "Invalid email or password";
+        Account account = accountRepository.findByEmail(accountDto.getEmail());
+        if (account == null || !passwordEncoder.matches(accountDto.getPassword(), account.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        if (account.getStatus() == Status.DISABLE) {
+            throw new RuntimeException("User has been deleted");
         }
         return jwtUtil.generateToken(accountDto.getEmail());
     }
@@ -135,26 +136,17 @@ public class UserServiceImpl implements UserService {
         }
 
         Profile profile = account.getProfile();
-        // Update profile information
-        profile.setName(profileDto.getName());
-        profile.setPhone(profileDto.getPhone());
-        profile.setAddress(profileDto.getAddress());
-        profile.setBloodType(profileDto.getBloodType());
-        profile.setGender(profileDto.getGender());
-        profile.setDateOfBirth(profileDto.getDateOfBirth());
-        profile.setPersonalId(profileDto.getPersonalId());
-        if (profile.getLastDonationDate() == null) {
-            profile.setLastDonationDate(profileDto.getLastDonationDate());
-        }
-        if (profile.getNextEligibleDonationDate() == null) {
-            profile.setNextEligibleDonationDate(profile.getLastDonationDate());
+        if (profile == null) {
+            throw new RuntimeException("Profile not found for account");
         }
 
-        // Save account will also save profile due to CascadeType.ALL
-//        Account savedAccount = accountRepository.save(account);
+        ProfileMapper.updateEntityFromDto(profile, profileDto);
+
         Profile updatedProfile = profileRepository.save(profile);
-        return profileMapper.toDto(updatedProfile);
+        return ProfileMapper.toDto(updatedProfile);
     }
+
+
 
     public AccountDto updateUserPassword(AccountDto accountDto, String oldPassword, String newPassword) {
         Account account = accountRepository.findByEmail(accountDto.getEmail());
@@ -172,6 +164,7 @@ public class UserServiceImpl implements UserService {
         Account savedAccount = accountRepository.save(account);
         return AccountMapper.toDto(savedAccount);
     }
+
 
     public String initiatePasswordReset(String email) {
         Account account = accountRepository.findByEmail(email);

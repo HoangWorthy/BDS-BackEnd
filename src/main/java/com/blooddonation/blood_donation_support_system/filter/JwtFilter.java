@@ -1,8 +1,6 @@
 package com.blooddonation.blood_donation_support_system.filter;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDto;
-import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.service.TokenBlacklistService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import io.jsonwebtoken.Jwt;

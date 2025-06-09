@@ -3,8 +3,9 @@ package com.blooddonation.blood_donation_support_system.mapper;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
-import com.blooddonation.blood_donation_support_system.entity.User;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
 
 @Component
 public class DonationEventMapper {
@@ -18,13 +19,12 @@ public class DonationEventMapper {
         dto.setName(event.getName());
         dto.setLocation(event.getLocation());
         dto.setDonationDate(event.getDonationDate());
-        dto.setRegisteredMemberCount(event.getRegisteredMemberCount());
+        dto.setRegisteredMemberCount(0);
         dto.setTotalMemberCount(event.getTotalMemberCount());
         dto.setStatus(event.getStatus());
         dto.setDonationType(event.getDonationType());
         dto.setAccountId(event.getAccount() != null ? event.getAccount().getId() : null);
-        dto.setCreatedDate(event.getCreatedDate());
-        dto.setQrCode(event.getQrCode());
+        dto.setCreatedDate(dto.getDonationDate());
 
         return dto;
     }
@@ -37,13 +37,12 @@ public class DonationEventMapper {
         event.setName(dto.getName());
         event.setLocation(dto.getLocation());
         event.setDonationDate(dto.getDonationDate());
-        event.setRegisteredMemberCount(dto.getRegisteredMemberCount());
+        event.setRegisteredMemberCount(0);
         event.setTotalMemberCount(dto.getTotalMemberCount());
         event.setStatus(dto.getStatus());
         event.setDonationType(dto.getDonationType());
         event.setAccount(account); // Must be resolved from service before mapping
-        event.setCreatedDate(dto.getCreatedDate());
-        event.setQrCode(dto.getQrCode());
+        event.setCreatedDate(LocalDate.now());
 
         return event;
     }

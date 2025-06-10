@@ -30,9 +30,6 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
 
     @Transactional
     public String addBloodUnitsToStockByEventId(Long eventId, String userEmail) {
-        // Validate Input
-        validator.validateStaffAccess(userEmail);
-
         // Fetch Data
         List<BloodUnit> bloodUnits = validator.validateAndGetBloodUnits(eventId);
 
@@ -60,9 +57,6 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
 
     @Transactional
     public List<MedicalFacilityStock> withdrawBloodFromStock(BloodType bloodType, ComponentType componentType, double requestedVolume, String userEmail) {
-        // Validate Input
-        validator.validateStaffAccess(userEmail);
-
         List<MedicalFacilityStock> stocksToWithdraw = new ArrayList<>();
         double remainingVolume = requestedVolume;
 

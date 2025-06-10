@@ -2,6 +2,7 @@ package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.Gender;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
@@ -29,6 +30,8 @@ public class ProfileDto {
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate nextEligibleDonationDate;
+
+    private Status status;
 
     private String personalId;
 }

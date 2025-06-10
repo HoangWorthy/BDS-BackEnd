@@ -11,45 +11,51 @@ public class EventRegistrationMapper {
     public static EventRegistrationDto toDto(EventRegistration registration) {
         if (registration == null) return null;
 
-        EventRegistrationDto dto = new EventRegistrationDto();
-        dto.setId(registration.getId());
-        dto.setAccountId(registration.getAccount() != null ? registration.getAccount().getId() : null);
-        dto.setEventId(registration.getEvent() != null ? registration.getEvent().getId() : null);
-        dto.setBloodType(registration.getBloodType());
-        dto.setDonationType(registration.getDonationType());
-        dto.setRegistrationDate(registration.getRegistrationDate());
-        dto.setStatus(registration.getStatus());
-        dto.setQrCode(registration.getQrCode());
-
-        return dto;
+        return EventRegistrationDto.builder()
+                .id(registration.getId())
+                .accountId(registration.getAccount() != null ? registration.getAccount().getId() : null)
+                .eventId(registration.getEvent() != null ? registration.getEvent().getId() : null)
+                .bloodType(registration.getBloodType())
+                .donationType(registration.getDonationType())
+                .registrationDate(registration.getRegistrationDate())
+                .status(registration.getStatus())
+                .qrCode(registration.getQrCode())
+                .build();
     }
 
-    public static EventRegistration toEntity(EventRegistrationDto dto, Account account, DonationEvent event, DonationTimeSlot donationTimeSlot, Profile profile) {
+    public static EventRegistration toEntity(EventRegistrationDto dto,
+                                             Account account,
+                                             DonationEvent event,
+                                             DonationTimeSlot timeSlot,
+                                             Profile profile) {
         if (dto == null) return null;
 
-        EventRegistration registration = new EventRegistration();
-        registration.setId(dto.getId());
-        registration.setAccount(account);   // Must be fetched before mapping
-        registration.setEvent(event); // Must be fetched before mapping
-        registration.setTimeSlot(donationTimeSlot);
-        registration.setBloodType(profile.getBloodType());
-        registration.setDonationType(event.getDonationType());
-        registration.setRegistrationDate(dto.getRegistrationDate());
-        registration.setStatus(Status.PENDING);
-        registration.setQrCode(dto.getQrCode());
-
-        return registration;
+        return EventRegistration.builder()
+                .id(dto.getId())
+                .account(account)
+                .event(event)
+                .timeSlot(timeSlot)
+                .profileId(account.getProfile().getId())
+                .bloodType(profile.getBloodType())
+                .donationType(event.getDonationType())
+                .registrationDate(dto.getRegistrationDate())
+                .status(Status.PENDING)
+                .qrCode(dto.getQrCode())
+                .build();
     }
 
-    public static EventRegistration registerOfflineEntity(DonationEvent event, Account account, Profile profile) {
+    public static EventRegistration createOfflineRegistration(DonationEvent event,
+                                                              Account account,
+                                                              Profile profile) {
         if (event == null) return null;
-        EventRegistration registration = new EventRegistration();
-        registration.setAccount(account);
-        registration.setEvent(event);
-        registration.setDonationType(event.getDonationType());
-        registration.setBloodType(profile.getBloodType());
-        registration.setStatus(Status.APPROVED);
 
-        return registration;
+        return EventRegistration.builder()
+                .account(account)
+                .event(event)
+                .profileId(profile.getId())
+                .donationType(event.getDonationType())
+                .bloodType(profile.getBloodType())
+                .status(Status.CHECKED_IN)
+                .build();
     }
 }

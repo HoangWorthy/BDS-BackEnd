@@ -1,21 +1,13 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
-import com.blooddonation.blood_donation_support_system.dto.UserDonationHistoryDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
-import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
-import com.blooddonation.blood_donation_support_system.enums.Role;
-import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
-import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
-import com.blooddonation.blood_donation_support_system.mapper.UserDonationHistoryMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
-import com.blooddonation.blood_donation_support_system.repository.EventRegistrationRepository;
 import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
+import com.blooddonation.blood_donation_support_system.service.AuthService;
 import com.blooddonation.blood_donation_support_system.service.EmailService;
-import com.blooddonation.blood_donation_support_system.service.UserService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import com.blooddonation.blood_donation_support_system.validator.UserValidator;
 import jakarta.transaction.Transactional;
@@ -26,11 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -41,14 +32,6 @@ public class UserServiceImpl implements UserService {
     private AccountRepository accountRepository;
     @Autowired
     private ProfileRepository profileRepository;
-    @Autowired
-    private ProfileMapper profileMapper;
-    @Autowired
-    private AccountMapper accountMapper;
-    @Autowired
-    private EventRegistrationRepository eventRegistrationRepository;
-    @Autowired
-    private UserDonationHistoryMapper userDonationHistoryMapper;
     @Autowired
     private UserValidator validator;
 
@@ -63,8 +46,6 @@ public class UserServiceImpl implements UserService {
         }
         // Encode the password
         accountDto.setPassword(passwordEncoder.encode(accountDto.getPassword()));
-        accountDto.setRole(Role.MEMBER);
-        accountDto.setStatus(Status.ENABLE);
         Account account = AccountMapper.toEntity(accountDto);
 
         removeOldCode(accountDto.getEmail());
@@ -130,32 +111,10 @@ public class UserServiceImpl implements UserService {
     }
 
     public String login(AccountDto accountDto) {
-        Account account = validator.getUserOrThrow(accountDto.getId());
+        Account account = validator.getEmailOrThrow(accountDto.getEmail());
         validator.validateLogin(account, accountDto);
         return jwtUtil.generateToken(accountDto.getEmail());
     }
-
-    @Transactional
-    public ProfileDto updateUser(AccountDto accountDto, ProfileDto profileDto) {
-        Account account = validator.getUserOrThrow(accountDto.getId());
-        Profile profile = validator.getProfileOrThrow(account.getProfile());
-
-        ProfileMapper.updateEntityFromDto(profile, profileDto);
-
-        Profile updatedProfile = profileRepository.save(profile);
-        return ProfileMapper.toDto(updatedProfile);
-    }
-
-
-
-    public AccountDto updateUserPassword(AccountDto accountDto, String oldPassword, String newPassword) {
-        Account account = validator.getUserOrThrow(accountDto.getId());
-        validator.validateUpdatePassword(oldPassword, account.getPassword(), newPassword);
-        account.setPassword(passwordEncoder.encode(newPassword));
-        Account savedAccount = accountRepository.save(account);
-        return AccountMapper.toDto(savedAccount);
-    }
-
 
     public String initiatePasswordReset(String email) {
         Account account = validator.getEmailOrThrow(email);
@@ -191,20 +150,6 @@ public class UserServiceImpl implements UserService {
 
         return "Password reset successfully";
     }
-
-    public ProfileDto getProfileById(Long accountId) {
-        Account account = validator.getUserOrThrow(accountId);
-        Profile profile = validator.getProfileOrThrow(account.getProfile());
-        return ProfileMapper.toDto(profile);
-    }
-
-    @Transactional
-    public List<UserDonationHistoryDto> getDonationHistory(Long accountId) {
-        Account account = validator.getUserOrThrow(accountId);
-        List<EventRegistration> registrations = eventRegistrationRepository.findByAccount(account);
-        return userDonationHistoryMapper.toDtoList(registrations);
-    }
-
 
     private String generateVerificationCode() {
         return String.format("%06d", (int) (Math.random() * 1000000));
@@ -270,4 +215,3 @@ public class UserServiceImpl implements UserService {
         });
     }
 }
-

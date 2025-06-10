@@ -8,7 +8,10 @@ public enum Status {
     REJECTED("Rejected"),
     CHECKED_IN("Checked In"),
     ENABLE("Enable"),
-    DISABLE("Disable");
+    DISABLE("Disable"),
+    AVAILABLE("Available"),
+    UNAVAILABLE("Unavailable");
+
 
 
     private final String status;

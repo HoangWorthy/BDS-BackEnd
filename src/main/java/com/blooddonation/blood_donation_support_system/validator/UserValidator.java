@@ -5,14 +5,9 @@ import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class UserValidator {
@@ -59,13 +54,4 @@ public class UserValidator {
             throw new RuntimeException("New password cannot be empty");
         }
     }
-
-    public void validateResetCode(HashMap, String resetCode) {
-        if (!codeExpiration.containsKey(resetCode)) {
-            throw new RuntimeException("Reset code not found");
-        }
-        if (LocalDateTime.now().isAfter(codeExpiration.get(resetCode))) {
-            throw new RuntimeException("Reset code is expired");
-        }
     }
-}

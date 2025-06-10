@@ -10,40 +10,37 @@ import java.time.LocalDate;
 @Component
 public class DonationEventMapper {
 
-
     public static DonationEventDto toDto(DonationEvent event) {
         if (event == null) return null;
 
-        DonationEventDto dto = new DonationEventDto();
-        dto.setId(event.getId());
-        dto.setName(event.getName());
-        dto.setLocation(event.getLocation());
-        dto.setDonationDate(event.getDonationDate());
-        dto.setRegisteredMemberCount(0);
-        dto.setTotalMemberCount(event.getTotalMemberCount());
-        dto.setStatus(event.getStatus());
-        dto.setDonationType(event.getDonationType());
-        dto.setAccountId(event.getAccount() != null ? event.getAccount().getId() : null);
-        dto.setCreatedDate(dto.getDonationDate());
-
-        return dto;
+        return DonationEventDto.builder()
+                .id(event.getId())
+                .name(event.getName())
+                .location(event.getLocation())
+                .donationDate(event.getDonationDate())
+                .registeredMemberCount(0) // Default value
+                .totalMemberCount(event.getTotalMemberCount())
+                .status(event.getStatus())
+                .donationType(event.getDonationType())
+                .accountId(event.getAccount() != null ? event.getAccount().getId() : null)
+                .createdDate(event.getDonationDate()) // Using donationDate as createdDate
+                .build();
     }
 
     public static DonationEvent toEntity(DonationEventDto dto, Account account) {
         if (dto == null) return null;
 
-        DonationEvent event = new DonationEvent();
-        event.setId(dto.getId());
-        event.setName(dto.getName());
-        event.setLocation(dto.getLocation());
-        event.setDonationDate(dto.getDonationDate());
-        event.setRegisteredMemberCount(0);
-        event.setTotalMemberCount(dto.getTotalMemberCount());
-        event.setStatus(dto.getStatus());
-        event.setDonationType(dto.getDonationType());
-        event.setAccount(account); // Must be resolved from service before mapping
-        event.setCreatedDate(LocalDate.now());
-
-        return event;
+        return DonationEvent.builder()
+                .id(dto.getId())
+                .name(dto.getName())
+                .location(dto.getLocation())
+                .donationDate(dto.getDonationDate())
+                .registeredMemberCount(0) // Default value
+                .totalMemberCount(dto.getTotalMemberCount())
+                .status(dto.getStatus())
+                .donationType(dto.getDonationType())
+                .account(account)
+                .createdDate(LocalDate.now())
+                .build();
     }
 }

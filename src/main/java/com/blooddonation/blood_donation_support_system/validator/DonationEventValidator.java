@@ -3,11 +3,8 @@ package com.blooddonation.blood_donation_support_system.validator;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
-import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.repository.*;
-import com.blooddonation.blood_donation_support_system.service.QRCodeService;
-import com.blooddonation.blood_donation_support_system.service.DonationTimeSlotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,43 +23,10 @@ public class DonationEventValidator {
     private DonationTimeSlotRepository donationTimeSlotRepository;
 
     @Autowired
-    private QRCodeService qrCodeService;
-
-    @Autowired
     private AccountRepository accountRepository;
 
     @Autowired
     private ProfileRepository profileRepository;
-
-    public void validateStaffAccess(String email, String operation) {
-        Account staff = accountRepository.findByEmail(email);
-        if (staff == null) {
-            throw new RuntimeException("Staff does not exist");
-        }
-        if (!staff.getRole().equals(Role.STAFF)) {
-            throw new RuntimeException("Only staff can " + operation);
-        }
-    }
-
-    public void validateMemberAccess(String email, String operation) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            throw new RuntimeException("member does not exist");
-        }
-        if (!account.getRole().equals(Role.MEMBER)) {
-            throw new RuntimeException("Only member can " + operation);
-        }
-    }
-
-    public void validateAdminAccess(String email, String operation) {
-        Account admin = accountRepository.findByEmail(email);
-        if (admin == null) {
-            throw new RuntimeException("Admin does not exist");
-        }
-        if (!admin.getRole().equals(Role.ADMIN)) {
-            throw new RuntimeException("Only admin can " + operation);
-        }
-    }
 
     public DonationEvent getEventOrThrow(Long eventId) {
         return donationEventRepository.findById(eventId)
@@ -76,7 +40,12 @@ public class DonationEventValidator {
 
     public Account getDonorOrThrow(Long accountId) {
         return accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Donor not found with id: " + accountId));
+                .orElseThrow(() -> new RuntimeException(("Donor not found with id: " + accountId)));
+    }
+
+    public Profile getProfileOrThrow(Long profileId) {
+        return profileRepository.findById(profileId)
+                .orElseThrow(() -> new RuntimeException(("Profile not found with id: " + profileId)));
     }
 
     public EventRegistration getRegistrationOrThrow(String personalId, DonationEvent event) {
@@ -119,9 +88,6 @@ public class DonationEventValidator {
 
     public void validateRegistrationEligibility(Account account, DonationEvent event, DonationTimeSlot timeSlot) {
         Profile profile = account.getProfile();
-        // Validate member access
-        validateMemberAccess(account.getEmail(), "register for donation events");
-
         // Check event status
         if (event.getStatus() != Status.APPROVED) {
             throw new RuntimeException("Cannot register for an event that is not approved");
@@ -190,7 +156,7 @@ public class DonationEventValidator {
                 e.printStackTrace();
             }
             return eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, Status.PENDING)
-                    .orElseThrow(() -> new RuntimeException("Registration not found"));
+                    .orElseThrow(() -> new RuntimeException("Registration not found or already checkin for this event"));
         }
         return null;
     }
@@ -203,6 +169,7 @@ public class DonationEventValidator {
         registration.setBloodType(member.getProfile().getBloodType());
         registration.setDonationType(event.getDonationType());
         registration.setStatus(Status.CHECKED_IN);
+        registration.setProfileId(member.getProfile().getId());
         return registration;
     }
 

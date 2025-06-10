@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "medical_facility_stocks")
 public class MedicalFacilityStock {

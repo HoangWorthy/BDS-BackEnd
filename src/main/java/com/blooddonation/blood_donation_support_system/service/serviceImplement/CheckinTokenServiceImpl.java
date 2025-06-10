@@ -24,12 +24,6 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
     @Autowired
     private DonationEventValidator validator;
 
-//    private final CheckinTokenRepository checkinTokenRepository;
-//
-//    public CheckinTokenServiceImpl(CheckinTokenRepository checkinTokenRepository) {
-//        this.checkinTokenRepository = checkinTokenRepository;
-//    }
-
     @Override
     public CheckinTokenDto generateTokenForProfile(Profile profile, DonationEvent donationEvent) {
         CheckinToken token = new CheckinToken();
@@ -44,7 +38,6 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
 
     @Override
     public ProfileDto getProfileFromToken(String token, String email) {
-        validator.validateStaffAccess(email, "get profile from token");
         CheckinToken checkinToken = checkinTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
 
@@ -56,6 +49,8 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
 
         return ProfileMapper.toDto(profile); // Convert to DTO
     }
+
+
 
 
 }

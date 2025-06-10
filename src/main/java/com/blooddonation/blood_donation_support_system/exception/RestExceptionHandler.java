@@ -22,5 +22,4 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected void handleMissingRequestCookie(org.springframework.web.bind.MissingRequestCookieException ex, HttpServletResponse response) throws IOException {
         response.sendRedirect("/login");
     }
-
 }

@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SingleBloodUnitRecordDto {
-    private Long accountId;
+//    private Long accountId;
+    private Long profileId;
     private Double volume;
 }

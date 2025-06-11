@@ -6,6 +6,7 @@ import com.blooddonation.blood_donation_support_system.dto.UserDonationHistoryDt
 import com.blooddonation.blood_donation_support_system.service.ProfileService;
 import com.blooddonation.blood_donation_support_system.service.TokenBlacklistService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class ProfileController {
     // Update User Profile
     @PutMapping("/update")
     public ResponseEntity<Object> update(@CookieValue("jwt-token") String jwtToken,
-                                         @RequestBody ProfileDto profileDto) {
+                                         @Valid @RequestBody ProfileDto profileDto) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(jwtToken);
             ProfileDto updatedAccount = profileService.updateUser(accountDto, profileDto);

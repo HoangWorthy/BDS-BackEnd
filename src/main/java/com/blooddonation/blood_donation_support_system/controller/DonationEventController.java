@@ -7,6 +7,7 @@ import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,8 +28,8 @@ public class DonationEventController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/staff/create")
-    public ResponseEntity<String> createDonationEvent(@RequestBody DonationEventDto donationEventDto,
-                                                      @CookieValue("jwt-token") String token) {
+    public ResponseEntity<String> createDonationEvent(@CookieValue("jwt-token") String token,
+                                                      @Valid @RequestBody DonationEventDto donationEventDto) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(token);
             String result = donationEventService.createDonation(donationEventDto, accountDto.getEmail());
@@ -83,9 +84,9 @@ public class DonationEventController {
 
     @PostMapping("/staff/{eventId}/record-donations")
     public ResponseEntity<Object> recordDonation(
+            @CookieValue("jwt-token") String token,
             @PathVariable Long eventId,
-            @RequestBody BulkBloodUnitRecordDto bulkRecordDto,
-            @CookieValue("jwt-token") String token) {
+            @Valid @RequestBody BulkBloodUnitRecordDto bulkRecordDto) {
         try {
             AccountDto staff = jwtUtil.extractUser(token);
             return ResponseEntity.ok(donationEventService.recordMultipleBloodDonations(eventId, bulkRecordDto.getSingleBloodUnitRecords(), staff.getEmail()));

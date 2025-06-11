@@ -43,5 +43,6 @@ package com.blooddonation.blood_donation_support_system.entity;
         @Enumerated(EnumType.STRING)
         private Status status;
 
+        @Column(unique = true)
         private String personalId;
     }

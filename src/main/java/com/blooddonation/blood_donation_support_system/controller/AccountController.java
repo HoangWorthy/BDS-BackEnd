@@ -1,9 +1,12 @@
 package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
+import com.blooddonation.blood_donation_support_system.dto.AccountRoleUpdateDto;
+import com.blooddonation.blood_donation_support_system.dto.AccountStatusUpdateDto;
 import com.blooddonation.blood_donation_support_system.dto.UpdatePasswordDto;
 import com.blooddonation.blood_donation_support_system.service.AccountService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +25,7 @@ public class AccountController {
     // Change User password
     @PutMapping("/update-password")
     public ResponseEntity<Object> updatePassword(@CookieValue("jwt-token") String jwtToken,
-                                                 @RequestBody UpdatePasswordDto updatePasswordDto) {
+                                                 @Valid @RequestBody UpdatePasswordDto updatePasswordDto) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(jwtToken);
             AccountDto updatedAccount = accountService.updateUserPassword(accountDto,
@@ -62,7 +65,7 @@ public class AccountController {
     @PutMapping("/admin/{accountId}/role")
     public ResponseEntity<Object> updateAccountRole(
             @PathVariable Long accountId,
-            @RequestBody AccountDto roleUpdate) {
+            @RequestBody AccountRoleUpdateDto roleUpdate) {
         try {
             AccountDto updatedAccount = accountService.updateUserRole(accountId, roleUpdate.getRole().name());
             return ResponseEntity.ok(updatedAccount);
@@ -74,7 +77,7 @@ public class AccountController {
     // Update a user's status(enable/disable)
     @PutMapping("/admin/{accountId}/status")
     public ResponseEntity<Object> updateAccountStatus(@PathVariable Long accountId,
-                                                      @RequestBody AccountDto statusUpdate) {
+                                                      @Valid @RequestBody AccountStatusUpdateDto statusUpdate) {
         try {
             AccountDto updatedAccount = accountService.updateUserStatus(accountId, statusUpdate.getStatus().name());
             return ResponseEntity.ok(updatedAccount);

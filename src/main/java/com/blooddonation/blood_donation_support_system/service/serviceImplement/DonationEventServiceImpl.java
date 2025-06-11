@@ -54,7 +54,7 @@ public class DonationEventServiceImpl implements DonationEventService {
         Account staff = accountRepository.findByEmail(staffEmail);
 
         // Create And Save Donation Event
-        DonationEvent donationEvent = DonationEventMapper.toEntity(donationEventDto, staff);
+        DonationEvent donationEvent = DonationEventMapper.createDonation(donationEventDto, staff);
         DonationEvent savedDonationEvent = donationEventRepository.save(donationEvent);
 
         // Create time slots for the event

@@ -8,6 +8,7 @@ import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class AuthController {
     private TokenBlacklistService tokenBlacklistService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AccountDto accountDto, HttpServletResponse response) {
+    public ResponseEntity<String> login(@Valid @RequestBody AccountDto accountDto, HttpServletResponse response) {
         try {
             String jwtToken = authService.login(accountDto);
             if (jwtToken == null || jwtToken.equals("Invalid email or password")) {
@@ -66,12 +67,15 @@ public class AuthController {
 
     // Register User
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody AccountDto accountDto) {
-        String result = authService.registerUser(accountDto);
-        if (result.equals("Email already exists") || result.contains("empty")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+    public ResponseEntity<String> registerUser(@Valid @RequestBody AccountDto accountDto) {
+        try {
+            String result = authService.registerUser(accountDto);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Registration failed");
         }
-        return ResponseEntity.ok(result);
     }
 
     //Verify User email before login
@@ -108,7 +112,7 @@ public class AuthController {
 
     // Reset Password using the code sent to the email
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto) {
         String result = authService.resetPassword(resetPasswordDto.getCode(), resetPasswordDto.getNewPassword());
         if (result.equals("Reset code invalid") ||
                 result.equals("Reset code expired") ||

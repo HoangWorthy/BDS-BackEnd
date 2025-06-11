@@ -41,8 +41,6 @@ public class AuthServiceImpl implements AuthService {
     public String registerUser(AccountDto accountDto) {
         if (accountRepository.findByEmail(accountDto.getEmail()) != null) {
             throw new RuntimeException("Email already exists");
-        } else if (accountDto.getEmail().isEmpty() || accountDto.getPassword().isEmpty()) {
-            throw new RuntimeException("email and Password cannot be empty");
         }
         // Encode the password
         accountDto.setPassword(passwordEncoder.encode(accountDto.getPassword()));
@@ -135,7 +133,6 @@ public class AuthServiceImpl implements AuthService {
         if (LocalDateTime.now().isAfter(codeExpiration.get(resetCode))) {
             return "Reset code expired";
         }
-
         Account account = temporaryUsers.get(resetCode);
         if (account == null) {
             return "Invalid reset code";

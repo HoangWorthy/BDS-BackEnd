@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountMapper {
+public class    AccountMapper {
     @Autowired
     private PasswordEncoder passwordEncoder;
 

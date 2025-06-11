@@ -4,14 +4,11 @@ import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.BulkBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
-import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,10 +97,14 @@ public class DonationEventController {
 
     @GetMapping("/staff/{eventId}/time-slots/{timeSlotId}/donors")
     public ResponseEntity<List<AccountDto>> getEventDonors(@PathVariable Long eventId,
-                                                           @PathVariable Long timeSlotId,
-                                                           @CookieValue("jwt-token") String token) {
-        AccountDto staff = jwtUtil.extractUser(token);
-        return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, staff.getEmail()));
+                                                           @PathVariable Long timeSlotId
+                                                           ) {
+        return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId));
+    }
+
+    @GetMapping("/staff/{eventId}/donors")
+    public ResponseEntity<List<ProfileDto>> getEventDonors(@PathVariable Long eventId) {
+        return ResponseEntity.ok(donationEventService.getEventDonorProfiles(eventId));
     }
 }
 

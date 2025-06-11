@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface EventRegistrationRepository extends JpaRepository<EventRegistration, Long> {
-    List<EventRegistration> findByEvent(DonationEvent event);
+    List<EventRegistration> findByEventId(Long eventId);
     Optional<EventRegistration> findByEventAndAccount(DonationEvent event, Account account);
     Optional<EventRegistration> findByEventAndProfileId(DonationEvent event, Long profileId);
     List<EventRegistration> findByEventAndTimeSlot(DonationEvent event, DonationTimeSlot timeSlot);

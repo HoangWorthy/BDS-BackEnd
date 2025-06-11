@@ -4,7 +4,6 @@ import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
-import com.blooddonation.blood_donation_support_system.entity.Profile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,5 +15,6 @@ public interface DonationEventService {
     List<DonationEventDto> getAllDonationEvents();
     List<DonationEventDto> getEventByBetweenDates(LocalDate startDate, LocalDate endDate);
     String recordMultipleBloodDonations(Long eventId, List<SingleBloodUnitRecordDto> records, String userEmail);
-    List<AccountDto> getEventDonors(Long eventId, Long timeSlotId, String userEmail);
+    List<AccountDto> getEventDonors(Long eventId, Long timeSlotId);
+    List<ProfileDto> getEventDonorProfiles(Long eventId);
 }

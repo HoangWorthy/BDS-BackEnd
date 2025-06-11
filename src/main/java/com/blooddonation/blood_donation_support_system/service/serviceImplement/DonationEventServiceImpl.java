@@ -7,19 +7,17 @@ import com.blooddonation.blood_donation_support_system.enums.DonationType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.*;
 import com.blooddonation.blood_donation_support_system.repository.*;
-import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.DonationTimeSlotService;
-import com.blooddonation.blood_donation_support_system.service.EventRegistrationService;
-import com.blooddonation.blood_donation_support_system.service.QRCodeService;
 import com.blooddonation.blood_donation_support_system.validator.DonationEventValidator;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,12 +107,28 @@ public class DonationEventServiceImpl implements DonationEventService {
     public String recordMultipleBloodDonations(Long eventId, List<SingleBloodUnitRecordDto> records, String userEmail) {
         // Fetch Data
         DonationEvent event = validator.getEventOrThrow(eventId);
-//        EventRegistration eventRegistration = eventRegistrationRepository.existsByAccountAndEvent();
         validator.validateBloodDonationRecording(event, records);
 
+        Set<Long> registeredProfileIds = getEventDonorProfiles(eventId).stream()
+                .map(ProfileDto::getId)
+                .collect(Collectors.toSet());
+
+        // Extract profile IDs from records
+        Set<Long> recordProfileIds = records.stream()
+                .map(SingleBloodUnitRecordDto::getProfileId)
+                .collect(Collectors.toSet());
+
+        // Check if all record profile IDs are registered
+        if (!recordProfileIds.containsAll(registeredProfileIds)) {
+            List<Long> missingProfileIds = registeredProfileIds.stream()
+                    .filter(id -> !recordProfileIds.contains(id))
+                    .toList();
+            throw new IllegalArgumentException(
+                    "The following registered profiles are missing in the records: " + missingProfileIds
+            );
+        }
         for (SingleBloodUnitRecordDto record : records) {
             Profile profile = validator.getProfileOrThrow(record.getProfileId());
-
             recordSingleBloodDonation(record, event, profile);
         }
 
@@ -124,14 +138,13 @@ public class DonationEventServiceImpl implements DonationEventService {
     }
 
     @Transactional
-    public void recordSingleBloodDonation(SingleBloodUnitRecordDto record, DonationEvent event, Profile profile) {
+    public void recordSingleBloodDonation(@Valid SingleBloodUnitRecordDto record, DonationEvent event, Profile profile) {
         EventRegistration registration = eventRegistrationRepository.findByEventAndProfileId(event, profile.getId())
                 .orElseThrow(() -> new RuntimeException(String.format("User profile %s is not registered for this event", profile.getId())));
         if (registration.getStatus() != Status.CHECKED_IN) {
             throw new RuntimeException(String.format("User profile %s is not checked in for this event", profile.getId()));
         }
 
-//        Profile profile = donor.getProfile();
         // Use the mapper to create the BloodUnit
         Account donor = validator.getDonorOrThrow(registration.getAccount().getId());
         BloodUnit bloodUnit = BloodUnitMapper.toEntityFromRecord(record, event, donor, profile);
@@ -152,7 +165,7 @@ public class DonationEventServiceImpl implements DonationEventService {
     }
 
     @Transactional
-    public List<AccountDto> getEventDonors(Long eventId, Long timeSlotId, String userEmail) {
+    public List<AccountDto> getEventDonors(Long eventId, Long timeSlotId) {
         // Fetch Data
         DonationEvent event = validator.getEventOrThrow(eventId);
         DonationTimeSlot timeSlot = validator.getSlotOrThrow(timeSlotId);
@@ -161,6 +174,15 @@ public class DonationEventServiceImpl implements DonationEventService {
         return registrations.stream()
                 .map(EventRegistration::getAccount)     // Get User from each registration
                 .map(AccountMapper::toDto)       // Convert each User to UserDto
+                .collect(Collectors.toList());
+    }
+
+    public List<ProfileDto> getEventDonorProfiles(Long eventId) {
+        return eventRegistrationRepository.findByEventId(eventId).stream()
+                .map(EventRegistration::getProfileId)
+                .map(profileId -> profileRepository.findById(profileId)
+                        .orElseThrow(() -> new RuntimeException("Profile not found: " + profileId)))
+                .map(ProfileMapper::toDto)
                 .collect(Collectors.toList());
     }
 

@@ -15,6 +15,7 @@ import com.blooddonation.blood_donation_support_system.service.EventRegistration
 import com.blooddonation.blood_donation_support_system.service.QRCodeService;
 import com.blooddonation.blood_donation_support_system.validator.DonationEventValidator;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -93,7 +94,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     }
 
     @Transactional
-    public ProfileDto registerForGuest(Long eventId, ProfileDto profileDto, String userEmail) {
+    public ProfileDto registerForGuest(Long eventId, @Valid ProfileDto profileDto, String userEmail) {
         // Fetch Data
         Account staff = accountRepository.findByEmail(userEmail);
         DonationEvent event = validator.getEventOrThrow(eventId);

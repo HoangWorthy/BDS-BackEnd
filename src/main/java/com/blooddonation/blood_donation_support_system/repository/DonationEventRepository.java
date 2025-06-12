@@ -1,6 +1,8 @@
 package com.blooddonation.blood_donation_support_system.repository;
 
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,5 +11,5 @@ import java.util.List;
 
 @Repository
 public interface DonationEventRepository extends JpaRepository<DonationEvent, Long> {
-    List<DonationEvent> findByDonationDateBetween(LocalDate startDate, LocalDate endDate);
+    Page<DonationEvent> findByDonationDateBetween(LocalDate startDate, LocalDate endDate, Pageable pageable);
 }

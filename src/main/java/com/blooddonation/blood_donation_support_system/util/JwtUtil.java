@@ -5,6 +5,7 @@ import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
+import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -14,18 +15,21 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 import static com.blooddonation.blood_donation_support_system.enums.Role.MEMBER;
 
 @Component
 public class JwtUtil {
 
+    private final ProfileRepository profileRepository;
     private final AccountRepository accountRepository;
     private final SecretKey secretKey;
     private final long tokenAge = 1000 * 60 * 60;
 
-    public JwtUtil(AccountRepository accountRepository,
+    public JwtUtil(ProfileRepository profileRepository, AccountRepository accountRepository,
                    @Value("${jwt.secret}") String secret) {
+        this.profileRepository = profileRepository;
         this.accountRepository = accountRepository;
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
@@ -45,10 +49,14 @@ public class JwtUtil {
         Account account = accountRepository.findByEmail(email);
         if (account == null) {
             Account newAccount = new Account();
+            newAccount.setPassword(UUID.randomUUID().toString());
             newAccount.setEmail(email);
             newAccount.setRole(MEMBER);
             newAccount.setProfile(new Profile());
-            accountRepository.save(newAccount);
+            Account savedAccount = accountRepository.save(newAccount);
+            Profile updateProfile = savedAccount.getProfile();
+            updateProfile.setAccountId(savedAccount.getId());
+            profileRepository.save(updateProfile);
         }
         return generateToken(email);
     }
@@ -78,6 +86,7 @@ public class JwtUtil {
     public AccountDto extractUser(String token) {
         String email = extractBody(token);
         Account account = accountRepository.findByEmail(email);
+
         if (account == null) {
             throw new RuntimeException("User not found with email: " + email);
         }

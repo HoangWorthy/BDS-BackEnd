@@ -34,14 +34,15 @@ package com.blooddonation.blood_donation_support_system.entity;
         @Enumerated(EnumType.STRING)
         private Gender gender;
 
-        @JsonFormat(pattern = "dd-MM-yyyy")
         private LocalDate dateOfBirth;
 
-        @JsonFormat(pattern = "dd-MM-yyyy")
         private LocalDate lastDonationDate;
 
-        @JsonFormat(pattern = "dd-MM-yyyy")
         private LocalDate nextEligibleDonationDate;
 
+        @Enumerated(EnumType.STRING)
+        private Status status;
+
+        @Column(unique = true)
         private String personalId;
     }

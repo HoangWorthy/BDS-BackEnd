@@ -1,18 +1,15 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
-import com.blooddonation.blood_donation_support_system.enums.Role;
-import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
-import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
+import com.blooddonation.blood_donation_support_system.service.AuthService;
 import com.blooddonation.blood_donation_support_system.service.EmailService;
-import com.blooddonation.blood_donation_support_system.service.UserService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
+import com.blooddonation.blood_donation_support_system.validator.UserValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -36,9 +33,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ProfileRepository profileRepository;
     @Autowired
-    private ProfileMapper profileMapper;
-    @Autowired
-    private AccountMapper accountMapper;
+    private UserValidator validator;
 
     private final Map<String, Account> temporaryUsers = new HashMap<>();
     private final Map<String, LocalDateTime> codeExpiration = new HashMap<>();
@@ -46,13 +41,9 @@ public class UserServiceImpl implements UserService {
     public String registerUser(AccountDto accountDto) {
         if (accountRepository.findByEmail(accountDto.getEmail()) != null) {
             throw new RuntimeException("Email already exists");
-        } else if (accountDto.getEmail().isEmpty() || accountDto.getPassword().isEmpty()) {
-            throw new RuntimeException("email and Password cannot be empty");
         }
         // Encode the password
         accountDto.setPassword(passwordEncoder.encode(accountDto.getPassword()));
-        accountDto.setRole(Role.MEMBER);
-        accountDto.setStatus(Status.ENABLE);
         Account account = AccountMapper.toEntity(accountDto);
 
         removeOldCode(accountDto.getEmail());
@@ -118,59 +109,13 @@ public class UserServiceImpl implements UserService {
     }
 
     public String login(AccountDto accountDto) {
-        Account account = accountRepository.findByEmail(accountDto.getEmail());
-        if (account == null || !passwordEncoder.matches(accountDto.getPassword(), account.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
-        }
-        if (account.getStatus() == Status.DISABLE) {
-            throw new RuntimeException("User has been deleted");
-        }
+        Account account = validator.getEmailOrThrow(accountDto.getEmail());
+        validator.validateLogin(account, accountDto);
         return jwtUtil.generateToken(accountDto.getEmail());
     }
 
-    @Transactional
-    public ProfileDto updateUser(AccountDto accountDto, ProfileDto profileDto) {
-        Account account = accountRepository.findByEmail(accountDto.getEmail());
-        if (account == null) {
-            throw new RuntimeException("Account not found");
-        }
-
-        Profile profile = account.getProfile();
-        if (profile == null) {
-            throw new RuntimeException("Profile not found for account");
-        }
-
-        ProfileMapper.updateEntityFromDto(profile, profileDto);
-
-        Profile updatedProfile = profileRepository.save(profile);
-        return ProfileMapper.toDto(updatedProfile);
-    }
-
-
-
-    public AccountDto updateUserPassword(AccountDto accountDto, String oldPassword, String newPassword) {
-        Account account = accountRepository.findByEmail(accountDto.getEmail());
-        if (account == null) {
-            throw new RuntimeException("User not found");
-        }
-        if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
-            throw new RuntimeException("Old password is incorrect");
-        }
-        if (newPassword.isEmpty()) {
-            throw new RuntimeException("New password cannot be empty");
-        }
-        account.setPassword(passwordEncoder.encode(newPassword));
-
-        Account savedAccount = accountRepository.save(account);
-        return AccountMapper.toDto(savedAccount);
-    }
-
-
     public String initiatePasswordReset(String email) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            return "Email not found";
-        }
+        Account account = validator.getEmailOrThrow(email);
 
         removeOldCode(email);
 
@@ -188,7 +133,6 @@ public class UserServiceImpl implements UserService {
         if (LocalDateTime.now().isAfter(codeExpiration.get(resetCode))) {
             return "Reset code expired";
         }
-
         Account account = temporaryUsers.get(resetCode);
         if (account == null) {
             return "Invalid reset code";
@@ -202,18 +146,6 @@ public class UserServiceImpl implements UserService {
         codeExpiration.remove(resetCode);
 
         return "Password reset successfully";
-    }
-
-    public ProfileDto getProfileByEmail(String email) {
-        Account account = accountRepository.findByEmail(email);
-        if (account == null) {
-            throw new RuntimeException("User not found with email: " + email);
-        }
-        Profile profile = account.getProfile();
-        if (profile == null) {
-            throw new RuntimeException("Profile not found for user: " + email);
-        }
-        return ProfileMapper.toDto(profile);
     }
 
     private String generateVerificationCode() {
@@ -280,4 +212,3 @@ public class UserServiceImpl implements UserService {
         });
     }
 }
-

@@ -1,6 +1,8 @@
 package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
+import com.blooddonation.blood_donation_support_system.dto.BloodRequestDto;
+import com.blooddonation.blood_donation_support_system.dto.MedicalFacilityStockDto;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.service.MedicalFacilityStockService;
@@ -39,15 +41,9 @@ public class MedicalFacilityStockController {
     }
 
     @PostMapping("/withdrawn")
-    public ResponseEntity<Object> withdrawBlood(
-            @RequestParam BloodType bloodType,
-            @RequestParam ComponentType componentType,
-            @RequestParam double volume,
-            @CookieValue("jwt-token") String token) {
+    public ResponseEntity<Object> withdrawBlood(@RequestBody BloodRequestDto bloodRequestDto) {
         try {
-            AccountDto accountDto = jwtUtil.extractUser(token);
-            List<MedicalFacilityStock> withdrawnStocks = medicalFacilityStockService.withdrawBloodFromStock(bloodType, componentType, volume, accountDto.getEmail());
-            return ResponseEntity.ok(withdrawnStocks);
+            return ResponseEntity.ok(medicalFacilityStockService.withdrawBloodFromStock(bloodRequestDto));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -68,6 +64,18 @@ public class MedicalFacilityStockController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while checking stock: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/get-stock")
+    public ResponseEntity<List<MedicalFacilityStockDto>> getStock() {
+        return new ResponseEntity<>(medicalFacilityStockService.getAllAvailableBlood(), HttpStatus.OK);
+    }
+
+    @PostMapping("/get-stock-by-type")
+    public ResponseEntity<List<MedicalFacilityStockDto>> getStockByType(
+            @RequestBody List<ComponentType> componentTypes,
+            @RequestParam BloodType bloodType) {
+        return new ResponseEntity<>(medicalFacilityStockService.getAvailableBloodByType(bloodType,componentTypes), HttpStatus.OK);
     }
 
 }

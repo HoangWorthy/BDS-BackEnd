@@ -12,6 +12,7 @@ public class ComponentRequestMapper {
                 .componentType(entity.getComponentType())
                 .volume(entity.getVolume())
                 .request_id(entity.getBloodRequest().getId())
+                .expiredDate(entity.getExpiredDate())
                 .build();
     }
 
@@ -21,6 +22,7 @@ public class ComponentRequestMapper {
                 .componentType(dto.getComponentType())
                 .volume(dto.getVolume())
                 .bloodRequest(bloodRequest)
+                .expiredDate(dto.getExpiredDate())
                 .build();
     }
 }

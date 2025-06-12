@@ -11,4 +11,5 @@ public interface IBloodRequestService {
     List<BloodRequestDto> findBloodRequestByName(String name);
     List<BloodRequestDto> findAllBloodRequest();
     BloodRequestDto findBloodRequestById(int id);
+    BloodRequestDto handleBloodRequestQueue(BloodRequestDto bloodRequestDto);
 }

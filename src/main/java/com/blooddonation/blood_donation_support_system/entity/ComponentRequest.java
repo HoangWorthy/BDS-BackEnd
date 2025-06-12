@@ -4,6 +4,8 @@ import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -21,7 +23,9 @@ public class ComponentRequest {
 
     private double volume;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "request_id", nullable = false)
     private BloodRequest bloodRequest;
+
+    private LocalDate expiredDate;
 }

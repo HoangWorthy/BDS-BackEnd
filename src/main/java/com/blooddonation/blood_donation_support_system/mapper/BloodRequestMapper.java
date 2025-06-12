@@ -22,6 +22,10 @@ public class BloodRequestMapper {
                 .createdTime(bloodRequest.getCreatedTime())
                 .status(bloodRequest.getStatus())
                 .urgency(bloodRequest.getUrgency())
+                .isDisabled(bloodRequest.isDisabled())
+                .haveServed(bloodRequest.isHaveServed())
+                .isPregnant(bloodRequest.isPregnant())
+                .isAutomation(bloodRequest.isAutomation())
                 .componentRequests(
                         bloodRequest.getComponentRequests() != null ?
                                 bloodRequest.getComponentRequests().stream()
@@ -43,6 +47,10 @@ public class BloodRequestMapper {
                 .phone(dto.getPhone())
                 .createdTime(dto.getCreatedTime())
                 .urgency(dto.getUrgency())
+                .isPregnant(dto.isPregnant())
+                .isDisabled(dto.isDisabled())
+                .haveServed(dto.isHaveServed())
+                .isAutomation(dto.isAutomation())
                 .build();
 
         if (dto.getComponentRequests() != null) {

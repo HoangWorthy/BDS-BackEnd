@@ -23,4 +23,23 @@ public class BloodRequestDto {
     private Urgency urgency;
     private BloodType bloodType;
     private List<ComponentRequestDto> componentRequests;
+    private boolean isPregnant;
+    private boolean isDisabled;
+    private boolean haveServed;
+    private boolean isAutomation;
+
+    public int calculatePriority() {
+        int priority = 0;
+        if (urgency != null) {
+            switch (urgency) {
+                case HIGH: priority += 3; break;
+                case MEDIUM: priority += 2; break;
+                case LOW: priority += 1; break;
+            }
+        }
+        if (isPregnant) priority += 2;
+        if (isDisabled) priority += 1;
+        if (haveServed) priority += 1;
+        return priority;
+    }
 }

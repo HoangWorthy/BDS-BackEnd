@@ -39,7 +39,14 @@ public class BloodRequest {
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
 
-    @OneToMany(mappedBy = "bloodRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "bloodRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ComponentRequest> componentRequests;
 
+    private boolean isPregnant;
+
+    private boolean isDisabled;
+
+    private boolean haveServed;
+
+    private boolean isAutomation;
 }

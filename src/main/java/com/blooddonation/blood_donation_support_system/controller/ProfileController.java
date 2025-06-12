@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping("/api/user/profile")
 public class ProfileController {
     @Autowired
     private ProfileService profileService;
@@ -79,7 +79,7 @@ public class ProfileController {
     }
 
     // Show the specific account
-    @GetMapping("/admin/{accountId}")
+    @GetMapping("/{accountId}")
     public ResponseEntity<Object> getProfileById(@PathVariable Long accountId) {
         try {
             ProfileDto profileDto = profileService.getProfileById(accountId);
@@ -93,7 +93,7 @@ public class ProfileController {
     }
 
     // Show a list of all profiles
-    @GetMapping("/admin/profileList")
+    @GetMapping("/profileList")
     public ResponseEntity<Page<ProfileDto>> getProfileList(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size,
                                                            @RequestParam(defaultValue = "id") String sortBy,
@@ -103,7 +103,7 @@ public class ProfileController {
     }
 
     // Show history of specific account
-    @GetMapping("/admin/history/{accountId}")
+    @GetMapping("/history/{accountId}")
     public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryById(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,

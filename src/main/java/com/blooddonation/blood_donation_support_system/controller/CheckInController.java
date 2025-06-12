@@ -42,7 +42,7 @@ public class CheckInController {
         }
     }
 
-    @GetMapping("/staff/info/{eventId}")
+    @GetMapping("/info/{eventId}")
     public ResponseEntity<Object> checkinInfo(@PathVariable Long eventId,
                                               @RequestParam String checkinToken,
                                               @CookieValue("jwt-token") String token) {
@@ -58,7 +58,7 @@ public class CheckInController {
         }
     }
 
-    @PostMapping("/staff/action/{eventId}")
+    @PostMapping("/action/{eventId}")
     public ResponseEntity<String> checkinToEvent(
             @PathVariable Long eventId,
             @RequestParam String action,

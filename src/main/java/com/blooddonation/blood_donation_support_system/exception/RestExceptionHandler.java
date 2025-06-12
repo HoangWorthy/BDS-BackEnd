@@ -20,10 +20,16 @@ import java.util.Map;
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // If user is not logged in and tries to access a protected resource, redirect to login page
-    @ExceptionHandler(org.springframework.web.bind.MissingRequestCookieException.class)
-    protected void handleMissingRequestCookie(org.springframework.web.bind.MissingRequestCookieException ex, HttpServletResponse response) throws IOException {
-        response.sendRedirect("/login");
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+        return handleExceptionInternal(ex, "Authentication failed: " + ex.getMessage(),
+                new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
+        return handleExceptionInternal(ex, "Access denied: " + ex.getMessage(),
+                new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
     // Handle validation errors (@Valid)

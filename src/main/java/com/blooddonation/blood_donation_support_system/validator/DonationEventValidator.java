@@ -58,14 +58,6 @@ public class DonationEventValidator {
                 .orElseThrow(() -> new RuntimeException("No pending registration found for personal ID: " + personalId));
     }
 
-    public List<EventRegistration> getRegistrationFromEventId(Long eventId) {
-        List<EventRegistration> eventRegistrations = eventRegistrationRepository.findByEventId(eventId);
-        for (EventRegistration eventRegistration : eventRegistrations) {
-            System.out.println(eventRegistration.getProfileId());
-        }
-        return eventRegistrations;
-    }
-
     public void validateEventVerification(String action) {
         if (!action.equals("approve") && !action.equals("reject")) {
             throw new RuntimeException("Invalid action: " + action);

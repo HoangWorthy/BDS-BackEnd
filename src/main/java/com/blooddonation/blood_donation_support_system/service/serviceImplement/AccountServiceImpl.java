@@ -1,10 +1,12 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
+import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
+import com.blooddonation.blood_donation_support_system.mapper.DonationEventMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.mapper.UserDonationHistoryMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
@@ -15,6 +17,10 @@ import com.blooddonation.blood_donation_support_system.service.EmailService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import com.blooddonation.blood_donation_support_system.validator.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -65,9 +71,9 @@ public class AccountServiceImpl implements AccountService {
         return AccountMapper.toDto(account);
     }
 
-    public List<AccountDto> getAllAccounts() {
-        List<Account> accounts = accountRepository.findAll();
-        return accounts.stream().map(AccountMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<AccountDto> getAllAccounts(int pageNumber, int pageSize, String sortBy, boolean ascending) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        return accountRepository.findAll(pageable).map(AccountMapper::toDto);
     }
 }

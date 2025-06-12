@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DonationTimeSlotMapper {
 
-    public DonationTimeSlotDto toDto(DonationTimeSlot timeSlot) {
+    public static DonationTimeSlotDto toDto(DonationTimeSlot timeSlot) {
         if (timeSlot == null) return null;
 
         return DonationTimeSlotDto.builder()
@@ -17,11 +17,10 @@ public class DonationTimeSlotMapper {
                 .endTime(timeSlot.getEndTime())
                 .maxCapacity(timeSlot.getMaxCapacity())
                 .currentRegistrations(timeSlot.getCurrentRegistrations())
-                .eventId(timeSlot.getEvent().getId())
                 .build();
     }
 
-    public DonationTimeSlot toEntity(DonationTimeSlotDto dto, DonationEvent event) {
+    public static DonationTimeSlot toEntity(DonationTimeSlotDto dto, DonationEvent event) {
         if (dto == null) return null;
 
         return DonationTimeSlot.builder()

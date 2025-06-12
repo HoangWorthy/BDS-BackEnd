@@ -69,5 +69,4 @@ public class MedicalFacilityStockController {
                     .body("An error occurred while checking stock: " + e.getMessage());
         }
     }
-
 }

@@ -47,6 +47,4 @@ public class DonationEventDto {
     @FutureOrPresent(message = "Donation date must be in the future or present")
     private LocalDate donationDate;
 
-
-
 }

@@ -13,6 +13,10 @@ import com.blooddonation.blood_donation_support_system.validator.DonationEventVa
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -94,14 +98,25 @@ public class DonationEventServiceImpl implements DonationEventService {
                 .toList();
     }
 
-    public List<DonationEventDto> getEventByBetweenDates(LocalDate startDate, LocalDate endDate) {
-        // Fetch Data
-        List<DonationEvent> donationEvents = donationEventRepository.findByDonationDateBetween(startDate, endDate);
-
-        return donationEvents.stream()
-                .map(DonationEventMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<DonationEventDto> getSortedPaginatedEvents(int pageNumber, int pageSize, String sortBy, boolean ascending) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        return donationEventRepository.findAll(pageable).map(DonationEventMapper::toDto);
     }
+
+
+    public Page<DonationEventDto> getPaginatedEventsByDateRange(
+            LocalDate start, LocalDate end,
+            int pageNumber, int pageSize,
+            String sortBy, boolean ascending) {
+
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<DonationEvent> page = donationEventRepository.findByDonationDateBetween(start, end, pageable);
+        return page.map(DonationEventMapper::toDto);
+    }
+
 
     @Transactional
     public String recordMultipleBloodDonations(Long eventId, List<SingleBloodUnitRecordDto> records, String userEmail) {
@@ -165,20 +180,40 @@ public class DonationEventServiceImpl implements DonationEventService {
     }
 
     @Transactional
-    public List<AccountDto> getEventDonors(Long eventId, Long timeSlotId) {
-        // Fetch Data
+    public Page<AccountDto> getEventDonors(Long eventId, Long timeSlotId, int pageNumber, int pageSize, String sortBy, boolean ascending) {
         DonationEvent event = validator.getEventOrThrow(eventId);
         DonationTimeSlot timeSlot = validator.getSlotOrThrow(timeSlotId);
 
-        List<EventRegistration> registrations = eventRegistrationRepository.findByEventAndTimeSlot(event, timeSlot);
-        return registrations.stream()
-                .map(EventRegistration::getAccount)     // Get User from each registration
-                .map(AccountMapper::toDto)       // Convert each User to UserDto
-                .collect(Collectors.toList());
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<EventRegistration> registrations = eventRegistrationRepository.findByEventAndTimeSlot(event, timeSlot, pageable);
+
+        return registrations.map(reg -> AccountMapper.toDto(reg.getAccount()));
     }
+
+    @Transactional
+    public Page<ProfileDto> getEventDonorProfilesPage(Long eventId, int pageNumber, int pageSize, String sortBy, boolean ascending) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        // Use a custom repository method to exclude CANCELLED
+        Page<EventRegistration> registrations = eventRegistrationRepository.findByEventIdAndStatusNot(
+                eventId, Status.CANCELLED, pageable
+        );
+
+        return registrations.map(registration -> {
+            Long profileId = registration.getProfileId();
+            Profile profile = profileRepository.findById(profileId)
+                    .orElseThrow(() -> new RuntimeException("Profile not found: " + profileId));
+            return ProfileMapper.toDto(profile);
+        });
+    }
+
 
     public List<ProfileDto> getEventDonorProfiles(Long eventId) {
         return eventRegistrationRepository.findByEventId(eventId).stream()
+                .filter(registration -> !Status.CANCELLED.equals(registration.getStatus()))
                 .map(EventRegistration::getProfileId)
                 .map(profileId -> profileRepository.findById(profileId)
                         .orElseThrow(() -> new RuntimeException("Profile not found: " + profileId)))

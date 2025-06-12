@@ -4,10 +4,12 @@ import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.BulkBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
+import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,18 +68,32 @@ public class DonationEventController {
     }
 
     @GetMapping("/donationList")
-    public ResponseEntity<List<DonationEventDto>> getAllDonationEvents() {
-        List<DonationEventDto> donationEvents = donationEventService.getAllDonationEvents();
-        return ResponseEntity.ok(donationEvents);
+    public ResponseEntity<Page<DonationEventDto>> getDonationEventsPaginatedAndSorted(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
+
+        Page<DonationEventDto> events = donationEventService.getSortedPaginatedEvents(page, size, sortBy, ascending);
+        return ResponseEntity.ok(events);
     }
 
+
     @GetMapping("/{startDate}/{endDate}/donationList")
-    public ResponseEntity<List<DonationEventDto>> getDonationEventsByDateRange(
+    public ResponseEntity<Page<DonationEventDto>> getDonationEventsByDateRange(
             @PathVariable LocalDate startDate,
-            @PathVariable LocalDate endDate) {
-        List<DonationEventDto> donationEvents = donationEventService.getEventByBetweenDates(startDate, endDate);
-        return ResponseEntity.ok(donationEvents);
+            @PathVariable LocalDate endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
+
+        Page<DonationEventDto> events = donationEventService.getPaginatedEventsByDateRange(
+                startDate, endDate, page, size, sortBy, ascending);
+
+        return ResponseEntity.ok(events);
     }
+
 
     @PostMapping("/staff/{eventId}/record-donations")
     public ResponseEntity<Object> recordDonation(
@@ -96,15 +112,23 @@ public class DonationEventController {
     }
 
     @GetMapping("/staff/{eventId}/time-slots/{timeSlotId}/donors")
-    public ResponseEntity<List<AccountDto>> getEventDonors(@PathVariable Long eventId,
-                                                           @PathVariable Long timeSlotId
+    public ResponseEntity<Page<AccountDto>> getEventDonors(@PathVariable Long eventId,
+                                                           @PathVariable Long timeSlotId,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size,
+                                                           @RequestParam(defaultValue = "id") String sortBy,
+                                                           @RequestParam(defaultValue = "true") boolean ascending
                                                            ) {
-        return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId));
+        return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, page, size, sortBy, ascending));
     }
 
     @GetMapping("/staff/{eventId}/donors")
-    public ResponseEntity<List<ProfileDto>> getEventDonors(@PathVariable Long eventId) {
-        return ResponseEntity.ok(donationEventService.getEventDonorProfiles(eventId));
+    public ResponseEntity<Page<ProfileDto>> getEventDonors(@PathVariable Long eventId,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size,
+                                                           @RequestParam(defaultValue = "id") String sortBy,
+                                                           @RequestParam(defaultValue = "true") boolean ascending) {
+        return ResponseEntity.ok(donationEventService.getEventDonorProfilesPage(eventId, page, size, sortBy, ascending));
     }
 }
 

@@ -8,6 +8,7 @@ import com.blooddonation.blood_donation_support_system.service.TokenBlacklistSer
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,11 +61,15 @@ public class ProfileController {
 
     // Show member history
     @GetMapping("/history")
-    public ResponseEntity<List<UserDonationHistoryDto>> history(
-            @CookieValue(value = "jwt-token") String jwtToken) {
+    public ResponseEntity<Page<UserDonationHistoryDto>> history(
+            @CookieValue(value = "jwt-token") String jwtToken,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(jwtToken);
-            List<UserDonationHistoryDto> history = profileService.getDonationHistory(accountDto.getId());
+            Page<UserDonationHistoryDto> history = profileService.getDonationHistory(accountDto.getId(), page, size, sortBy, ascending);
             return ResponseEntity.ok(history);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -89,16 +94,24 @@ public class ProfileController {
 
     // Show a list of all profiles
     @GetMapping("/admin/profileList")
-    public ResponseEntity<List<ProfileDto>> getProfileList() {
-        List<ProfileDto> profileDtoList = profileService.getAllProfiles();
+    public ResponseEntity<Page<ProfileDto>> getProfileList(@RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size,
+                                                           @RequestParam(defaultValue = "id") String sortBy,
+                                                           @RequestParam(defaultValue = "true") boolean ascending) {
+        Page<ProfileDto> profileDtoList = profileService.getAllProfiles(page, size, sortBy, ascending);
         return ResponseEntity.ok(profileDtoList);
     }
 
     // Show history of specific account
     @GetMapping("/admin/history/{accountId}")
-    public ResponseEntity<List<UserDonationHistoryDto>> getHistoryById(@PathVariable Long accountId) {
+    public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryById(
+            @PathVariable Long accountId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
         try {
-            List<UserDonationHistoryDto> history = profileService.getDonationHistory(accountId);
+            Page<UserDonationHistoryDto> history = profileService.getDonationHistory(accountId, page, size, sortBy, ascending);
             return ResponseEntity.ok(history);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);

@@ -1,18 +1,29 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
+import com.blooddonation.blood_donation_support_system.dto.DonationTimeSlotDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.enums.Status;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DonationEventMapper {
 
     public static DonationEventDto toDto(DonationEvent event) {
         if (event == null) return null;
+
+        List<DonationTimeSlotDto> slots = null;
+        if (event.getTimeSlots() != null) {
+            slots = event.getTimeSlots().stream()
+                    .map(DonationTimeSlotMapper::toDto)
+                    .collect(Collectors.toList());
+        }
 
         return DonationEventDto.builder()
                 .id(event.getId())
@@ -24,9 +35,11 @@ public class DonationEventMapper {
                 .status(event.getStatus())
                 .donationType(event.getDonationType())
                 .accountId(event.getAccount() != null ? event.getAccount().getId() : null)
-                .createdDate(event.getDonationDate()) // Using donationDate as createdDate
+                .createdDate(LocalDate.now())
+                .timeSlotDtos(slots) // Set the timeSlotDtos here
                 .build();
     }
+
 
     public static DonationEvent toEntity(DonationEventDto dto, Account account) {
         if (dto == null) return null;

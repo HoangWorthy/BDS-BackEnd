@@ -34,7 +34,7 @@ public class DonationEvent {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate donationDate;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<DonationTimeSlot> timeSlots = new ArrayList<>();
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

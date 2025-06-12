@@ -7,6 +7,9 @@ import com.blooddonation.blood_donation_support_system.dto.UpdatePasswordDto;
 import com.blooddonation.blood_donation_support_system.service.AccountService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +59,13 @@ public class AccountController {
 
     // Show a list of all accounts
     @GetMapping("/admin/accountList")
-    public ResponseEntity<List<AccountDto>> getAccountList() {
-        List<AccountDto> accountDtoList = accountService.getAllAccounts();
+    public ResponseEntity<Page<AccountDto>> getAccountList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+    ) {
+        Page<AccountDto> accountDtoList = accountService.getAllAccounts(page, size, sortBy, ascending);
         return ResponseEntity.ok(accountDtoList);
     }
 

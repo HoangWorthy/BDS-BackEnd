@@ -31,7 +31,7 @@ public class UserDonationHistoryMapper {
                 .registrationDate(eventRegistration.getRegistrationDate())
                 .registrationStatus(eventRegistration.getStatus())
                 .donationDate(donationEvent.getDonationDate())
-                .donationType(donationEvent.getDonationType())
+                .donationType(eventRegistration.getDonationType())
                 .donationLocation(donationEvent.getLocation())
                 .donationName(donationEvent.getName())
                 .donationVolume(bloodUnit != null ? bloodUnit.getVolume() : null)

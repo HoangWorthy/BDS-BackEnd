@@ -32,5 +32,5 @@ public class DonationTimeSlotDto {
 
     @Min(value = 0, message = "Current registrations cannot be negative")
     private Integer currentRegistrations;
-    private Long eventId;
+//    private Long eventId;
 }

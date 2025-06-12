@@ -18,6 +18,10 @@ import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import com.blooddonation.blood_donation_support_system.validator.UserValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -62,15 +66,16 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Transactional
-    public List<UserDonationHistoryDto> getDonationHistory(Long accountId) {
+    public Page<UserDonationHistoryDto> getDonationHistory(long accountId, int pageNumber, int pageSize, String sortBy, boolean ascending) {
         Account account = validator.getUserOrThrow(accountId);
-        List<EventRegistration> registrations = eventRegistrationRepository.findByAccount(account);
-        return userDonationHistoryMapper.toDtoList(registrations);
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        return eventRegistrationRepository.findByAccount(account, pageable).map(userDonationHistoryMapper::toDto);
     }
 
-    public List<ProfileDto> getAllProfiles() {
-        List<Profile> profiles = profileRepository.findAll();
-        return profiles.stream().map(ProfileMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<ProfileDto> getAllProfiles(int pageNumber, int pageSize, String sortBy, boolean ascending) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        return profileRepository.findAll(pageable).map(ProfileMapper::toDto);
     }
 }

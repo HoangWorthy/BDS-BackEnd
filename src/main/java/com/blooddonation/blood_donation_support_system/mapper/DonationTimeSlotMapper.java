@@ -7,31 +7,29 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DonationTimeSlotMapper {
-    public DonationTimeSlotDto toDto(DonationTimeSlot timeSlot) {
+
+    public static DonationTimeSlotDto toDto(DonationTimeSlot timeSlot) {
         if (timeSlot == null) return null;
 
-        DonationTimeSlotDto dto = new DonationTimeSlotDto();
-        dto.setId(timeSlot.getId());
-        dto.setStartTime(timeSlot.getStartTime());
-        dto.setEndTime(timeSlot.getEndTime());
-        dto.setMaxCapacity(timeSlot.getMaxCapacity());
-        dto.setCurrentRegistrations(timeSlot.getCurrentRegistrations());
-        dto.setEventId(timeSlot.getEvent().getId());
-
-        return dto;
+        return DonationTimeSlotDto.builder()
+                .id(timeSlot.getId())
+                .startTime(timeSlot.getStartTime())
+                .endTime(timeSlot.getEndTime())
+                .maxCapacity(timeSlot.getMaxCapacity())
+                .currentRegistrations(timeSlot.getCurrentRegistrations())
+                .build();
     }
 
-    public DonationTimeSlot toEntity(DonationTimeSlotDto dto, DonationEvent event) {
+    public static DonationTimeSlot toEntity(DonationTimeSlotDto dto, DonationEvent event) {
         if (dto == null) return null;
 
-        DonationTimeSlot timeSlot = new DonationTimeSlot();
-        timeSlot.setId(dto.getId());
-        timeSlot.setStartTime(dto.getStartTime());
-        timeSlot.setEndTime(dto.getEndTime());
-        timeSlot.setMaxCapacity(dto.getMaxCapacity());
-        timeSlot.setCurrentRegistrations(0);
-        timeSlot.setEvent(event);
-
-        return timeSlot;
+        return DonationTimeSlot.builder()
+                .id(dto.getId())
+                .startTime(dto.getStartTime())
+                .endTime(dto.getEndTime())
+                .maxCapacity(dto.getMaxCapacity())
+                .currentRegistrations(0) // Always start with 0 for new entities
+                .event(event)
+                .build();
     }
 }

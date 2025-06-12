@@ -11,45 +11,48 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BloodUnitMapper {
+
     public static BloodUnitDto toDto(BloodUnit entity) {
         if (entity == null) return null;
 
-        BloodUnitDto dto = new BloodUnitDto();
-        dto.setId(entity.getId());
-        dto.setEventId(entity.getEvent() != null ? entity.getEvent().getId() : null);
-        dto.setAccountId(entity.getDonor() != null ? entity.getDonor().getId() : null);
-        dto.setBloodType(entity.getBloodType());
-        dto.setComponentType(entity.getComponentType());
-        dto.setVolume(entity.getVolume());
-        dto.setStatus(entity.getStatus());
-        return dto;
+        return BloodUnitDto.builder()
+                .id(entity.getId())
+                .eventId(entity.getEvent() != null ? entity.getEvent().getId() : null)
+                .accountId(entity.getDonor() != null ? entity.getDonor().getId() : null)
+                .bloodType(entity.getBloodType())
+                .componentType(entity.getComponentType())
+                .volume(entity.getVolume())
+                .status(entity.getStatus())
+                .build();
     }
 
     public static BloodUnit toEntity(BloodUnitDto dto, Account donor, DonationEvent event) {
         if (dto == null) return null;
 
-        BloodUnit entity = new BloodUnit();
-        entity.setId(dto.getId());
-        entity.setDonor(donor);
-        entity.setEvent(event);
-        entity.setBloodType(dto.getBloodType());
-        entity.setComponentType(dto.getComponentType());
-        entity.setVolume(dto.getVolume());
-        entity.setStatus(dto.getStatus());
-        return entity;
+        return BloodUnit.builder()
+                .id(dto.getId())
+                .donor(donor)
+                .event(event)
+                .bloodType(dto.getBloodType())
+                .componentType(dto.getComponentType())
+                .volume(dto.getVolume())
+                .status(dto.getStatus())
+                .build();
     }
 
-    public static BloodUnit toEntity1(SingleBloodUnitRecordDto dto, Account donor, DonationEvent event, Profile profile) {
+    public static BloodUnit toEntityFromRecord(SingleBloodUnitRecordDto dto,
+                                               DonationEvent event,
+                                               Account donor,
+                                               Profile profile) {
         if (dto == null) return null;
 
-        BloodUnit entity = new BloodUnit();
-        entity.setDonor(donor);
-        entity.setEvent(event);
-        entity.setVolume(dto.getVolume());
-        entity.setBloodType(profile.getBloodType());
-        entity.setStatus(Status.PENDING);
-        // Don't set bloodType or componentType here if they are derived elsewhere (e.g., from Profile)
-        return entity;
+        return BloodUnit.builder()
+                .donor(profile.getAccountId() != null ? donor : null)
+                .profileId(profile.getId())
+                .event(event)
+                .volume(dto.getVolume())
+                .bloodType(profile.getBloodType())
+                .status(Status.PENDING)
+                .build();
     }
-
 }

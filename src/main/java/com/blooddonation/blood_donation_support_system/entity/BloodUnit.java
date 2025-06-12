@@ -4,15 +4,13 @@ import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "blood_units")
 public class BloodUnit {
@@ -26,9 +24,11 @@ public class BloodUnit {
     private DonationEvent event;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "donor_id", nullable = false)
+    @JoinColumn(name = "donor_id", nullable = true)
     private Account donor;
 
+    @Column(nullable = false)
+    private Long profileId;
 
     @Column(nullable = false)
     private Double volume;

@@ -15,70 +15,72 @@ public class MedicalFacilityStockMapper {
     public static MedicalFacilityStockDto toDto(MedicalFacilityStock stock) {
         if (stock == null) return null;
 
-        MedicalFacilityStockDto dto = new MedicalFacilityStockDto();
-        dto.setId(stock.getId());
-        dto.setVolume(stock.getVolume());
-        dto.setBloodType(stock.getBloodType());
-        dto.setComponentType(stock.getComponentType());
-        dto.setExpiryDate(stock.getExpiryDate());
-
-        return dto;
+        return MedicalFacilityStockDto.builder()
+                .id(stock.getId())
+                .volume(stock.getVolume())
+                .bloodType(stock.getBloodType())
+                .componentType(stock.getComponentType())
+                .expiryDate(stock.getExpiryDate())
+                .build();
     }
 
     public static MedicalFacilityStock toEntity(MedicalFacilityStockDto dto) {
         if (dto == null) return null;
 
-        MedicalFacilityStock stock = new MedicalFacilityStock();
-        stock.setId(dto.getId());
-        stock.setVolume(dto.getVolume());
-        stock.setBloodType(dto.getBloodType());
-        stock.setComponentType(dto.getComponentType());
-        stock.setExpiryDate(dto.getExpiryDate());
-
-        return stock;
+        return MedicalFacilityStock.builder()
+                .id(dto.getId())
+                .volume(dto.getVolume())
+                .bloodType(dto.getBloodType())
+                .componentType(dto.getComponentType())
+                .expiryDate(dto.getExpiryDate())
+                .build();
     }
 
     public static MedicalFacilityStock fromBloodUnit(BloodUnit bloodUnit) {
         if (bloodUnit == null) return null;
 
-        MedicalFacilityStock stock = new MedicalFacilityStock();
-        stock.setBloodType(bloodUnit.getBloodType());
-        stock.setVolume(bloodUnit.getVolume());
-        stock.setComponentType(bloodUnit.getComponentType());
-        // Optionally set expiry date here if there's logic for it
-        return stock;
+        return MedicalFacilityStock.builder()
+                .bloodType(bloodUnit.getBloodType())
+                .volume(bloodUnit.getVolume())
+                .componentType(bloodUnit.getComponentType())
+                // TODO: Add expiry date calculation logic based on component type
+                .build();
     }
 
-
-    public static MedicalFacilityStock copyWithNewVolume(MedicalFacilityStock original, double newVolume) {
+    public static MedicalFacilityStock copyWithNewVolume(MedicalFacilityStock original,
+                                                         double newVolume) {
         if (original == null) return null;
 
-        MedicalFacilityStock copy = new MedicalFacilityStock();
-        copy.setId(original.getId()); // Use same ID for updates
-        copy.setBloodType(original.getBloodType());
-        copy.setComponentType(original.getComponentType());
-        copy.setVolume(newVolume);
-        copy.setExpiryDate(original.getExpiryDate());
-        return copy;
+        return MedicalFacilityStock.builder()
+                .id(original.getId()) // Keep same ID for updates
+                .bloodType(original.getBloodType())
+                .componentType(original.getComponentType())
+                .volume(newVolume)
+                .expiryDate(original.getExpiryDate())
+                .build();
     }
 
-    public static MedicalFacilityStock createWithdrawnStock(MedicalFacilityStock source, double withdrawnVolume) {
-        MedicalFacilityStock withdrawn = new MedicalFacilityStock();
-        withdrawn.setBloodType(source.getBloodType());
-        withdrawn.setComponentType(source.getComponentType());
-        withdrawn.setVolume(withdrawnVolume);
-        withdrawn.setExpiryDate(source.getExpiryDate());
-        return withdrawn;
+    public static MedicalFacilityStock createWithdrawnStock(MedicalFacilityStock source,
+                                                            double withdrawnVolume) {
+        if (source == null) return null;
+
+        return MedicalFacilityStock.builder()
+                .bloodType(source.getBloodType())
+                .componentType(source.getComponentType())
+                .volume(withdrawnVolume)
+                .expiryDate(source.getExpiryDate())
+                .build();
     }
 
-    public static MedicalFacilityStock createComponent(BloodType bloodType, ComponentType componentType, double volume, LocalDate expiryDate) {
-        MedicalFacilityStock component = new MedicalFacilityStock();
-        component.setBloodType(bloodType);
-        component.setComponentType(componentType);
-        component.setVolume(volume);
-        component.setExpiryDate(expiryDate);
-        return component;
+    public static MedicalFacilityStock createComponent(BloodType bloodType,
+                                                            ComponentType componentType,
+                                                            double volume,
+                                                            LocalDate expiryDate) {
+        return MedicalFacilityStock.builder()
+                .bloodType(bloodType)
+                .componentType(componentType)
+                .volume(volume)
+                .expiryDate(expiryDate)
+                .build();
     }
-
-
 }

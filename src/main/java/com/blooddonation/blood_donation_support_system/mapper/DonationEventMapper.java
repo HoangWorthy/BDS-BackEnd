@@ -1,49 +1,77 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
+import com.blooddonation.blood_donation_support_system.dto.DonationTimeSlotDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
+import com.blooddonation.blood_donation_support_system.enums.Status;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DonationEventMapper {
 
-
     public static DonationEventDto toDto(DonationEvent event) {
         if (event == null) return null;
 
-        DonationEventDto dto = new DonationEventDto();
-        dto.setId(event.getId());
-        dto.setName(event.getName());
-        dto.setLocation(event.getLocation());
-        dto.setDonationDate(event.getDonationDate());
-        dto.setRegisteredMemberCount(0);
-        dto.setTotalMemberCount(event.getTotalMemberCount());
-        dto.setStatus(event.getStatus());
-        dto.setDonationType(event.getDonationType());
-        dto.setAccountId(event.getAccount() != null ? event.getAccount().getId() : null);
-        dto.setCreatedDate(dto.getDonationDate());
+        List<DonationTimeSlotDto> slots = null;
+        if (event.getTimeSlots() != null) {
+            slots = event.getTimeSlots().stream()
+                    .map(DonationTimeSlotMapper::toDto)
+                    .collect(Collectors.toList());
+        }
 
-        return dto;
+        return DonationEventDto.builder()
+                .id(event.getId())
+                .name(event.getName())
+                .location(event.getLocation())
+                .donationDate(event.getDonationDate())
+                .registeredMemberCount(0) // Default value
+                .totalMemberCount(event.getTotalMemberCount())
+                .status(event.getStatus())
+                .donationType(event.getDonationType())
+                .accountId(event.getAccount() != null ? event.getAccount().getId() : null)
+                .createdDate(LocalDate.now())
+                .timeSlotDtos(slots) // Set the timeSlotDtos here
+                .build();
     }
+
 
     public static DonationEvent toEntity(DonationEventDto dto, Account account) {
         if (dto == null) return null;
 
-        DonationEvent event = new DonationEvent();
-        event.setId(dto.getId());
-        event.setName(dto.getName());
-        event.setLocation(dto.getLocation());
-        event.setDonationDate(dto.getDonationDate());
-        event.setRegisteredMemberCount(0);
-        event.setTotalMemberCount(dto.getTotalMemberCount());
-        event.setStatus(dto.getStatus());
-        event.setDonationType(dto.getDonationType());
-        event.setAccount(account); // Must be resolved from service before mapping
-        event.setCreatedDate(LocalDate.now());
+        return DonationEvent.builder()
+                .id(dto.getId())
+                .name(dto.getName())
+                .location(dto.getLocation())
+                .donationDate(dto.getDonationDate())
+                .registeredMemberCount(0) // Default value
+                .totalMemberCount(dto.getTotalMemberCount())
+                .status(dto.getStatus())
+                .donationType(dto.getDonationType())
+                .account(account)
+                .createdDate(LocalDate.now())
+                .build();
+    }
 
-        return event;
+    public static DonationEvent createDonation(DonationEventDto dto, Account account) {
+        if (dto == null) return null;
+
+        return DonationEvent.builder()
+                .id(dto.getId())
+                .name(dto.getName())
+                .location(dto.getLocation())
+                .donationDate(dto.getDonationDate())
+                .registeredMemberCount(0) // Default value
+                .totalMemberCount(dto.getTotalMemberCount())
+                .status(Status.PENDING)
+                .donationType(dto.getDonationType())
+                .account(account)
+                .createdDate(LocalDate.now())
+                .build();
     }
 }

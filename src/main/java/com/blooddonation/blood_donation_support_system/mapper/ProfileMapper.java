@@ -20,6 +20,7 @@ public class ProfileMapper {
                 .dateOfBirth(Profile.getDateOfBirth())
                 .lastDonationDate(Profile.getLastDonationDate())
                 .nextEligibleDonationDate(Profile.getNextEligibleDonationDate())
+                .status(Profile.getStatus())
                 .personalId(Profile.getPersonalId())
                 .build();
     }
@@ -53,6 +54,7 @@ public class ProfileMapper {
         profile.setGender(dto.getGender());
         profile.setDateOfBirth(dto.getDateOfBirth());
         profile.setPersonalId(dto.getPersonalId());
+        profile.setStatus(dto.getStatus());
 
         if (profile.getLastDonationDate() == null) {
             profile.setLastDonationDate(dto.getLastDonationDate());

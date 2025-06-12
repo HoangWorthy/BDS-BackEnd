@@ -3,10 +3,7 @@ package com.blooddonation.blood_donation_support_system.dto;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -14,10 +11,12 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class BloodUnitDto {
     private Long id;
     private Long eventId;
     private Long accountId;
+    private Long profileId;
     private Double volume;
     private BloodType bloodType;
     private ComponentType componentType;

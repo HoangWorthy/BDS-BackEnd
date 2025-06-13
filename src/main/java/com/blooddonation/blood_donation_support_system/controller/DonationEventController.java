@@ -26,7 +26,7 @@ public class DonationEventController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @PostMapping("/staff/create")
+    @PostMapping("/create")
     public ResponseEntity<String> createDonationEvent(@CookieValue("jwt-token") String token,
                                                       @Valid @RequestBody DonationEventDto donationEventDto) {
         try {
@@ -95,7 +95,7 @@ public class DonationEventController {
     }
 
 
-    @PostMapping("/staff/{eventId}/record-donations")
+    @PostMapping("/{eventId}/record-donations")
     public ResponseEntity<Object> recordDonation(
             @CookieValue("jwt-token") String token,
             @PathVariable Long eventId,
@@ -111,7 +111,7 @@ public class DonationEventController {
         }
     }
 
-    @GetMapping("/staff/{eventId}/time-slots/{timeSlotId}/donors")
+    @GetMapping("/{eventId}/time-slots/{timeSlotId}/donors")
     public ResponseEntity<Page<AccountDto>> getEventDonors(@PathVariable Long eventId,
                                                            @PathVariable Long timeSlotId,
                                                            @RequestParam(defaultValue = "0") int page,
@@ -122,7 +122,7 @@ public class DonationEventController {
         return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, page, size, sortBy, ascending));
     }
 
-    @GetMapping("/staff/{eventId}/donors")
+    @GetMapping("/{eventId}/donors")
     public ResponseEntity<Page<ProfileDto>> getEventDonors(@PathVariable Long eventId,
                                                            @RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size,

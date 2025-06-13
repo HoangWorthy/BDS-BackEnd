@@ -49,9 +49,6 @@ public class DonationEventServiceImpl implements DonationEventService {
 
     @Transactional
     public String createDonation(DonationEventDto donationEventDto, String staffEmail) {
-        // Validate Input
-        validator.validateEventCreation(donationEventDto);
-
         // Fetch Data
         Account staff = accountRepository.findByEmail(staffEmail);
 

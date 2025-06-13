@@ -3,6 +3,7 @@ package com.blooddonation.blood_donation_support_system.mapper;
 import com.blooddonation.blood_donation_support_system.dto.BloodRequestDto;
 import com.blooddonation.blood_donation_support_system.dto.ComponentRequestDto;
 import com.blooddonation.blood_donation_support_system.entity.BloodRequest;
+import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.ComponentRequest;
 
 import java.util.List;
@@ -59,6 +60,13 @@ public class BloodRequestMapper {
                     .collect(Collectors.toList());
 
             bloodRequest.setComponentRequests(componentRequests);
+        }
+
+        if(dto.getBloodUnits() != null) {
+            List<BloodUnit> bloodUnits = dto.getBloodUnits().stream()
+                    .map(dto1 -> BloodUnitMapper.toEntity(dto1, bloodRequest))
+                    .collect(Collectors.toList());
+            bloodRequest.setBloodUnits(bloodUnits);
         }
 
         return bloodRequest;

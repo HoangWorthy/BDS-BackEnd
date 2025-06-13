@@ -37,9 +37,6 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
 
     @Override
     public String addBloodUnitsToStockByEventId(Long eventId, String userEmail) {
-        // Validate Input
-        validator.validateStaffAccess(userEmail);
-
         // Fetch Data
         List<BloodUnit> bloodUnits = validator.validateAndGetBloodUnits(eventId);
 

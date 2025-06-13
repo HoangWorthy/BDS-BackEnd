@@ -27,6 +27,7 @@ public class BloodRequestDto {
     private boolean isDisabled;
     private boolean haveServed;
     private boolean isAutomation;
+    private List<BloodUnitDto> bloodUnits;
 
     public int calculatePriority() {
         int priority = 0;

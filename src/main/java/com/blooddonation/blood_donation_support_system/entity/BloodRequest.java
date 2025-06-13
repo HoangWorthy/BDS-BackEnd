@@ -42,6 +42,9 @@ public class BloodRequest {
     @OneToMany(mappedBy = "bloodRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ComponentRequest> componentRequests;
 
+    @OneToMany(mappedBy = "bloodUnit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BloodUnit> bloodUnits;
+
     private boolean isPregnant;
 
     private boolean isDisabled;

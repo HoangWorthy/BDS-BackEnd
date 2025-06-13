@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/blood-request")
+@RequestMapping("/api/blood-request")
 public class BloodRequestController {
     @Autowired
     private IBloodRequestService iBloodRequestService;

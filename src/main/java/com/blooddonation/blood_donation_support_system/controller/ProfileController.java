@@ -93,7 +93,7 @@ public class ProfileController {
     }
 
     // Show a list of all profiles
-    @GetMapping("/profileList")
+    @GetMapping("/list-profiles")
     public ResponseEntity<Page<ProfileDto>> getProfileList(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size,
                                                            @RequestParam(defaultValue = "id") String sortBy,

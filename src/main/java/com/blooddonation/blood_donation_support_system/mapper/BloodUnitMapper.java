@@ -2,10 +2,7 @@ package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.BloodUnitDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
-import com.blooddonation.blood_donation_support_system.entity.Account;
-import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
-import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
-import com.blooddonation.blood_donation_support_system.entity.Profile;
+import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +20,7 @@ public class BloodUnitMapper {
                 .componentType(entity.getComponentType())
                 .volume(entity.getVolume())
                 .status(entity.getStatus())
+                .bloodRequestId(entity.getBloodRequest().getId())
                 .build();
     }
 
@@ -37,6 +35,19 @@ public class BloodUnitMapper {
                 .componentType(dto.getComponentType())
                 .volume(dto.getVolume())
                 .status(dto.getStatus())
+                .build();
+    }
+    public static BloodUnit toEntity(BloodUnitDto dto,   BloodRequest bloodRequest) {
+        if (dto == null) return null;
+
+        return BloodUnit.builder()
+                .id(dto.getId())
+                .donor(donor)
+                .bloodType(dto.getBloodType())
+                .componentType(dto.getComponentType())
+                .volume(dto.getVolume())
+                .status(dto.getStatus())
+                .bloodRequest(bloodRequest)
                 .build();
     }
 

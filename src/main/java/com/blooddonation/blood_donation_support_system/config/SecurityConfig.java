@@ -3,6 +3,7 @@ package com.blooddonation.blood_donation_support_system.config;
 import com.blooddonation.blood_donation_support_system.filter.JwtFilter;
 import com.blooddonation.blood_donation_support_system.service.OAuth2LoginSuccessHandler;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,17 +47,29 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint((request, response, ex) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"Authentication failed\":\"Please log in to access this resource\"}");
+                        })
+                        .accessDeniedHandler((request, response, ex) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("{\"Access denied\":\"You don't have the required role to access this resource\"}");
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/account/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/account/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
-                        .requestMatchers("/api/profile/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/profile/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
+                        .requestMatchers("/api/user/account/accountList", "/api/user/account/{accountId}/role", "/api/user/account/{accountId}/status", "/api/user/account/{accountId}").hasRole("ADMIN")
+                        .requestMatchers("/api/user/account/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
+                        .requestMatchers("/api/user/profile/{accountId}", "/api/user/profile/profileList", "/api/user/profile/history/{accountId}").hasRole("ADMIN")
+                        .requestMatchers("/api/user/profile/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
                         .requestMatchers("/api/checkin/{eventId}/qr-code").hasRole("MEMBER")
-                        .requestMatchers("/api/checkin/staff/**").hasRole("STAFF")
-                        .requestMatchers("/api/event-registration/staff/**").hasRole("STAFF")
+                        .requestMatchers("/api/checkin/info/{eventId}","/api/checkin/action/{eventId}").hasRole("STAFF")
+                        .requestMatchers("/api/event-registration/{eventId}/registerOffline", "/api/event-registration/{eventId}/register-guest").hasRole("STAFF")
                         .requestMatchers("/api/event-registration/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
-                        .requestMatchers("/api/donation-event/staff/**").hasRole("STAFF")
+                        .requestMatchers("/api/donation-event/create", "/api/donation-event/{eventId}/record-donations", "/api/donation-event/{eventId}/time-slots/{timeSlotId}/donors", "/api/donation-event/{eventId}/donors").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/{eventId}/status").hasRole("ADMIN")
                         .requestMatchers("/api/donation-event/**").permitAll()
                         .requestMatchers("/api/medical-facility-stock/**").hasRole("STAFF")
@@ -65,6 +78,10 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler())
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\":\"OAuth2 authentication failed\"}");
+                        })
                 );
 
 

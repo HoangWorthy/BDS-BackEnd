@@ -41,7 +41,7 @@ public class EventRegistrationController {
         }
     }
 
-    @PostMapping("/staff/{eventId}/registerOffline")
+    @PostMapping("/{eventId}/registerOffline")
     public ResponseEntity<String> registerForEventOffline(
             @PathVariable Long eventId,
             @RequestParam String personalId,
@@ -58,7 +58,7 @@ public class EventRegistrationController {
         }
     }
 
-    @PostMapping("/staff/{eventId}/register-guest")
+    @PostMapping("/{eventId}/register-guest")
     public ResponseEntity<Object> registerGuest(
             @PathVariable Long eventId,
             @RequestBody ProfileDto profileDto,

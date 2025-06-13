@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/account")
+@RequestMapping("/api/user/account")
 public class AccountController {
     @Autowired
     private JwtUtil jwtUtil;
@@ -58,7 +58,7 @@ public class AccountController {
     }
 
     // Show a list of all accounts
-    @GetMapping("/admin/accountList")
+    @GetMapping("/accountList")
     public ResponseEntity<Page<AccountDto>> getAccountList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -70,7 +70,7 @@ public class AccountController {
     }
 
     // Update a user's role
-    @PutMapping("/admin/{accountId}/role")
+    @PutMapping("/{accountId}/role")
     public ResponseEntity<Object> updateAccountRole(
             @PathVariable Long accountId,
             @RequestBody AccountRoleUpdateDto roleUpdate) {
@@ -83,7 +83,7 @@ public class AccountController {
     }
 
     // Update a user's status(enable/disable)
-    @PutMapping("/admin/{accountId}/status")
+    @PutMapping("/{accountId}/status")
     public ResponseEntity<Object> updateAccountStatus(@PathVariable Long accountId,
                                                       @Valid @RequestBody AccountStatusUpdateDto statusUpdate) {
         try {
@@ -95,7 +95,7 @@ public class AccountController {
     }
 
     // Show specific account
-    @GetMapping("/admin/{accountId}")
+    @GetMapping("/{accountId}")
     public ResponseEntity<Object> getAccountById(@PathVariable Long accountId) {
         try {
             AccountDto accountDto = accountService.getAccountById(accountId);

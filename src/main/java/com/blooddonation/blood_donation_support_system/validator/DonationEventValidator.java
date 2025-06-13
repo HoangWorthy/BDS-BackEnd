@@ -70,12 +70,6 @@ public class DonationEventValidator {
         }
     }
 
-    public void validateEventCreation(DonationEventDto dto) {
-        if (dto.getDonationDate().isBefore(LocalDate.now())) {
-            throw new RuntimeException("Donation date cannot be in the past");
-        }
-    }
-
     public void validateBloodDonationRecording(DonationEvent event, List<SingleBloodUnitRecordDto> records) {
         if (event.getStatus().equals(Status.COMPLETED)) {
             throw new RuntimeException("Event is already recorded");

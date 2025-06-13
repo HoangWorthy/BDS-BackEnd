@@ -79,7 +79,7 @@ public class ProfileController {
     }
 
     // Show the specific account
-    @GetMapping("/{accountId}")
+    @GetMapping("/list-profile/{accountId}")
     public ResponseEntity<Object> getProfileById(@PathVariable Long accountId) {
         try {
             ProfileDto profileDto = profileService.getProfileById(accountId);
@@ -93,7 +93,7 @@ public class ProfileController {
     }
 
     // Show a list of all profiles
-    @GetMapping("/profileList")
+    @GetMapping("/list-profile")
     public ResponseEntity<Page<ProfileDto>> getProfileList(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size,
                                                            @RequestParam(defaultValue = "id") String sortBy,
@@ -103,7 +103,7 @@ public class ProfileController {
     }
 
     // Show history of specific account
-    @GetMapping("/history/{accountId}")
+    @GetMapping("/list-profile/{accountId}/history")
     public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryById(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,

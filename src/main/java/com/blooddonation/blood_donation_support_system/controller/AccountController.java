@@ -58,7 +58,7 @@ public class AccountController {
     }
 
     // Show a list of all accounts
-    @GetMapping("/accountList")
+    @GetMapping("/list-account")
     public ResponseEntity<Page<AccountDto>> getAccountList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -95,7 +95,7 @@ public class AccountController {
     }
 
     // Show specific account
-    @GetMapping("/{accountId}")
+    @GetMapping("list-account/{accountId}")
     public ResponseEntity<Object> getAccountById(@PathVariable Long accountId) {
         try {
             AccountDto accountDto = accountService.getAccountById(accountId);

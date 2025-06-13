@@ -60,6 +60,8 @@ public class EventRegistration {
     @JoinColumn(name = "checkin_token_id")
     private CheckinToken checkinToken;
 
+//    private String form;
+
 
 
     @PrePersist

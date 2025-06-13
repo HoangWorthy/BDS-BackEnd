@@ -27,8 +27,9 @@ public class BloodUnit {
     @JoinColumn(name = "donor_id", nullable = true)
     private Account donor;
 
-    @Column(nullable = false)
-    private Long profileId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id")
+    private Profile profileId;
 
     @Column(nullable = false)
     private Double volume;
@@ -44,6 +45,4 @@ public class BloodUnit {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
-
-
 }

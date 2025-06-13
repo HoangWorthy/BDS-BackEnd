@@ -15,6 +15,9 @@ public class ProfileMapper {
                 .name(Profile.getName())
                 .phone(Profile.getPhone())
                 .address(Profile.getAddress())
+                .ward(Profile.getWard())
+                .district(Profile.getDistrict())
+                .city(Profile.getCity())
                 .bloodType(Profile.getBloodType())
                 .gender(Profile.getGender())
                 .dateOfBirth(Profile.getDateOfBirth())
@@ -34,6 +37,9 @@ public class ProfileMapper {
                 .name(profileDto.getName())
                 .phone(profileDto.getPhone())
                 .address(profileDto.getAddress())
+                .ward(profileDto.getWard())
+                .district(profileDto.getDistrict())
+                .city(profileDto.getCity())
                 .bloodType(profileDto.getBloodType())
                 .gender(profileDto.getGender())
                 .dateOfBirth(profileDto.getDateOfBirth())
@@ -50,6 +56,9 @@ public class ProfileMapper {
         profile.setName(dto.getName());
         profile.setPhone(dto.getPhone());
         profile.setAddress(dto.getAddress());
+        profile.setWard(dto.getWard());
+        profile.setDistrict(dto.getDistrict());
+        profile.setCity(dto.getCity());
         profile.setBloodType(dto.getBloodType());
         profile.setGender(dto.getGender());
         profile.setDateOfBirth(dto.getDateOfBirth());

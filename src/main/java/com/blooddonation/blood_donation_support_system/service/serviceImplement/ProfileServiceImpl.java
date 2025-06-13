@@ -45,8 +45,9 @@ public class ProfileServiceImpl implements ProfileService {
         Account account = validator.getUserOrThrow(accountDto.getId());
         Profile profile = validator.getProfileOrThrow(account.getProfile());
 
-        if (!profile.getPersonalId().equals(profileDto.getPersonalId())) {
-            // Check if new personalId already exists
+
+
+        if (profile.getPersonalId() == null || !profile.getPersonalId().equals(profileDto.getPersonalId())) {
             profileRepository.findByPersonalId(profileDto.getPersonalId())
                     .ifPresent(existingProfile -> {
                         throw new RuntimeException("Personal ID already exists");

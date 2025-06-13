@@ -25,7 +25,18 @@ public class ProfileDto {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String phone;
 
+    @NotBlank(message = "Address cannot be blank")
     private String address;
+
+    @NotBlank(message = "Ward cannot be blank")
+    private String ward;
+
+    @NotBlank(message = "District cannot be blank")
+    private String district;
+
+    @NotBlank(message = "City cannot be blank")
+    private String city;
+
     @NotNull(message = "Blood type is required")
     private BloodType bloodType;
 

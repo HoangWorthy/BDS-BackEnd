@@ -86,14 +86,14 @@ public class DonationEventServiceImpl implements DonationEventService {
         return DonationEventMapper.toDto(donationEvent);
     }
 
-    public List<DonationEventDto> getAllDonationEvents() {
-        // Fetch Data
-        List<DonationEvent> donationEvents = donationEventRepository.findAll();
-
-        return donationEvents.stream()
-                .map(DonationEventMapper::toDto)
-                .toList();
-    }
+//    public List<DonationEventDto> getAllDonationEvents() {
+//        // Fetch Data
+//        List<DonationEvent> donationEvents = donationEventRepository.findAll();
+//
+//        return donationEvents.stream()
+//                .map(DonationEventMapper::toDto)
+//                .toList();
+//    }
 
     public Page<DonationEventDto> getSortedPaginatedEvents(int pageNumber, int pageSize, String sortBy, boolean ascending) {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();

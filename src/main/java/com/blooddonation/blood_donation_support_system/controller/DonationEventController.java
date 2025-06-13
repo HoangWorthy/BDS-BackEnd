@@ -41,7 +41,7 @@ public class DonationEventController {
         }
     }
 
-    @PatchMapping("/{eventId}/status")
+    @PatchMapping("/list-donation/{eventId}/status")
     public ResponseEntity<String> approveDonationEvent(@PathVariable Long eventId,
                                                        @CookieValue("jwt-token") String token,
                                                        @RequestParam String action) {
@@ -57,7 +57,7 @@ public class DonationEventController {
         }
     }
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/list-donation/{eventId}")
     public ResponseEntity<Object> getEventDetails(@PathVariable Long eventId) {
         try {
             DonationEventDto eventDetails = donationEventService.getDonationEventById(eventId);
@@ -67,7 +67,7 @@ public class DonationEventController {
         }
     }
 
-    @GetMapping("/donationList")
+    @GetMapping("/list-donation")
     public ResponseEntity<Page<DonationEventDto>> getDonationEventsPaginatedAndSorted(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -79,7 +79,7 @@ public class DonationEventController {
     }
 
 
-    @GetMapping("/{startDate}/{endDate}/donationList")
+    @GetMapping("/list-donation/{startDate}/{endDate}")
     public ResponseEntity<Page<DonationEventDto>> getDonationEventsByDateRange(
             @PathVariable LocalDate startDate,
             @PathVariable LocalDate endDate,
@@ -95,7 +95,7 @@ public class DonationEventController {
     }
 
 
-    @PostMapping("/{eventId}/record-donations")
+    @PostMapping("/list-donation/{eventId}/record-donations")
     public ResponseEntity<Object> recordDonation(
             @CookieValue("jwt-token") String token,
             @PathVariable Long eventId,
@@ -111,7 +111,7 @@ public class DonationEventController {
         }
     }
 
-    @GetMapping("/{eventId}/time-slots/{timeSlotId}/donors")
+    @GetMapping("/list-donation/{eventId}/time-slots/{timeSlotId}/donors")
     public ResponseEntity<Page<AccountDto>> getEventDonors(@PathVariable Long eventId,
                                                            @PathVariable Long timeSlotId,
                                                            @RequestParam(defaultValue = "0") int page,
@@ -122,7 +122,7 @@ public class DonationEventController {
         return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, page, size, sortBy, ascending));
     }
 
-    @GetMapping("/{eventId}/donors")
+    @GetMapping("/list-donation/{eventId}/donors")
     public ResponseEntity<Page<ProfileDto>> getEventDonors(@PathVariable Long eventId,
                                                            @RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size,

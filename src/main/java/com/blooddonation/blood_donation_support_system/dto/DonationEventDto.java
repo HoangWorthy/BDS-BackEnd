@@ -25,8 +25,19 @@ public class DonationEventDto {
     private String name;
 
     @NotBlank(message = "Location cannot be blank")
-    @Size(min = 5, max = 200, message = "Location must be between 5 and 200 characters")
     private String location;
+
+    @NotBlank(message = "Address cannot be blank")
+    private String address;
+
+    @NotBlank(message = "Ward cannot be blank")
+    private String ward;
+
+    @NotBlank(message = "District cannot be blank")
+    private String district;
+
+    @NotBlank(message = "City cannot be blank")
+    private String city;
 
     private Integer registeredMemberCount;
 

@@ -28,6 +28,12 @@ package com.blooddonation.blood_donation_support_system.entity;
 
         private String address;
 
+        private String ward;
+
+        private String district;
+
+        private String city;
+
         @Enumerated(EnumType.STRING)
         private BloodType bloodType;
 

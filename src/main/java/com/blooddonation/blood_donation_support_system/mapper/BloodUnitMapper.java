@@ -59,7 +59,7 @@ public class BloodUnitMapper {
 
         return BloodUnit.builder()
                 .donor(profile.getAccountId() != null ? donor : null)
-                .profileId(profile.getId())
+                .profileId(profile)
                 .event(event)
                 .volume(dto.getVolume())
                 .bloodType(profile.getBloodType())

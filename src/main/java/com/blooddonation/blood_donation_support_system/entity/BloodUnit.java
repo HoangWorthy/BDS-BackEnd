@@ -20,15 +20,16 @@ public class BloodUnit {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = true)
+    @JoinColumn(name = "event_id", nullable = false)
     private DonationEvent event;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "donor_id", nullable = true)
     private Account donor;
 
-    @Column(nullable = false)
-    private Long profileId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id")
+    private Profile profileId;
 
     @Column(nullable = false)
     private Double volume;

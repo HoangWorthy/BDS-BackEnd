@@ -27,8 +27,15 @@ public class DonationEvent {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String location;
+    @Column(nullable = false)
+    private String address;
+
+    private String ward;
+
+    private String district;
+
+    private String city;
 
     @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
@@ -64,9 +71,5 @@ public class DonationEvent {
     @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate createdDate;
-
-//    @Column(name = "qr_code")
-//    @Lob
-//    private byte[] qrCode;
 
 }

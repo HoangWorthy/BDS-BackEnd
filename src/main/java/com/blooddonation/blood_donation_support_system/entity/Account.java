@@ -6,7 +6,10 @@ package com.blooddonation.blood_donation_support_system.entity;
     import jakarta.validation.constraints.NotBlank;
     import lombok.*;
 
-    @Getter
+    import java.util.ArrayList;
+    import java.util.List;
+
+@Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -21,6 +24,9 @@ package com.blooddonation.blood_donation_support_system.entity;
         @OneToOne(cascade = CascadeType.ALL)
         @JoinColumn(name = "profile_id", nullable = false)
         private Profile profile;
+
+        @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<Blog> blogs = new ArrayList<>();
 
         @NotBlank
         @Column(unique = true)

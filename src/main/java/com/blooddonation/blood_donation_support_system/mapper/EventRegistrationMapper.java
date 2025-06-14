@@ -5,6 +5,8 @@ import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 public class EventRegistrationMapper {
 
@@ -20,6 +22,7 @@ public class EventRegistrationMapper {
                 .registrationDate(registration.getRegistrationDate())
                 .status(registration.getStatus())
                 .qrCode(registration.getQrCode())
+                .jsonForm(registration.getJsonForm())
                 .build();
     }
 
@@ -27,7 +30,8 @@ public class EventRegistrationMapper {
                                              Account account,
                                              DonationEvent event,
                                              DonationTimeSlot timeSlot,
-                                             Profile profile) {
+                                             Profile profile,
+                                             String jsonForm) {
         if (dto == null) return null;
 
         return EventRegistration.builder()
@@ -41,12 +45,13 @@ public class EventRegistrationMapper {
                 .registrationDate(dto.getRegistrationDate())
                 .status(Status.PENDING)
                 .qrCode(dto.getQrCode())
+                .jsonForm(jsonForm)
                 .build();
     }
 
-    public static EventRegistration createOfflineRegistration(DonationEvent event,
-                                                              Account account,
-                                                              Profile profile) {
+    public static EventRegistration createGuestRegistration(DonationEvent event,
+                                                            Account account,
+                                                            Profile profile, String jsonForm) {
         if (event == null) return null;
 
         return EventRegistration.builder()
@@ -56,6 +61,22 @@ public class EventRegistrationMapper {
                 .donationType(event.getDonationType())
                 .bloodType(profile.getBloodType())
                 .status(Status.CHECKED_IN)
+                .jsonForm(jsonForm)
+                .build();
+    }
+
+    public static EventRegistration createOfflineRegistration(Account member, DonationEvent event, String jsonForm) {
+        if (event == null) return null;
+
+        return EventRegistration.builder()
+                .account(member)
+                .event(event)
+                .registrationDate(LocalDate.now())
+                .bloodType(member.getProfile().getBloodType())
+                .donationType(event.getDonationType())
+                .status(Status.CHECKED_IN)
+                .profileId(member.getProfile().getId())
+                .jsonForm(jsonForm)
                 .build();
     }
 }

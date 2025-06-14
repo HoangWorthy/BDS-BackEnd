@@ -1,15 +1,17 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
 import com.blooddonation.blood_donation_support_system.dto.CheckinTokenDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileWithFormResponseDto;
 import com.blooddonation.blood_donation_support_system.entity.CheckinToken;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
+import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.mapper.CheckinTokenMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.CheckinTokenRepository;
 import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.validator.DonationEventValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +39,9 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
     }
 
     @Override
-    public ProfileDto getProfileFromToken(String token, String email) {
+    @Transactional
+    public ProfileWithFormResponseDto getProfileFromToken(String token, String email, Long eventId) {
+        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
         CheckinToken checkinToken = checkinTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
 
@@ -46,11 +50,10 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
         }
 
         Profile profile = checkinToken.getProfile();
-
-        return ProfileMapper.toDto(profile); // Convert to DTO
+        EventRegistration eventRegistration = validator.getRegistrationOrThrow(profile.getPersonalId(), donationEvent);
+        String jsonForm = eventRegistration.getJsonForm();
+        return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm) ; // Convert to DTO
     }
-
-
 
 
 }

@@ -4,6 +4,7 @@ import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,8 @@ public class EventRegistrationDto {
     private BloodType bloodType;
     private DonationType donationType;
     private byte[] qrCode;
+    @JsonRawValue
+    private String jsonForm;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate registrationDate;

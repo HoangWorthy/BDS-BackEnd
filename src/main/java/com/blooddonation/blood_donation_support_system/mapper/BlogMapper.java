@@ -15,7 +15,7 @@ public class BlogMapper {
                 .author(account)
                 .title(blogDto.getTitle())
                 .content(blogDto.getContent())
-                .imagePath(blogDto.getImagePath())
+                .thumbnail(blogDto.getThumbnail())
                 .build();
     }
 
@@ -27,7 +27,7 @@ public class BlogMapper {
                 .authorId(blog.getAuthor().getId())
                 .title(blog.getTitle())
                 .content(blog.getContent())
-                .imagePath(blog.getImagePath())
+                .thumbnail(blog.getThumbnail())
                 .status(blog.getStatus())
                 .creationDate(blog.getCreationDate())
                 .lastModifiedDate(blog.getLastModifiedDate())

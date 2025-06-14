@@ -41,7 +41,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     private CheckinTokenService checkinTokenService;
 
     @Transactional
-    public String registerForEventOnline(Long eventId, Long timeSlotId, String userEmail) {
+    public String registerForEventOnline(Long eventId, Long timeSlotId, String userEmail, String jsonForm) {
         //Fetch Data
         Account account = accountRepository.findByEmail(userEmail);
         Profile profile = account.getProfile();
@@ -53,14 +53,14 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
         // Create And Save Registration
         EventRegistrationDto eventRegistrationDto = new EventRegistrationDto();
-        EventRegistration registration = EventRegistrationMapper.toEntity(eventRegistrationDto,account,donationEvent,timeSlot,profile);
+        EventRegistration registration = EventRegistrationMapper.toEntity(eventRegistrationDto,account,donationEvent,timeSlot,profile,jsonForm);
         eventRegistrationRepository.save(registration);
 
         // Generate CheckinToken
         CheckinTokenDto tokenDto = checkinTokenService.generateTokenForProfile(profile, donationEvent);
 
         // Generate QR code URL and image
-        String qrUrl = String.format("http://localhost:8080/api/checkin/staff/info/%d?checkinToken=%s", eventId, tokenDto.getToken());
+        String qrUrl = String.format("http://localhost:8080/api/checkin/info/%d?checkinToken=%s", eventId, tokenDto.getToken());
         try {
             byte[] qrCode = qrCodeService.generateQRCode(qrUrl);
             registration.setQrCode(qrCode);
@@ -74,7 +74,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     }
 
     @Transactional
-    public String registerForEventOffline(Long eventId, String personalId, String userEmail) {
+    public String registerForEventOffline(Long eventId, String personalId, String userEmail, String jsonForm) {
         // Fetch Data
         DonationEvent event = validator.getEventOrThrow(eventId);
         Account member = validator.validateAndGetMemberAccount(personalId);
@@ -87,14 +87,14 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         }
 
         validator.validateRegistrationEligibility(member, event, null);
-        EventRegistration newRegistration = validator.createRegistration(member, event);
+        EventRegistration newRegistration = EventRegistrationMapper.createOfflineRegistration(member, event, jsonForm);
         event.setRegisteredMemberCount(event.getRegisteredMemberCount() - 1);
         eventRegistrationRepository.save(newRegistration);
         return "Member registered and checked in successfully";
     }
 
     @Transactional
-    public ProfileDto registerForGuest(Long eventId, @Valid ProfileDto profileDto, String userEmail) {
+    public ProfileDto registerForGuest(Long eventId, @Valid ProfileDto profileDto, String userEmail, String jsonForm) {
         // Fetch Data
         Account staff = accountRepository.findByEmail(userEmail);
         DonationEvent event = validator.getEventOrThrow(eventId);
@@ -110,7 +110,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         Profile savedProfile = profileRepository.save(profile);
 
         // Create event registration for guest
-        EventRegistration registration = EventRegistrationMapper.createOfflineRegistration(event, staff, savedProfile);
+        EventRegistration registration = EventRegistrationMapper.createGuestRegistration(event, staff, savedProfile, jsonForm);
         event.setRegisteredMemberCount(event.getRegisteredMemberCount() - 1);
         eventRegistrationRepository.save(registration);
 

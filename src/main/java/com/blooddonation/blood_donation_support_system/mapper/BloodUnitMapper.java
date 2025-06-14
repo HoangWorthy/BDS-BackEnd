@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.BloodUnitDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.Status;
@@ -15,12 +16,14 @@ public class BloodUnitMapper {
         return BloodUnitDto.builder()
                 .id(entity.getId())
                 .eventId(entity.getEvent() != null ? entity.getEvent().getId() : null)
+                .bloodRequestId(entity.getBloodRequest() != null ? entity.getBloodRequest().getId() : null)
                 .accountId(entity.getDonor() != null ? entity.getDonor().getId() : null)
                 .bloodType(entity.getBloodType())
                 .componentType(entity.getComponentType())
                 .volume(entity.getVolume())
                 .status(entity.getStatus())
                 .bloodRequestId(entity.getBloodRequest().getId())
+                .profileId(entity.getProfileId().getId())
                 .build();
     }
 
@@ -37,17 +40,17 @@ public class BloodUnitMapper {
                 .status(dto.getStatus())
                 .build();
     }
-    public static BloodUnit toEntity(BloodUnitDto dto,   BloodRequest bloodRequest) {
+    public static BloodUnit toEntity(BloodUnitDto dto, BloodRequest bloodRequest, Profile profile) {
         if (dto == null) return null;
 
         return BloodUnit.builder()
                 .id(dto.getId())
-                .donor(donor)
+                .bloodRequest(bloodRequest)
+                .profileId(profile)
                 .bloodType(dto.getBloodType())
                 .componentType(dto.getComponentType())
                 .volume(dto.getVolume())
                 .status(dto.getStatus())
-                .bloodRequest(bloodRequest)
                 .build();
     }
 
@@ -66,4 +69,5 @@ public class BloodUnitMapper {
                 .status(Status.PENDING)
                 .build();
     }
+
 }

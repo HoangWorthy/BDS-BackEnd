@@ -1,6 +1,8 @@
 package com.blooddonation.blood_donation_support_system.service;
 
 import com.blooddonation.blood_donation_support_system.dto.BloodRequestDto;
+import com.blooddonation.blood_donation_support_system.dto.BloodUnitDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,5 +13,7 @@ public interface IBloodRequestService {
     List<BloodRequestDto> findBloodRequestByName(String name);
     List<BloodRequestDto> findAllBloodRequest();
     BloodRequestDto findBloodRequestById(int id);
-    BloodRequestDto handleBloodRequestQueue(BloodRequestDto bloodRequestDto);
+    BloodRequestDto addBloodRequestDonor(BloodRequestDto bloodRequestDto, BloodUnitDto bloodUnitDto, ProfileDto profileDto);
+    BloodRequestDto fulfillBloodRequest(BloodRequestDto bloodRequestDto);
 }
+

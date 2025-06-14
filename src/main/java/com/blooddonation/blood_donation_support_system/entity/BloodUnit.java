@@ -20,7 +20,7 @@ public class BloodUnit {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = false)
+    @JoinColumn(name = "event_id", nullable = true)
     private DonationEvent event;
 
     @ManyToOne(fetch = FetchType.LAZY)

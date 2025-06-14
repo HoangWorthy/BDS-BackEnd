@@ -1,10 +1,8 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
-import com.blooddonation.blood_donation_support_system.dto.BloodRequestDto;
-import com.blooddonation.blood_donation_support_system.dto.ComponentRequestDto;
-import com.blooddonation.blood_donation_support_system.dto.MedicalFacilityStockDto;
+import com.blooddonation.blood_donation_support_system.dto.*;
 import com.blooddonation.blood_donation_support_system.entity.BloodRequest;
-import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
+import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.enums.BloodRequestStatus;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Urgency;
@@ -30,6 +28,8 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
     private BloodRequestRepository bloodRequestRepository;
     @Autowired
     private MedicalFacilityStockService medicalFacilityStockService;
+    @Autowired
+    private ProfileServiceImpl profileService;
     private final PriorityBlockingQueue<BloodRequestDto> bloodRequestQueue;
     private final PriorityBlockingQueue<BloodRequestDto> pendingRequestQueue;
     private final int HIGH_URGENCY_DELAY = 0;
@@ -123,9 +123,31 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
         return BloodRequestMapper.toBloodRequestDto(bloodRequest);
     }
 
+
     @Override
-    public BloodRequestDto handleBloodRequestQueue(BloodRequestDto bloodRequestDto) {
-        return bloodRequestDto;
+    public BloodRequestDto addBloodRequestDonor(BloodRequestDto bloodRequestDto, BloodUnitDto bloodUnitDto, ProfileDto profileDto) {
+        if (bloodRequestDto.getBloodUnits() == null) {
+            bloodRequestDto.setBloodUnits(new ArrayList<>());
+        }
+        if (profileDto.getId() == null) {
+            profileDto = profileService.saveProfile(profileDto);
+        }
+        bloodUnitDto.setProfileId(profileDto.getId());
+        bloodRequestDto.getBloodUnits().add(bloodUnitDto);
+
+        BloodRequest bloodRequest = bloodRequestRepository.save(
+                BloodRequestMapper.toBloodRequestEntity(bloodRequestDto)
+        );
+        return BloodRequestMapper.toBloodRequestDto(bloodRequest);
+    }
+
+    @Override
+    public BloodRequestDto fulfillBloodRequest(BloodRequestDto bloodRequestDto) {
+        bloodRequestDto.setStatus(BloodRequestStatus.FULFILLED);
+        bloodRequestQueue.remove(bloodRequestDto);
+        pendingRequestQueue.remove(bloodRequestDto);
+        BloodRequest bloodRequest = bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto));
+        return BloodRequestMapper.toBloodRequestDto(bloodRequest);
     }
 
     @PostConstruct
@@ -134,7 +156,6 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
         Thread worker = new Thread(() -> {
             while (true) {
                 try {
-                    System.out.println(bloodRequestQueue.size() + " requests in available queue");
                     BloodRequestDto request = bloodRequestQueue.peek();
                     if (request == null) {
                         Thread.sleep(60 * 1000);
@@ -165,7 +186,6 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
         Thread worker = new Thread(() -> {
             while (true) {
                 try {
-                    System.out.println(pendingRequestQueue.size() + " pending requests in pending queue");
                     List<BloodRequestDto> toProcess = new ArrayList<>();
                     List<BloodRequestDto> pendingList = new ArrayList<>(pendingRequestQueue);
 

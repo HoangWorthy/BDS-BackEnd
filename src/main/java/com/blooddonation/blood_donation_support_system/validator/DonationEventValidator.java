@@ -144,27 +144,10 @@ public class DonationEventValidator {
 
     public EventRegistration validateAndGetExistingRegistration(Account member, DonationEvent event) {
         if (eventRegistrationRepository.existsByAccountAndEvent(member, event)) {
-            try {
-                eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, Status.PENDING);
-            } catch (RuntimeException e) {
-                e.printStackTrace();
-            }
             return eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, Status.PENDING)
                     .orElseThrow(() -> new RuntimeException("Registration not found or already checkin for this event"));
         }
         return null;
-    }
-
-    public EventRegistration createRegistration(Account member, DonationEvent event) {
-        EventRegistration registration = new EventRegistration();
-        registration.setAccount(member);
-        registration.setEvent(event);
-        registration.setRegistrationDate(LocalDate.now());
-        registration.setBloodType(member.getProfile().getBloodType());
-        registration.setDonationType(event.getDonationType());
-        registration.setStatus(Status.CHECKED_IN);
-        registration.setProfileId(member.getProfile().getId());
-        return registration;
     }
 
     public void validateCancellation(DonationEvent event, EventRegistration registration) {

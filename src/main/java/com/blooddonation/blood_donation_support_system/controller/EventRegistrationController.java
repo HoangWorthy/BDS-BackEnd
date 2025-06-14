@@ -3,6 +3,7 @@ package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileWithFormResponseDto;
 import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.EventRegistrationService;
@@ -28,10 +29,11 @@ public class EventRegistrationController {
     @PostMapping("/{eventId}/{timeSlotId}/register")
     public ResponseEntity<String> registerForEvent(@PathVariable Long eventId,
                                                    @PathVariable Long timeSlotId,
+                                                   @RequestBody String jsonForm,
                                                    @CookieValue("jwt-token") String token) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(token);
-            String result = eventRegistrationService.registerForEventOnline(eventId, timeSlotId, accountDto.getEmail());
+            String result = eventRegistrationService.registerForEventOnline(eventId, timeSlotId, accountDto.getEmail(), jsonForm);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -45,10 +47,11 @@ public class EventRegistrationController {
     public ResponseEntity<String> registerForEventOffline(
             @PathVariable Long eventId,
             @RequestParam String personalId,
+            @RequestBody String jsonForm,
             @CookieValue("jwt-token") String token) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(token);
-            String result = eventRegistrationService.registerForEventOffline(eventId, personalId, accountDto.getEmail());
+            String result = eventRegistrationService.registerForEventOffline(eventId, personalId, accountDto.getEmail(), jsonForm);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -61,11 +64,11 @@ public class EventRegistrationController {
     @PostMapping("/{eventId}/register-guest")
     public ResponseEntity<Object> registerGuest(
             @PathVariable Long eventId,
-            @RequestBody ProfileDto profileDto,
+            @RequestBody ProfileWithFormResponseDto profileWithFormResponseDto,
             @CookieValue("jwt-token") String token) {
         try {
             AccountDto staff = jwtUtil.extractUser(token);
-            ProfileDto registeredProfile = eventRegistrationService.registerForGuest(eventId, profileDto, staff.getEmail());
+            ProfileDto registeredProfile = eventRegistrationService.registerForGuest(eventId, profileWithFormResponseDto.getProfile(), staff.getEmail(), profileWithFormResponseDto.getJsonForm());
             return ResponseEntity.ok(registeredProfile);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

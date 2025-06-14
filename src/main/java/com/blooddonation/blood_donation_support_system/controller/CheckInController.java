@@ -2,6 +2,7 @@ package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
+import com.blooddonation.blood_donation_support_system.dto.ProfileWithFormResponseDto;
 import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.EventRegistrationService;
@@ -48,7 +49,7 @@ public class CheckInController {
                                               @CookieValue("jwt-token") String token) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(token);
-            ProfileDto profileDto = checkinTokenService.getProfileFromToken(checkinToken, accountDto.getEmail());
+            ProfileWithFormResponseDto profileDto = checkinTokenService.getProfileFromToken(checkinToken, accountDto.getEmail(), eventId);
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -66,8 +67,8 @@ public class CheckInController {
             @CookieValue("jwt-token") String token) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(token);
-            ProfileDto profileDto = checkinTokenService.getProfileFromToken(checkinToken, accountDto.getEmail());
-            String result = eventRegistrationService.checkInMember(eventId, action, accountDto.getEmail(), profileDto);
+            ProfileWithFormResponseDto profileDto = checkinTokenService.getProfileFromToken(checkinToken, accountDto.getEmail(), eventId);
+            String result = eventRegistrationService.checkInMember(eventId, action, accountDto.getEmail(), profileDto.getProfile());
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

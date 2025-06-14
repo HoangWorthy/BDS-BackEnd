@@ -65,7 +65,6 @@ public class JwtUtil {
     }
 
 
-
     public boolean isTokenExpired(String token) {
         final Date expiration = Jwts.parser()
                 .verifyWith(secretKey)

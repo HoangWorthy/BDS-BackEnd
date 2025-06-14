@@ -39,5 +39,5 @@ package com.blooddonation.blood_donation_support_system.entity;
         private Role role;
 
         @Enumerated(EnumType.STRING)
-        private Status status;
+        private Status status = Status.ENABLE;
     }

@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - deploy/develop
+      - Deploy/Develop
   workflow_dispatch:
 
 jobs:

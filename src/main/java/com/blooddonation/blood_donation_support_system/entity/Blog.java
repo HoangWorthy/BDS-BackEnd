@@ -18,8 +18,11 @@ public class Blog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
-    private String imagePath;
+    
+    private String thumbnail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

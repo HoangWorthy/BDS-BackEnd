@@ -25,8 +25,8 @@ public class BlogDto {
     @Size(min = 10, message = "Content must be at least 10 characters long")
     private String content;
 
-    @Size(max = 255, message = "Image path must not exceed 255 characters")
-    private String imagePath;
+    @NotBlank(message = "Thumbnail is required")
+    private String thumbnail;
 
     @NotNull(message = "Status is required")
     private Status status;

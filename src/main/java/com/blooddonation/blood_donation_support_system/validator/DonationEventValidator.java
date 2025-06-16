@@ -113,6 +113,10 @@ public class DonationEventValidator {
                 profile.getNextEligibleDonationDate().isAfter(event.getDonationDate())) {
             throw new RuntimeException("You are not eligible to donate on this date. Please check your next eligible donation date.");
         }
+
+        if(profile.getBloodType() == null){
+            throw new RuntimeException("Blood type cannot be null. Please update your profile.");
+        }
     }
 
     public void validateCheckIn(DonationEvent event, EventRegistration registration, Account member) {

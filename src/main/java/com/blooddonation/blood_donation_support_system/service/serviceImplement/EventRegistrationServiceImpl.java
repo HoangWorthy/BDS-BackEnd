@@ -81,7 +81,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         EventRegistration registration = validator.validateAndGetExistingRegistration(member, event);
         if (registration != null) {
             registration.setStatus(Status.CHECKED_IN);
-            registration.setProfileId(member.getProfile().getId());
+//            registration.setProfileId(member.getProfile());
             eventRegistrationRepository.save(registration);
             return "Member checked in successfully";
         }

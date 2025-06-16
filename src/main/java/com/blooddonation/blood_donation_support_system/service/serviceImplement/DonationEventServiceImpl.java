@@ -151,7 +151,7 @@ public class DonationEventServiceImpl implements DonationEventService {
 
     @Transactional
     public void recordSingleBloodDonation(@Valid SingleBloodUnitRecordDto record, DonationEvent event, Profile profile) {
-        EventRegistration registration = eventRegistrationRepository.findByEventAndProfileId(event, profile.getId())
+        EventRegistration registration = eventRegistrationRepository.findByEventAndProfileId(event, profile)
                 .orElseThrow(() -> new RuntimeException(String.format("User profile %s is not registered for this event", profile.getId())));
         if (registration.getStatus() != Status.CHECKED_IN) {
             throw new RuntimeException(String.format("User profile %s is not checked in for this event", profile.getId()));
@@ -200,8 +200,8 @@ public class DonationEventServiceImpl implements DonationEventService {
         );
 
         return registrations.map(registration -> {
-            Long profileId = registration.getProfileId();
-            Profile profile = profileRepository.findById(profileId)
+            Profile profileId = registration.getProfileId();
+            Profile profile = profileRepository.findById(profileId.getId())
                     .orElseThrow(() -> new RuntimeException("Profile not found: " + profileId));
             return ProfileMapper.toDto(profile);
         });
@@ -212,7 +212,7 @@ public class DonationEventServiceImpl implements DonationEventService {
         return eventRegistrationRepository.findByEventId(eventId).stream()
                 .filter(registration -> !Status.CANCELLED.equals(registration.getStatus()))
                 .map(EventRegistration::getProfileId)
-                .map(profileId -> profileRepository.findById(profileId)
+                .map(profileId -> profileRepository.findById(profileId.getId())
                         .orElseThrow(() -> new RuntimeException("Profile not found: " + profileId)))
                 .map(ProfileMapper::toDto)
                 .collect(Collectors.toList());

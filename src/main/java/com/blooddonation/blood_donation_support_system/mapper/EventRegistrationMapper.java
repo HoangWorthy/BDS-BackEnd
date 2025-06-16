@@ -39,11 +39,11 @@ public class EventRegistrationMapper {
                 .account(account)
                 .event(event)
                 .timeSlot(timeSlot)
-                .profileId(account.getProfile().getId())
+                .profileId(account.getProfile())
                 .bloodType(profile.getBloodType())
                 .donationType(event.getDonationType())
                 .registrationDate(dto.getRegistrationDate())
-                .status(Status.PENDING)
+                .status(dto.getStatus())
                 .qrCode(dto.getQrCode())
                 .jsonForm(jsonForm)
                 .build();
@@ -57,7 +57,7 @@ public class EventRegistrationMapper {
         return EventRegistration.builder()
                 .account(account)
                 .event(event)
-                .profileId(profile.getId())
+                .profileId(profile)
                 .donationType(event.getDonationType())
                 .bloodType(profile.getBloodType())
                 .status(Status.CHECKED_IN)
@@ -75,7 +75,7 @@ public class EventRegistrationMapper {
                 .bloodType(member.getProfile().getBloodType())
                 .donationType(event.getDonationType())
                 .status(Status.CHECKED_IN)
-                .profileId(member.getProfile().getId())
+                .profileId(member.getProfile())
                 .jsonForm(jsonForm)
                 .build();
     }

@@ -26,7 +26,9 @@ public class EventRegistration {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    private Long profileId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id" , nullable = false)
+    private Profile profileId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
@@ -40,7 +42,7 @@ public class EventRegistration {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate registrationDate;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
 

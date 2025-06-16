@@ -19,6 +19,7 @@ public class Blog {
     private Long id;
     private String title;
 
+    @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
     

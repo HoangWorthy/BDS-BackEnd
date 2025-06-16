@@ -45,7 +45,6 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DH_REPO_NAME }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DH_REPO_NAME }}:latest
           cache-from: |
             type=gha
             type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DH_REPO_NAME }}:latest

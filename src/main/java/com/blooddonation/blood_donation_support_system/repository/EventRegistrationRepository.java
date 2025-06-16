@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface EventRegistrationRepository extends JpaRepository<EventRegistration, Long> {
     List<EventRegistration> findByEventId(Long eventId);
     Optional<EventRegistration> findByEventAndAccount(DonationEvent event, Account account);
-    Optional<EventRegistration> findByEventAndProfileId(DonationEvent event, Long profileId);
+    Optional<EventRegistration> findByEventAndProfileId(DonationEvent event, Profile profile);
     Page<EventRegistration> findByEventAndTimeSlot(DonationEvent event, DonationTimeSlot timeSlot, Pageable pageable);
     boolean existsByAccountAndEvent(Account account, DonationEvent event);
     Optional<EventRegistration> findByAccountAndEventAndStatus(Account account, DonationEvent event, Status status);

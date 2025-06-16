@@ -2,9 +2,11 @@ package com.blooddonation.blood_donation_support_system.validator;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
+import com.blooddonation.blood_donation_support_system.entity.Blog;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
+import com.blooddonation.blood_donation_support_system.repository.BlogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,8 @@ public class UserValidator {
     private AccountRepository accountRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private BlogRepository blogRepository;
 
     public Account getUserOrThrow(Long id) {
         Account account = accountRepository.findById(id)
@@ -35,6 +39,12 @@ public class UserValidator {
             throw new RuntimeException("Email not found");
         }
         return account;
+    }
+
+    public Blog getBlogOrThrow(Long id) {
+        Blog blog = blogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Blog not found with id: " + id));
+        return blog;
     }
 
     public void validateLogin(Account account, AccountDto accountDto) {

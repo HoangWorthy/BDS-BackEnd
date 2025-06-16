@@ -19,15 +19,17 @@ public class Blog {
     private Long id;
     private String title;
 
+    @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
-    
+
     private String thumbnail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private Account author;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
     private LocalDate creationDate;
     private LocalDate lastModifiedDate;
@@ -42,5 +44,6 @@ public class Blog {
     @PreUpdate
     protected void onUpdate() {
         lastModifiedDate = LocalDate.now();
+        status = Status.PENDING;
     }
 }

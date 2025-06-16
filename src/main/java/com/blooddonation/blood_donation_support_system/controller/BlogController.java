@@ -23,14 +23,14 @@ public class BlogController {
     private JwtUtil jwtUtil;
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createBlog(
+    public ResponseEntity<String> createBlog(
             @Valid @RequestPart("blog") BlogDto blogDto,
             @RequestPart("thumbnail") MultipartFile thumbnail,
             @CookieValue("jwt-token") String token) {
         try {
             AccountDto account = jwtUtil.extractUser(token);
-            BlogDto created = blogService.createBlog(blogDto, thumbnail, account.getEmail());
-            return ResponseEntity.ok(created);
+            String result = blogService.createBlog(blogDto, thumbnail, account.getEmail());
+            return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -38,5 +38,20 @@ public class BlogController {
         }
     }
 
+    @PutMapping("/update/{blogId}")
+    public ResponseEntity<String> updateBlog(
+            @PathVariable Long blogId,
+            @Valid @RequestPart("blog") BlogDto blogDto,
+            @RequestPart("thumbnail") MultipartFile thumbnail) {
+
+        try {
+            String result = blogService.updateBlog(blogId, blogDto, thumbnail);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create blog");
+        }
+    }
 
 }

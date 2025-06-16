@@ -7,5 +7,5 @@ import java.io.IOException;
 
 @Service
 public interface ImageUploadService {
-    String uploadImage(MultipartFile image) throws IOException;
+    String uploadImage(MultipartFile image);
 }

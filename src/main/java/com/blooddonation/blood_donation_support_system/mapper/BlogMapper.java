@@ -34,4 +34,15 @@ public class BlogMapper {
                 .build();
     }
 
+    public static Blog update(BlogDto blogDto, Blog blog) {
+        if (blogDto == null) return null;
+
+        blog.setTitle(blogDto.getTitle());
+        blog.setContent(blogDto.getContent());
+        if (blog.getThumbnail() != null) {
+            blog.setThumbnail(blogDto.getThumbnail());
+        }
+        return blog;
+    }
+
 }

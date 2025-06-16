@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, ex) -> {
                             response.setContentType("application/json");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("{\"Authentication failed\":\"Please log in to access this resource\"}");
+                            response.getWriter().write("{\"Authentication failed\":" + ex);
                         })
                         .accessDeniedHandler((request, response, ex) -> {
                             response.setContentType("application/json");

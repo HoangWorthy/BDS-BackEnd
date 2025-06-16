@@ -1,12 +1,18 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
+import com.blooddonation.blood_donation_support_system.dto.BloodRequestDto;
+import com.blooddonation.blood_donation_support_system.dto.ComponentRequestDto;
+import com.blooddonation.blood_donation_support_system.dto.MedicalFacilityStockDto;
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
+import com.blooddonation.blood_donation_support_system.enums.BloodRequestStatus;
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.mapper.BloodRequestMapper;
 import com.blooddonation.blood_donation_support_system.mapper.MedicalFacilityStockMapper;
+import com.blooddonation.blood_donation_support_system.repository.BloodRequestRepository;
 import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
 import com.blooddonation.blood_donation_support_system.repository.MedicalFacilityStockRepository;
 import com.blooddonation.blood_donation_support_system.service.MedicalFacilityStockService;
@@ -16,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,8 +32,10 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
     private BloodUnitRepository bloodUnitRepository;
     @Autowired
     private MedicalFacilityStockValidator validator;
+    @Autowired
+    private BloodRequestRepository bloodRequestRepository;
 
-    @Transactional
+    @Override
     public String addBloodUnitsToStockByEventId(Long eventId, String userEmail) {
         // Fetch Data
         List<BloodUnit> bloodUnits = validator.validateAndGetBloodUnits(eventId);
@@ -54,46 +61,21 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         return String.format("Successfully added %d blood units to stock", bloodUnits.size());
     }
 
-
     @Transactional
-    public List<MedicalFacilityStock> withdrawBloodFromStock(BloodType bloodType, ComponentType componentType, double requestedVolume, String userEmail) {
-        List<MedicalFacilityStock> stocksToWithdraw = new ArrayList<>();
-        double remainingVolume = requestedVolume;
-
-        // Fetch stock
-        List<MedicalFacilityStock> availableStocks = medicalFacilityStockRepository
-                .findByBloodTypeAndComponentTypeOrderByExpiryDateAsc(bloodType, componentType);
-
-        if (availableStocks.isEmpty()) {
-            throw new RuntimeException("No matching blood stock available");
+    public int withdrawBloodFromStock(BloodRequestDto bloodRequestDto) {
+        int dataChanges = 0;
+        for (ComponentRequestDto componentRequest : bloodRequestDto.getComponentRequests()) {
+            dataChanges += medicalFacilityStockRepository.withdrawBloodFromStock(
+                    bloodRequestDto.getBloodType(),
+                    componentRequest.getComponentType(),
+                    componentRequest.getVolume()
+            );
         }
-
-        double totalAvailableVolume = availableStocks.stream()
-                .mapToDouble(MedicalFacilityStock::getVolume)
-                .sum();
-
-        if (totalAvailableVolume < requestedVolume) {
-            throw new RuntimeException("Insufficient blood stock: only " + totalAvailableVolume + " available");
+        if(!bloodRequestDto.isAutomation()) {
+            bloodRequestDto.setStatus(BloodRequestStatus.FULFILLED);
+            bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto));
         }
-
-        for (MedicalFacilityStock stock : availableStocks) {
-            if (remainingVolume <= 0) break;
-
-            if (stock.getVolume() <= remainingVolume) {
-                remainingVolume -= stock.getVolume();
-                stocksToWithdraw.add(stock);
-                medicalFacilityStockRepository.delete(stock);
-            } else {
-                MedicalFacilityStock updatedStock = MedicalFacilityStockMapper.copyWithNewVolume(stock, stock.getVolume() - remainingVolume);
-                MedicalFacilityStock withdrawnStock = MedicalFacilityStockMapper.createWithdrawnStock(stock, remainingVolume);
-
-                medicalFacilityStockRepository.save(updatedStock);
-                stocksToWithdraw.add(withdrawnStock);
-                remainingVolume = 0;
-            }
-        }
-
-        return stocksToWithdraw;
+        return dataChanges;
     }
 
 
@@ -126,6 +108,29 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         }
 
         return String.format("Removed %d expired stocks:\n%s", count, removedStock.toString());
+    }
+
+    @Override
+    public List<MedicalFacilityStockDto> getAllAvailableBlood() {
+        List<MedicalFacilityStock> medicalFacilityStocks = medicalFacilityStockRepository.findAllAvailableBlood();
+        return medicalFacilityStocks.stream()
+                .map(MedicalFacilityStockMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<MedicalFacilityStockDto> getAvailableBloodByType(BloodType bloodType, List<ComponentType> componentTypes) {
+        List<MedicalFacilityStock> medicalFacilityStocks = medicalFacilityStockRepository.findAvailableBloodByType(bloodType, componentTypes);
+        return medicalFacilityStocks.stream()
+                .map(MedicalFacilityStockMapper::toDto)
+                .toList();
+    }
+    @Override
+    public List<MedicalFacilityStockDto> getAvailableBloodByType(BloodType bloodType, ComponentType componentType) {
+        List<MedicalFacilityStock> medicalFacilityStocks = medicalFacilityStockRepository.findAvailableBloodByType(bloodType, componentType);
+        return medicalFacilityStocks.stream()
+                .map(MedicalFacilityStockMapper::toDto)
+                .toList();
     }
 
     private void updateOrCreateStock(MedicalFacilityStock newStock) {
@@ -171,7 +176,15 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
 
         return components;
     }
-
-
-
+    @Transactional
+    public int addToStock(BloodRequestDto bloodRequestDto) {
+        int dataChanges = 0;
+        for (ComponentRequestDto componentRequest : bloodRequestDto.getComponentRequests()) {
+            dataChanges += medicalFacilityStockRepository.addStock(bloodRequestDto.getBloodType(),
+                    componentRequest.getComponentType(),
+                    componentRequest.getVolume(),
+                    componentRequest.getExpiredDate());
+        }
+        return dataChanges;
+    }
 }

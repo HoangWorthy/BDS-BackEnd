@@ -21,4 +21,5 @@ public class BloodUnitDto {
     private BloodType bloodType;
     private ComponentType componentType;
     private Status status;
+    private Long bloodRequestId;
 }

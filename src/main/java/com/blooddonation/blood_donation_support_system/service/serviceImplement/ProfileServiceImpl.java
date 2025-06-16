@@ -66,6 +66,22 @@ public class ProfileServiceImpl implements ProfileService {
         return ProfileMapper.toDto(profile);
     }
 
+    public ProfileDto getProfileByPersonalId(String personalId) {
+        Profile profile = profileRepository.findByPersonalId(personalId)
+                .orElseThrow(() -> new RuntimeException("Profile not found with personal ID: " + personalId));
+        return ProfileMapper.toDto(profile);
+    }
+
+    public ProfileDto saveProfile(ProfileDto profileDto) {
+        if (profileRepository.findByPersonalId(profileDto.getPersonalId()).isPresent()) {
+            throw new RuntimeException("Personal ID already exists");
+        }
+
+        Profile profile = ProfileMapper.toEntity(profileDto);
+        Profile savedProfile = profileRepository.save(profile);
+        return ProfileMapper.toDto(savedProfile);
+    }
+
     @Transactional
     public Page<UserDonationHistoryDto> getDonationHistory(long accountId, int pageNumber, int pageSize, String sortBy, boolean ascending) {
         Account account = validator.getUserOrThrow(accountId);

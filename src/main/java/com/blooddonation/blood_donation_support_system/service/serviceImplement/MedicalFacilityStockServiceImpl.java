@@ -187,4 +187,10 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         }
         return dataChanges;
     }
+    @Override
+    public MedicalFacilityStockDto addBloodIntoStock(MedicalFacilityStockDto stockDto) {
+        MedicalFacilityStock entity = MedicalFacilityStockMapper.toEntity(stockDto);
+        MedicalFacilityStock saved = medicalFacilityStockRepository.save(entity);
+        return MedicalFacilityStockMapper.toDto(saved);
+    }
 }

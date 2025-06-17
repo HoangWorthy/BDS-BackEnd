@@ -17,6 +17,9 @@ public class DonationEventValidator {
     private DonationEventRepository donationEventRepository;
 
     @Autowired
+    private DonationEventRequestRepository donationEventRequestRepository;
+
+    @Autowired
     private EventRegistrationRepository eventRegistrationRepository;
 
     @Autowired
@@ -31,6 +34,11 @@ public class DonationEventValidator {
     public DonationEvent getEventOrThrow(Long eventId) {
         return donationEventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Donation event not found with id: " + eventId));
+    }
+
+    public DonationEventRequest getRequestOrThrow(Long requestId) {
+        return donationEventRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Donation request not found"));
     }
 
     public DonationTimeSlot getSlotOrThrow(Long timeSlotId) {
@@ -114,7 +122,7 @@ public class DonationEventValidator {
             throw new RuntimeException("You are not eligible to donate on this date. Please check your next eligible donation date.");
         }
 
-        if(profile.getBloodType() == null){
+        if (profile.getBloodType() == null) {
             throw new RuntimeException("Blood type cannot be null. Please update your profile.");
         }
     }

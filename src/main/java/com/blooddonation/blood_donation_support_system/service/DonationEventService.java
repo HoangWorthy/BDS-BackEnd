@@ -10,10 +10,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface DonationEventService {
-    String createDonation(DonationEventDto donationEventDto, String staffEmail);
-
-    String verifyDonationEvent(Long eventId, String adminEmail, String action);
-
     DonationEventDto getDonationEventById(Long eventId);
 
     String recordMultipleBloodDonations(Long eventId, List<SingleBloodUnitRecordDto> records, String userEmail);

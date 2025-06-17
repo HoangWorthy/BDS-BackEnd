@@ -69,6 +69,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/checkin/info/{eventId}","/api/checkin/action/{eventId}").hasRole("STAFF")
                         .requestMatchers("/api/event-registration/{eventId}/registerOffline", "/api/event-registration/{eventId}/register-guest").hasRole("STAFF")
                         .requestMatchers("/api/event-registration/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
+                        .requestMatchers("/api/donation-event-request/pending/**").hasRole("ADMIN")
+                        .requestMatchers("/api/donation-event-request/**").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/create", "/api/donation-event/list-donation/{eventId}/record-donations", "/api/donation-event/list-donation/{eventId}/time-slots/{timeSlotId}/donors", "/api/donation-event/list-donation/{eventId}/donors").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/list-donation/{eventId}/status").hasRole("ADMIN")
                         .requestMatchers("/api/donation-event/**").permitAll()

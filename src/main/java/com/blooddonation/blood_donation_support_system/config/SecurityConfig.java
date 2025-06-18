@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/donation-event/create", "/api/donation-event/list-donation/{eventId}/record-donations", "/api/donation-event/list-donation/{eventId}/time-slots/{timeSlotId}/donors", "/api/donation-event/list-donation/{eventId}/donors").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/list-donation/{eventId}/status").hasRole("ADMIN")
                         .requestMatchers("/api/donation-event/**").permitAll()
-                        .requestMatchers("/api/medical-facility-stock/**").hasRole("STAFF")
+                        .requestMatchers("/api/medical-facility-stock/**").hasAnyRole("STAFF", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

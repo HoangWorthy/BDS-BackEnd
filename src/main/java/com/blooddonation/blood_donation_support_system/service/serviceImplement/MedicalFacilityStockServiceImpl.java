@@ -193,4 +193,9 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         MedicalFacilityStock saved = medicalFacilityStockRepository.save(entity);
         return MedicalFacilityStockMapper.toDto(saved);
     }
+
+    @Override
+    public void deleteStockById(Long id) {
+        medicalFacilityStockRepository.deleteById(id);
+    }
 }

@@ -27,6 +27,6 @@ public class AccountDto {
     private String password;
     private Role role;
     private Status status;
+    private String avatar;
 
 }
-

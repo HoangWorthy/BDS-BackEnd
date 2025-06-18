@@ -23,6 +23,7 @@ public class    AccountMapper {
                 .password(account.getPassword())
                 .role(account.getRole())
                 .status(account.getStatus())
+                .avatar(account.getAvatar())
                 .build();
     }
 
@@ -35,6 +36,8 @@ public class    AccountMapper {
                 .password(accountDto.getPassword())
                 .role(Role.MEMBER)
                 .status(Status.ENABLE)
+                .avatar(accountDto.getAvatar())
                 .build();
     }
 }
+

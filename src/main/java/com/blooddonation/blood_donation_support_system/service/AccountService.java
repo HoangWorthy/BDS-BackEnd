@@ -18,4 +18,7 @@ public interface AccountService {
     AccountDto updateUserStatus(Long accountId, String status);
 
     AccountDto getAccountById(Long accountId);
+
+    AccountDto setAccountAvatar(Long accountId, String avatarUrl);
 }
+

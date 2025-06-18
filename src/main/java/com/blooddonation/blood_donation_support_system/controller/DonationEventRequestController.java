@@ -76,9 +76,12 @@ public class DonationEventRequestController {
     }
 
     @GetMapping("/my-requests/{requestId}")
-    public ResponseEntity<Object> getEventRequestDetailsByAccount(@PathVariable Long requestId) {
+    public ResponseEntity<Object> getEventRequestDetailsByAccount(
+            @CookieValue("jwt-token") String token,
+            @PathVariable Long requestId) {
         try {
-            DonationEventRequestDto requestDetails = donationEventRequestService.getDonationRequestById(requestId);
+            AccountDto accountDto = jwtUtil.extractUser(token);
+            DonationEventRequestDto requestDetails = donationEventRequestService.getDonationRequestByAuthor(requestId, accountDto.getId());
             return ResponseEntity.ok(requestDetails);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

@@ -49,9 +49,15 @@ public class DonationEventServiceImpl implements DonationEventService {
 
 
     public DonationEventDto getDonationEventById(Long eventId) {
-        // Fetch Data
         DonationEvent donationEvent = validator.getEventOrThrow(eventId);
 
+        return DonationEventMapper.toDto(donationEvent);
+    }
+
+    public DonationEventDto getDonationEventByAuthor(Long eventId, Long accountId) {
+        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
+        Account account = validator.getDonorOrThrow(accountId);
+        validator.validateCorrectAuthor(account, donationEvent);
         return DonationEventMapper.toDto(donationEvent);
     }
 
@@ -59,6 +65,12 @@ public class DonationEventServiceImpl implements DonationEventService {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         return donationEventRepository.findAll(pageable).map(DonationEventMapper::toDto);
+    }
+
+    public Page<DonationEventDto> getSortedPaginatedEventsByAccount(Long accountId, int pageNumber, int pageSize, String sortBy, boolean ascending) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        return donationEventRepository.findByAccountId(accountId,pageable).map(DonationEventMapper::toDto);
     }
 
 

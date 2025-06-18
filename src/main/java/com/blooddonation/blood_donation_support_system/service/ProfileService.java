@@ -13,4 +13,6 @@ public interface ProfileService {
     Page<UserDonationHistoryDto> getDonationHistory(long accountId, int pageNumber, int pageSize, String sortBy, boolean ascending);
 
     Page<ProfileDto> getAllProfiles(int pageNumber, int pageSize, String sortBy, boolean ascending);
+
+    void notifyEligibleDonors();
 }

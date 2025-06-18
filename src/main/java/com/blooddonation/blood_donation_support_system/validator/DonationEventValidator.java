@@ -72,6 +72,12 @@ public class DonationEventValidator {
         }
     }
 
+    public void validateCorrectAuthor(Account account, DonationEvent event) {
+        if (!account.equals(event.getAccount())) {
+            throw new RuntimeException("You don't have the right to edit this event");
+        }
+    }
+
     public void validateCheckinVerification(String action) {
         if (!action.equals("approve") && !action.equals("reject")) {
             throw new RuntimeException("Invalid action: " + action);

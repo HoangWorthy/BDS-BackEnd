@@ -5,6 +5,7 @@ import com.blooddonation.blood_donation_support_system.dto.BulkBloodUnitRecordDt
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
+import com.blooddonation.blood_donation_support_system.service.DonationEventRequestService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.validation.Valid;
@@ -25,6 +26,8 @@ public class DonationEventController {
     private DonationEventService donationEventService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private DonationEventRequestService donationEventRequestService;
 
     @GetMapping("/list-donation/{eventId}")
     public ResponseEntity<Object> getEventDetails(@PathVariable Long eventId) {
@@ -34,6 +37,63 @@ public class DonationEventController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @GetMapping("my-donations")
+    public ResponseEntity<Page<DonationEventDto>> getDonationByAccount(
+            @CookieValue("jwt-token") String token,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
+        AccountDto staff = jwtUtil.extractUser(token);
+        Page<DonationEventDto> events = donationEventService.getSortedPaginatedEventsByAccount(staff.getId(), pageNumber, pageSize, sortBy, ascending);
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("my-donations/{eventId}")
+    public ResponseEntity<Object> getEventDetailsByAccount(
+            @CookieValue("jwt-token") String token,
+            @PathVariable Long eventId) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(token);
+            DonationEventDto eventDetails = donationEventService.getDonationEventByAuthor(eventId, accountDto.getId());
+            return ResponseEntity.ok(eventDetails);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("my-donations/{eventId}/update")
+    public ResponseEntity<String> updateDonationEvent(
+            @CookieValue("jwt-token") String token,
+            @PathVariable Long eventId,
+            @RequestBody @Valid DonationEventDto donationEventDto) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(token);
+            String result = donationEventRequestService.updateDonationRequest(accountDto.getId(), eventId, donationEventDto);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating update request" + e.getMessage());
+        }
+    }
+
+    @PostMapping("my-donations/{eventId}/delete")
+    public ResponseEntity<String> deleteDonationEvent(
+            @CookieValue("jwt-token") String token,
+            @PathVariable Long eventId) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(token);
+            String result = donationEventRequestService.deleteDonationRequest(accountDto.getId(), eventId);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating delete request" + e.getMessage());
+        }
+
     }
 
     @GetMapping("/list-donation")
@@ -87,7 +147,7 @@ public class DonationEventController {
                                                            @RequestParam(defaultValue = "10") int size,
                                                            @RequestParam(defaultValue = "id") String sortBy,
                                                            @RequestParam(defaultValue = "true") boolean ascending
-                                                           ) {
+    ) {
         return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, page, size, sortBy, ascending));
     }
 

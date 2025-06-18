@@ -43,7 +43,7 @@ public class DonationEvent {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<DonationTimeSlot> timeSlots = new ArrayList<>();
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<EventRegistration> registrations = new ArrayList<>();
 
     @Column(name = "registered_member_count")

@@ -56,4 +56,36 @@ public class DonationEventRequestMapper {
                 .crudType(CRUDType.CREATE)
                 .build();
     }
+
+    public static DonationEventRequest updateDonation(DonationEventDto eventDto, Account account, DonationEvent donationEvent) {
+        if (eventDto == null) {
+            return null;
+        }
+
+        return DonationEventRequest.builder()
+                .id(eventDto.getId())
+                .account(account)
+                .donationEvent(donationEvent)
+                .newDonationEventDto(eventDto)
+                .oldDonationEventDto(DonationEventMapper.toDto(donationEvent))
+                .status(Status.PENDING)
+                .crudType(CRUDType.UPDATE)
+                .build();
+    }
+
+    public static DonationEventRequest deleteDonation(DonationEventDto eventDto, Account account, DonationEvent donationEvent) {
+        if (eventDto == null) {
+            return null;
+        }
+
+        return DonationEventRequest.builder()
+                .id(null)
+                .donationEvent(donationEvent)
+                .account(account)
+                .oldDonationEventDto(eventDto)
+                .newDonationEventDto(null)
+                .status(Status.PENDING)
+                .crudType(CRUDType.DELETE)
+                .build();
+    }
 }

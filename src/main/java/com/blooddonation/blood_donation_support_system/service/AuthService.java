@@ -3,7 +3,7 @@ package com.blooddonation.blood_donation_support_system.service;
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 
 public interface AuthService {
-    String registerUser(AccountDto accountDto);
+    String registerUser(AccountDto accountDto, String name);
 
     String resendVerificationCode(String email);
 

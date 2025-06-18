@@ -47,37 +47,6 @@ public class DonationEventServiceImpl implements DonationEventService {
     @Autowired
     private ProfileRepository profileRepository;
 
-    @Transactional
-    public String createDonation(DonationEventDto donationEventDto, String staffEmail) {
-        // Fetch Data
-        Account staff = accountRepository.findByEmail(staffEmail);
-
-        // Create And Save Donation Event
-        DonationEvent donationEvent = DonationEventMapper.createDonation(donationEventDto, staff);
-        DonationEvent savedDonationEvent = donationEventRepository.save(donationEvent);
-
-        // Create time slots for the event
-        List<DonationTimeSlot> timeSlots = donationTimeSlotService.createTimeSlotsForEvent(donationEventDto.getTimeSlotDtos(), savedDonationEvent);
-        savedDonationEvent.setTimeSlots(timeSlots);
-        return "Donation event created successfully";
-    }
-
-    @Transactional
-    public String verifyDonationEvent(Long eventId, String adminEmail, String action) {
-        // Validate Input
-        validator.validateEventVerification(action);
-
-        // Fetch Data
-        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
-        Account admin = accountRepository.findByEmail(adminEmail);
-
-        // Update Event Status
-        donationEvent.setStatus(action.equals("approve") ? Status.APPROVED : Status.REJECTED);
-        donationEvent.setAccount(admin);
-        donationEventRepository.save(donationEvent);
-
-        return "Donation event " + action + "d successfully";
-    }
 
     public DonationEventDto getDonationEventById(Long eventId) {
         // Fetch Data
@@ -85,15 +54,6 @@ public class DonationEventServiceImpl implements DonationEventService {
 
         return DonationEventMapper.toDto(donationEvent);
     }
-
-//    public List<DonationEventDto> getAllDonationEvents() {
-//        // Fetch Data
-//        List<DonationEvent> donationEvents = donationEventRepository.findAll();
-//
-//        return donationEvents.stream()
-//                .map(DonationEventMapper::toDto)
-//                .toList();
-//    }
 
     public Page<DonationEventDto> getSortedPaginatedEvents(int pageNumber, int pageSize, String sortBy, boolean ascending) {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();

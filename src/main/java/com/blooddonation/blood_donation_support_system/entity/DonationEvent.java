@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class DonationEvent {
     @Column(nullable = false)
     private String name;
 
-    private String location;
+    private String hospital;
     @Column(nullable = false)
     private String address;
 

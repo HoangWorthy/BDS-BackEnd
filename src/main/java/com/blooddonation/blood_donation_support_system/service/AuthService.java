@@ -9,7 +9,7 @@ public interface AuthService {
 
     String verifyUser(String code);
 
-    String login(AccountDto accountDto);
+    AccountDto login(AccountDto accountDto);
 
     String initiatePasswordReset(String email);
 

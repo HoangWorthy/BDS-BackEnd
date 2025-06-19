@@ -108,10 +108,11 @@ public class AuthServiceImpl implements AuthService {
         return "Invalid verification code";
     }
 
-    public String login(AccountDto accountDto) {
+    @Override
+    public AccountDto login(AccountDto accountDto) {
         Account account = validator.getEmailOrThrow(accountDto.getEmail());
         validator.validateLogin(account, accountDto);
-        return jwtUtil.generateToken(accountDto.getEmail());
+        return AccountMapper.toDto(account);
     }
 
     public String initiatePasswordReset(String email) {
@@ -212,4 +213,3 @@ public class AuthServiceImpl implements AuthService {
         });
     }
 }
-

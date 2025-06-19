@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler())
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("{\"error\":\"OAuth2 authentication failed\"}");
+                            response.getWriter().write("{\"error\":\"OAuth2 authentication failed\"}, " + exception.getMessage() + "}");
                         })
                 );
 

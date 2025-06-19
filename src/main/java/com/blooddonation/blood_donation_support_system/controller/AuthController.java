@@ -67,9 +67,10 @@ public class AuthController {
 
     // Register User
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody AccountDto accountDto) {
+    public ResponseEntity<String> registerUser(@Valid @RequestBody AccountDto accountDto,
+                                               @RequestParam String name) {
         try {
-            String result = authService.registerUser(accountDto);
+            String result = authService.registerUser(accountDto, name);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

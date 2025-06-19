@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
+import com.blooddonation.blood_donation_support_system.dto.TempUserDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
@@ -35,10 +36,10 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserValidator validator;
 
-    private final Map<String, Account> temporaryUsers = new HashMap<>();
+    private final Map<String, TempUserDto> temporaryUsers = new HashMap<>();
     private final Map<String, LocalDateTime> codeExpiration = new HashMap<>();
 
-    public String registerUser(AccountDto accountDto) {
+    public String registerUser(AccountDto accountDto, String name) {
         if (accountRepository.findByEmail(accountDto.getEmail()) != null) {
             throw new RuntimeException("Email already exists");
         }
@@ -48,9 +49,14 @@ public class AuthServiceImpl implements AuthService {
 
         removeOldCode(accountDto.getEmail());
 
+        TempUserDto tempUser = TempUserDto.builder()
+                .account(account)
+                .name(name)
+                .build();
+
         // Generate a verification code and store it temporarily
         String verificationCode = generateVerificationCode();
-        temporaryUsers.put(verificationCode, account);
+        temporaryUsers.put(verificationCode, tempUser);
         codeExpiration.put(verificationCode, LocalDateTime.now().plusMinutes(10));
 
         // Send verification email
@@ -59,11 +65,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public String resendVerificationCode(String email) {
-        Account account = temporaryUsers.values().stream()
-                .filter(u -> u.getEmail().equals(email))
+        TempUserDto tempUser = temporaryUsers.values().stream()
+                .filter(u -> u.getAccount().getEmail().equals(email))
                 .findFirst()
                 .orElse(null);
-        if (account == null) {
+        if (tempUser == null) {
             return "No temporary registration found for this email";
         }
 
@@ -71,10 +77,10 @@ public class AuthServiceImpl implements AuthService {
         removeOldCode(email);
 
         String newVerificationCode = generateVerificationCode();
-        temporaryUsers.put(newVerificationCode, account);
+        temporaryUsers.put(newVerificationCode, tempUser);
         codeExpiration.put(newVerificationCode, LocalDateTime.now().plusMinutes(10));
 
-        sendVerificationEmail(account, newVerificationCode);
+        sendVerificationEmail(tempUser.getAccount(), newVerificationCode);
         return "New verification email sent";
     }
 
@@ -87,10 +93,12 @@ public class AuthServiceImpl implements AuthService {
             return "Verification code expired";
         }
 
-        Account account = temporaryUsers.get(code);
-        if (account != null) {
+        TempUserDto tempUser = temporaryUsers.get(code);
+        if (tempUser != null) {
             // Create and set profile
             Profile profile = new Profile();
+            profile.setName(tempUser.getName());
+            Account account = tempUser.getAccount();
             account.setProfile(profile);
 
             // Save account to get generated ID
@@ -121,7 +129,14 @@ public class AuthServiceImpl implements AuthService {
 
         String resetCode = generateVerificationCode();
         codeExpiration.put(resetCode, LocalDateTime.now().plusMinutes(10));
-        temporaryUsers.put(resetCode, account);
+
+        // Create TempUserDto for password reset
+        TempUserDto tempUser = TempUserDto.builder()
+                .account(account)
+                .name(account.getProfile().getName())
+                .build();
+
+        temporaryUsers.put(resetCode, tempUser);
         sendResetPassword(account, resetCode);
         return "New password reset code sent";
     }
@@ -133,11 +148,12 @@ public class AuthServiceImpl implements AuthService {
         if (LocalDateTime.now().isAfter(codeExpiration.get(resetCode))) {
             return "Reset code expired";
         }
-        Account account = temporaryUsers.get(resetCode);
-        if (account == null) {
+        TempUserDto tempUser = temporaryUsers.get(resetCode);
+        if (tempUser == null) {
             return "Invalid reset code";
         }
 
+        Account account = tempUser.getAccount();
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
 
@@ -154,7 +170,7 @@ public class AuthServiceImpl implements AuthService {
 
     private void removeOldCode(String email) {
         String oldCode = temporaryUsers.entrySet().stream()
-                .filter(entry -> entry.getValue().getEmail().equals(email))
+                .filter(entry -> entry.getValue().getAccount().getEmail().equals(email))
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .orElse(null);

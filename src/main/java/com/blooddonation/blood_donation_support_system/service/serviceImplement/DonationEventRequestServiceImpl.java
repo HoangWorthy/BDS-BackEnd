@@ -2,16 +2,15 @@ package com.blooddonation.blood_donation_support_system.service.serviceImplement
 
 import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventRequestDto;
-import com.blooddonation.blood_donation_support_system.entity.Account;
-import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
-import com.blooddonation.blood_donation_support_system.entity.DonationEventRequest;
-import com.blooddonation.blood_donation_support_system.entity.DonationTimeSlot;
+import com.blooddonation.blood_donation_support_system.entity.*;
+import com.blooddonation.blood_donation_support_system.enums.CRUDType;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.DonationEventMapper;
 import com.blooddonation.blood_donation_support_system.mapper.DonationEventRequestMapper;
 import com.blooddonation.blood_donation_support_system.repository.*;
 import com.blooddonation.blood_donation_support_system.service.DonationEventRequestService;
 import com.blooddonation.blood_donation_support_system.service.DonationTimeSlotService;
+import com.blooddonation.blood_donation_support_system.service.EmailService;
 import com.blooddonation.blood_donation_support_system.validator.DonationEventValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,12 +28,6 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
     private DonationEventRepository donationEventRepository;
 
     @Autowired
-    private EventRegistrationRepository eventRegistrationRepository;
-
-    @Autowired
-    private BloodUnitRepository bloodUnitRepository;
-
-    @Autowired
     private DonationTimeSlotService donationTimeSlotService;
 
     @Autowired
@@ -44,34 +37,73 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
     private AccountRepository accountRepository;
 
     @Autowired
-    private ProfileRepository profileRepository;
+    private DonationEventRequestRepository donationEventRequestRepository;
 
     @Autowired
-    private DonationEventRequestRepository donationEventRequestRepository;
+    private EmailService emailService;
 
     @Transactional
     public String createDonationRequest(DonationEventDto donationEventDto, String staffEmail) {
         Account staff = accountRepository.findByEmail(staffEmail);
-
         DonationEventRequest donationEventRequest = DonationEventRequestMapper.createDonation(donationEventDto, staff);
         donationEventRequestRepository.save(donationEventRequest);
         return "Donation request created successfully";
     }
 
+    public String updateDonationRequest(Long accountId, Long eventId, DonationEventDto donationEventDto) {
+        Account staff = validator.getDonorOrThrow(accountId);
+        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
+        validator.validateCorrectAuthor(staff, donationEvent);
+
+        DonationEventRequest donationEventRequest = DonationEventRequestMapper.updateDonation(donationEventDto, staff, donationEvent);
+        donationEventRequestRepository.save(donationEventRequest);
+        return "Donation request updated successfully";
+    }
+
+    public String deleteDonationRequest(Long accountId, Long eventId) {
+        Account staff = validator.getDonorOrThrow(accountId);
+        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
+        validator.validateCorrectAuthor(staff, donationEvent);
+        DonationEventDto donationEventDto = DonationEventMapper.toDto(donationEvent);
+
+        DonationEventRequest donationEventRequest = DonationEventRequestMapper.deleteDonation(donationEventDto, staff, donationEvent);
+        donationEventRequestRepository.save(donationEventRequest);
+        return "Donation request deleted successfully";
+    }
+
     @Transactional
     public String verifyDonation(Long requestId, String action) {
         DonationEventRequest request = validator.getRequestOrThrow(requestId);
+        if (!request.getStatus().equals(Status.PENDING)) {
+            return "Donation request has already been verified";
+        }
         validator.validateEventVerification(action);
 
-        if (action.equals("approve")) {
-            createDonation(request.getNewDonationEventDto(), request.getAccount().getEmail());
-            request.setStatus(Status.APPROVED);
-            donationEventRequestRepository.save(request);
-            return "Donation request approved";
-        } else {
+        if (action.equals("reject")) {
             request.setStatus(Status.REJECTED);
             donationEventRequestRepository.save(request);
             return "Donation request rejected";
+        }
+
+        CRUDType type = request.getCrudType();
+        switch (type) {
+            case CREATE:
+                createDonation(request.getNewDonationEventDto(), request.getAccount().getEmail());
+                request.setStatus(Status.APPROVED);
+                donationEventRequestRepository.save(request);
+                return "Donation request approved, Donation event created successfully";
+            case UPDATE:
+                updateDonation(request.getNewDonationEventDto(), request.getAccount().getEmail(), request);
+                request.setStatus(Status.APPROVED);
+                donationEventRequestRepository.save(request);
+                return "Donation request approved, Donation event updated successfully";
+            case DELETE:
+                deleteDonation(request.getDonationEvent());
+                request.setStatus(Status.APPROVED);
+                donationEventRequestRepository.save(request);
+                return "Donation request approved, Donation event deleted successfully";
+            default:
+                return "Invalid request type";
         }
     }
 
@@ -93,7 +125,13 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
         return DonationEventRequestMapper.toDto(donationEventRequest);
     }
 
-    public String createDonation(DonationEventDto donationEventDto, String staffEmail) {
+    public DonationEventRequestDto getDonationRequestByAuthor(Long requestId, Long accountId) {
+        DonationEventRequest donationEventRequest = validator.getRequestOrThrow(requestId);
+        validator.validateCorrectAuthor(donationEventRequest.getAccount(), donationEventRequest.getDonationEvent());
+        return DonationEventRequestMapper.toDto(donationEventRequest);
+    }
+
+    public void createDonation(DonationEventDto donationEventDto, String staffEmail) {
         // Fetch Data
         Account staff = accountRepository.findByEmail(staffEmail);
 
@@ -104,6 +142,55 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
         // Create time slots for the event
         List<DonationTimeSlot> timeSlots = donationTimeSlotService.createTimeSlotsForEvent(donationEventDto.getTimeSlotDtos(), savedDonationEvent);
         savedDonationEvent.setTimeSlots(timeSlots);
-        return "Donation event created successfully";
+    }
+
+    private void sendDonationEventNotification(DonationEvent event, String subject) {
+        List<EventRegistration> eventRegistrations = event.getRegistrations();
+        event.getRegistrations().forEach(registration -> {
+            try {
+                String htmlMessage = "<html>"
+                        + "<body>"
+                        + "<h2>Donation Event Update Notice</h2>"
+                        + "<p>Dear " + registration.getProfileId().getName() + ",</p>"
+                        + "<p>The donation event '" + event.getName() + "' has been updated.</p>"
+                        + "<p>Event details:</p>"
+                        + "<ul>"
+                        + "<li>Date: " + event.getDonationDate() + "</li>"
+                        + "<li>Location: " + event.getHospital() + "</li>"
+                        + "<li>Address: " + event.getAddress() + "</li>"
+                        + "<li>Donation Type: " + event.getDonationType() + "</li>"
+                        + "<li>Status: " + event.getStatus() + "</li>"
+                        + "</ul>"
+                        + "<p><a href='http://localhost:2025/api/donation-event/list-donation/" + event.getId() + "'>View Event Details</a></p>"
+                        + "<p>Best regards,<br>Blood Donation Support System</p>"
+                        + "</body>"
+                        + "</html>";
+
+                emailService.sendVerificationEmail(
+                        registration.getAccount().getEmail(),
+                        subject,
+                        htmlMessage
+                );
+            } catch (Exception e) {
+                System.err.println("Failed to send email to " + registration.getAccount().getEmail() + ": " + e.getMessage());
+            }
+        });
+    }
+
+    @Transactional
+    public void updateDonation(DonationEventDto donationEventDto, String staffEmail, DonationEventRequest request) {
+        Account staff = accountRepository.findByEmail(staffEmail);
+        DonationEvent existingEvent = request.getDonationEvent();
+
+        DonationEvent donationEvent = DonationEventMapper.updateDonation(donationEventDto, staff, existingEvent.getId());
+        sendDonationEventNotification(existingEvent, "Donation Event Update Notice");
+        donationEventRepository.save(donationEvent);
+    }
+
+    @Transactional
+    public void deleteDonation(DonationEvent donationEvent) {
+        donationEvent.setStatus(Status.CANCELLED);
+        donationEventRepository.save(donationEvent);
+        sendDonationEventNotification(donationEvent, "Donation Event Update Notice");
     }
 }

@@ -78,6 +78,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/medical-facility-stock/**").hasRole("STAFF")
                         .requestMatchers(("/api/blog/list-blogs/**")).hasRole("ADMIN")
                         .requestMatchers(("/api/blog/my-blogs/**")).hasRole("STAFF")
+                        .requestMatchers("/api/blog-request/create", "/api/blog-request/my-requests/**").hasRole("STAFF")
+                        .requestMatchers(("/api/blog-request/pending/**")).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

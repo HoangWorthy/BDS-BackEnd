@@ -26,7 +26,9 @@ public class AccountDto {
     )
     private String password;
     private Role role;
+
     private AccountStatus status;
+    private String avatar;
+
 
 }
-

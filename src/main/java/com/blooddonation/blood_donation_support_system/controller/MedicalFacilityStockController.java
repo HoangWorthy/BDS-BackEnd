@@ -77,5 +77,27 @@ public class MedicalFacilityStockController {
             @RequestParam BloodType bloodType) {
         return new ResponseEntity<>(medicalFacilityStockService.getAvailableBloodByType(bloodType,componentTypes), HttpStatus.OK);
     }
+    @PostMapping("/add-blood-into-stock")
+    public ResponseEntity<?> addBloodIntoStock(@RequestBody MedicalFacilityStockDto stockDto) {
+        try {
+            MedicalFacilityStockDto result = medicalFacilityStockService.addBloodIntoStock(stockDto);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while adding blood into stock: " + e.getMessage());
+        }
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteStock(@PathVariable Long id) {
+        try {
+            medicalFacilityStockService.deleteStockById(id);
+            return ResponseEntity.ok("Stock deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete stock: " + e.getMessage());
+        }
+    }
 }

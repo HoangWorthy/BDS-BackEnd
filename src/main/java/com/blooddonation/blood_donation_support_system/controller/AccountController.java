@@ -12,6 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user/account")
@@ -103,4 +110,49 @@ public class AccountController {
                     .body("An error occurred while retrieving user information by email");
         }
     }
+
+    // Add account avatar
+    @PostMapping("/{accountId}/avatar")
+    public ResponseEntity<Object> addAccountAvatar(@PathVariable Long accountId, @RequestParam("avatar") MultipartFile avatarFile) {
+        try {
+            if (avatarFile.isEmpty()) {
+                return ResponseEntity.badRequest().body("Avatar file is empty");
+            }
+            String uploadDir = "uploads/avatars/";
+            Files.createDirectories(Paths.get(uploadDir));
+            String fileName = accountId + "_" + avatarFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, fileName);
+            avatarFile.transferTo(filePath);
+            String avatarUrl = "/" + uploadDir + fileName;
+            AccountDto updatedAccount = accountService.setAccountAvatar(accountId, avatarUrl);
+            return ResponseEntity.ok(updatedAccount);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload avatar: " + e.getMessage());
+        }
+    }
+
+    // Update account avatar
+    @PutMapping("/{accountId}/avatar")
+    public ResponseEntity<Object> updateAccountAvatar(@PathVariable Long accountId, @RequestParam("avatar") MultipartFile avatarFile) {
+        try {
+            if (avatarFile.isEmpty()) {
+                return ResponseEntity.badRequest().body("Avatar file is empty");
+            }
+            String uploadDir = "uploads/avatars/";
+            Files.createDirectories(Paths.get(uploadDir));
+            String fileName = accountId + "_" + avatarFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, fileName);
+            avatarFile.transferTo(filePath);
+            String avatarUrl = "/" + uploadDir + fileName;
+            AccountDto updatedAccount = accountService.setAccountAvatar(accountId, avatarUrl);
+            return ResponseEntity.ok(updatedAccount);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update avatar: " + e.getMessage());
+        }
+    }
 }
+
+
+
+
+

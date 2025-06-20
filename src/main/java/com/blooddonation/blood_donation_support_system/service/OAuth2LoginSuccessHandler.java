@@ -29,6 +29,6 @@ package com.blooddonation.blood_donation_support_system.service;
                 String token = jwtUtil.saveOAuth2User(oAuth2User);
 
                 response.setHeader("Set-Cookie", "jwt-token=" + token + "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600");
-                response.sendRedirect("http://115.73.218.193:2024/");
+                response.sendRedirect("http://localhost:3000");
             }
         }

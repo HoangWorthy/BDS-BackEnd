@@ -28,13 +28,11 @@ public class AuthController {
     private TokenBlacklistService tokenBlacklistService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody AccountDto accountDto, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody AccountDto accountDto, HttpServletResponse response) {
         try {
-            String jwtToken = authService.login(accountDto);
-            if (jwtToken == null || jwtToken.equals("Invalid email or password")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
-            }
+            AccountDto loggedInAccount = authService.login(accountDto);
 
+            String jwtToken = jwtUtil.generateToken(loggedInAccount.getEmail());
             Cookie cookie = new Cookie("jwt-token", jwtToken);
             cookie.setHttpOnly(true);
             cookie.setSecure(false); // HTTPS only — use false for localhost HTTP dev
@@ -43,7 +41,7 @@ public class AuthController {
             cookie.setDomain("localhost"); // Optional, but helps in some setups
             response.addCookie(cookie);
 
-            return ResponseEntity.ok("Login successful");
+            return ResponseEntity.ok(loggedInAccount);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -62,7 +60,6 @@ public class AuthController {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
-        response.sendRedirect("/login");
     }
 
     // Register User

@@ -75,11 +75,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/donation-event/list-donation/{eventId}/status").hasRole("ADMIN")
                         .requestMatchers("/api/donation-event/my-donations/**").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/**").permitAll()
-                        .requestMatchers("/api/medical-facility-stock/**").hasRole("STAFF")
+
+                        
                         .requestMatchers(("/api/blog/list-blogs/**")).hasRole("ADMIN")
                         .requestMatchers(("/api/blog/my-blogs/**")).hasRole("STAFF")
                         .requestMatchers("/api/blog-request/create", "/api/blog-request/my-requests/**").hasRole("STAFF")
                         .requestMatchers(("/api/blog-request/pending/**")).hasRole("ADMIN")
+                        .requestMatchers("/api/medical-facility-stock/**").hasAnyRole("STAFF", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -87,7 +89,7 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler())
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("{\"error\":\"OAuth2 authentication failed\"}");
+                            response.getWriter().write("{\"error\":\"OAuth2 authentication failed\"}, " + exception.getMessage() + "}");
                         })
                 );
 

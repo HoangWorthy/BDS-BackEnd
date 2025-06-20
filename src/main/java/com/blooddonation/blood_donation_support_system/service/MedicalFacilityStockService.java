@@ -16,4 +16,6 @@ public interface MedicalFacilityStockService {
     List<MedicalFacilityStockDto> getAvailableBloodByType(BloodType bloodType, List<ComponentType> componentTypes);
     int addToStock(BloodRequestDto bloodRequestDto);
     List<MedicalFacilityStockDto> getAvailableBloodByType(BloodType bloodType, ComponentType componentType);
+    MedicalFacilityStockDto addBloodIntoStock(MedicalFacilityStockDto medicalFacilityStockDto);
+    void deleteStockById(Long id);
 }

@@ -65,4 +65,13 @@ public class AccountServiceImpl implements AccountService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         return accountRepository.findAll(pageable).map(AccountMapper::toDto);
     }
+
+    public AccountDto setAccountAvatar(Long accountId, String avatarUrl) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        account.setAvatar(avatarUrl);
+        Account savedAccount = accountRepository.save(account);
+        return AccountMapper.toDto(savedAccount);
+    }
 }
+

@@ -1,7 +1,7 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class UserDonationHistoryDto {
     private Long registrationId;
     private LocalDate registrationDate;
-    private Status registrationStatus;
+    private DonationRegistrationStatus registrationDonationRegistrationStatus;
     private Double donationVolume;
     private LocalDate donationDate;
     private DonationType donationType;

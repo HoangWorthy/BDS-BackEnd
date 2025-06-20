@@ -1,7 +1,7 @@
 package com.blooddonation.blood_donation_support_system.repository;
 
 import com.blooddonation.blood_donation_support_system.entity.*;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +17,7 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     Optional<EventRegistration> findByEventAndProfileId(DonationEvent event, Profile profile);
     Page<EventRegistration> findByEventAndTimeSlot(DonationEvent event, DonationTimeSlot timeSlot, Pageable pageable);
     boolean existsByAccountAndEvent(Account account, DonationEvent event);
-    Optional<EventRegistration> findByAccountAndEventAndStatus(Account account, DonationEvent event, Status status);
+    Optional<EventRegistration> findByAccountAndEventAndStatus(Account account, DonationEvent event, DonationRegistrationStatus donationRegistrationStatus);
     Page<EventRegistration> findByAccount(Account account, Pageable pageable);
-    Page<EventRegistration> findByEventIdAndStatusNot(Long eventId, Status status, Pageable pageable);
+    Page<EventRegistration> findByEventIdAndStatusNot(Long eventId, DonationRegistrationStatus donationRegistrationStatus, Pageable pageable);
 }

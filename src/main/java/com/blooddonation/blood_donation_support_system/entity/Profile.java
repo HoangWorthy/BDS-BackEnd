@@ -46,7 +46,7 @@ package com.blooddonation.blood_donation_support_system.entity;
         private LocalDate nextEligibleDonationDate;
 
         @Enumerated(EnumType.STRING)
-        private Status status = Status.AVAILABLE;
+        private ProfileStatus status;
 
         @Column(unique = true)
         private String personalId;

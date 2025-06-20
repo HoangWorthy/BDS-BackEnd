@@ -3,7 +3,7 @@ package com.blooddonation.blood_donation_support_system.util;
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
@@ -54,7 +54,7 @@ public class JwtUtil {
             newAccount.setPassword(UUID.randomUUID().toString());
             newAccount.setEmail(email);
             newAccount.setRole(MEMBER);
-            newAccount.setStatus(Status.ENABLE);
+            newAccount.setStatus(AccountStatus.ENABLE);
             Profile profile = new Profile();
             profile.setName(name);
             newAccount.setProfile(profile);

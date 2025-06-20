@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.BlogStatus;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -29,7 +30,7 @@ public class BlogDto {
     private String thumbnail;
 
     @NotNull(message = "Status is required")
-    private Status status;
+    private BlogStatus status;
 
     private LocalDate creationDate;
     private LocalDate lastModifiedDate;

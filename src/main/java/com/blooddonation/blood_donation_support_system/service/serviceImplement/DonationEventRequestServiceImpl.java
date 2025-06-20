@@ -4,7 +4,8 @@ import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.DonationEventRequestDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.CRUDType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
+import com.blooddonation.blood_donation_support_system.enums.DonationRequestStatus;
 import com.blooddonation.blood_donation_support_system.mapper.DonationEventMapper;
 import com.blooddonation.blood_donation_support_system.mapper.DonationEventRequestMapper;
 import com.blooddonation.blood_donation_support_system.repository.*;
@@ -74,13 +75,13 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
     @Transactional
     public String verifyDonation(Long requestId, String action) {
         DonationEventRequest request = validator.getRequestOrThrow(requestId);
-        if (!request.getStatus().equals(Status.PENDING)) {
+        if (!request.getStatus().equals(DonationRequestStatus.PENDING)) {
             return "Donation request has already been verified";
         }
         validator.validateEventVerification(action);
 
         if (action.equals("reject")) {
-            request.setStatus(Status.REJECTED);
+            request.setStatus(DonationRequestStatus.REJECTED);
             donationEventRequestRepository.save(request);
             return "Donation request rejected";
         }
@@ -89,17 +90,17 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
         switch (type) {
             case CREATE:
                 createDonation(request.getNewDonationEventDto(), request.getAccount().getEmail());
-                request.setStatus(Status.APPROVED);
+                request.setStatus(DonationRequestStatus.APPROVED);
                 donationEventRequestRepository.save(request);
                 return "Donation request approved, Donation event created successfully";
             case UPDATE:
                 updateDonation(request.getNewDonationEventDto(), request.getAccount().getEmail(), request);
-                request.setStatus(Status.APPROVED);
+                request.setStatus(DonationRequestStatus.APPROVED);
                 donationEventRequestRepository.save(request);
                 return "Donation request approved, Donation event updated successfully";
             case DELETE:
                 deleteDonation(request.getDonationEvent());
-                request.setStatus(Status.APPROVED);
+                request.setStatus(DonationRequestStatus.APPROVED);
                 donationEventRequestRepository.save(request);
                 return "Donation request approved, Donation event deleted successfully";
             default:
@@ -189,7 +190,7 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
 
     @Transactional
     public void deleteDonation(DonationEvent donationEvent) {
-        donationEvent.setStatus(Status.CANCELLED);
+        donationEvent.setStatus(DonationEventStatus.CANCELLED);
         donationEventRepository.save(donationEvent);
         sendDonationEventNotification(donationEvent, "Donation Event Update Notice");
     }

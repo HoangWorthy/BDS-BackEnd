@@ -8,14 +8,10 @@ import com.blooddonation.blood_donation_support_system.service.AccountService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/user/account")
@@ -87,7 +83,7 @@ public class AccountController {
     public ResponseEntity<Object> updateAccountStatus(@PathVariable Long accountId,
                                                       @Valid @RequestBody AccountStatusUpdateDto statusUpdate) {
         try {
-            AccountDto updatedAccount = accountService.updateUserStatus(accountId, statusUpdate.getStatus().name());
+            AccountDto updatedAccount = accountService.updateUserStatus(accountId, statusUpdate.getDonationRegistrationStatus().name());
             return ResponseEntity.ok(updatedAccount);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

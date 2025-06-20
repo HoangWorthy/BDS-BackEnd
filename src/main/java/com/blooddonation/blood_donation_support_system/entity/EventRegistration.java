@@ -2,7 +2,7 @@ package com.blooddonation.blood_donation_support_system.entity;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,7 +44,7 @@ public class EventRegistration {
 
 //    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private DonationRegistrationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_slot_id")
@@ -74,7 +74,7 @@ public class EventRegistration {
         }
         // Set default status if not provided
         if (status == null) {
-            status = Status.PENDING;
+            status = DonationRegistrationStatus.PENDING;
         }
 
         // Update registered member count in donation event

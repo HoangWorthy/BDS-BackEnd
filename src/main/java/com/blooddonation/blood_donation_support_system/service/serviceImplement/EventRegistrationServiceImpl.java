@@ -5,7 +5,7 @@ import com.blooddonation.blood_donation_support_system.dto.EventRegistrationDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.entity.EventRegistration;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import com.blooddonation.blood_donation_support_system.mapper.CheckinTokenMapper;
 import com.blooddonation.blood_donation_support_system.mapper.EventRegistrationMapper;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
@@ -60,7 +60,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         CheckinTokenDto tokenDto = checkinTokenService.generateTokenForProfile(profile, donationEvent);
 
         // Generate QR code URL and image
-        String qrUrl = String.format("http://localhost:8080/api/checkin/info/%d?checkinToken=%s", eventId, tokenDto.getToken());
+        String qrUrl = String.format("http://localhost:2025/api/checkin/info/%d?checkinToken=%s", eventId, tokenDto.getToken());
         try {
             byte[] qrCode = qrCodeService.generateQRCode(qrUrl);
             registration.setQrCode(qrCode);
@@ -80,7 +80,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         Account member = validator.validateAndGetMemberAccount(personalId);
         EventRegistration registration = validator.validateAndGetExistingRegistration(member, event);
         if (registration != null) {
-            registration.setStatus(Status.CHECKED_IN);
+            registration.setStatus(DonationRegistrationStatus.CHECKED_IN);
 //            registration.setProfileId(member.getProfile());
             eventRegistrationRepository.save(registration);
             return "Member checked in successfully";
@@ -129,7 +129,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         validator.validateCancellation(event, registration);
 
         // Update registration status and decrease counts
-        registration.setStatus(Status.CANCELLED);
+        registration.setStatus(DonationRegistrationStatus.CANCELLED);
         eventRegistrationRepository.save(registration);
         event.setRegisteredMemberCount(event.getRegisteredMemberCount() - 1);
         donationEventRepository.save(event);
@@ -162,10 +162,10 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         EventRegistration registration = validator.getRegistrationOrThrow(profileDto.getPersonalId(), event);
 
         if (action.equals("approve")) {
-            registration.setStatus(Status.CHECKED_IN);
+            registration.setStatus(DonationRegistrationStatus.CHECKED_IN);
             eventRegistrationRepository.save(registration);
         } else if (action.equals("reject")) {
-            registration.setStatus(Status.REJECTED);
+            registration.setStatus(DonationRegistrationStatus.REJECTED);
         }
         return "Checked-in " + action + " successfully";
     }

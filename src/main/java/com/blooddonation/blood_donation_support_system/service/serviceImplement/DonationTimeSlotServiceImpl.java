@@ -38,7 +38,7 @@ public class DonationTimeSlotServiceImpl implements DonationTimeSlotService {
 
         // Use the mapper to convert DTOs to entities
         List<DonationTimeSlot> timeSlots = donationTimeSlotDto.stream()
-                .map(dto -> donationTimeSlotMapper.toEntity(dto, event))
+                .map(dto -> DonationTimeSlotMapper.toEntity(dto, event))
                 .collect(Collectors.toList());
 
         return donationTimeSlotRepository.saveAll(timeSlots);

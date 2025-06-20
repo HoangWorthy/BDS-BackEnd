@@ -1,9 +1,9 @@
 package com.blooddonation.blood_donation_support_system.validator;
 
-import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import com.blooddonation.blood_donation_support_system.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,6 +31,12 @@ public class DonationEventValidator {
     @Autowired
     private ProfileRepository profileRepository;
 
+    @Autowired
+    private BlogRepository blogRepository;
+
+    @Autowired
+    private BlogRequestRepository blogRequestRepository;
+
     public DonationEvent getEventOrThrow(Long eventId) {
         return donationEventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Donation event not found with id: " + eventId));
@@ -39,6 +45,16 @@ public class DonationEventValidator {
     public DonationEventRequest getRequestOrThrow(Long requestId) {
         return donationEventRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Donation request not found"));
+    }
+
+    public Blog getBlogOrThrow(Long blogId) {
+        return blogRepository.findById(blogId)
+                .orElseThrow(() -> new RuntimeException("Blog not found with id: " + blogId));
+    }
+
+    public BlogRequest getBlogRequestOrThrow(Long blogRequestId) {
+        return blogRequestRepository.findById(blogRequestId)
+                .orElseThrow(() -> new RuntimeException("Blog request not found with id: " + blogRequestId));
     }
 
     public DonationTimeSlot getSlotOrThrow(Long timeSlotId) {
@@ -62,7 +78,7 @@ public class DonationEventValidator {
 
         Account account = accountRepository.findById(profile.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found for personal ID: " + personalId));
-        return eventRegistrationRepository.findByAccountAndEventAndStatus(account, event, Status.PENDING)
+        return eventRegistrationRepository.findByAccountAndEventAndStatus(account, event, DonationRegistrationStatus.PENDING)
                 .orElseThrow(() -> new RuntimeException("No pending registration found for personal ID: " + personalId));
     }
 
@@ -78,6 +94,12 @@ public class DonationEventValidator {
         }
     }
 
+    public void validateCorrectAuthor(Account account, Blog blog) {
+        if (!account.equals(blog.getAuthor())) {
+            throw new RuntimeException("You don't have the right to edit this blog");
+        }
+    }
+
     public void validateCheckinVerification(String action) {
         if (!action.equals("approve") && !action.equals("reject")) {
             throw new RuntimeException("Invalid action: " + action);
@@ -85,7 +107,7 @@ public class DonationEventValidator {
     }
 
     public void validateBloodDonationRecording(DonationEvent event, List<SingleBloodUnitRecordDto> records) {
-        if (event.getStatus().equals(Status.COMPLETED)) {
+        if (event.getStatus().equals(DonationEventStatus.COMPLETED)) {
             throw new RuntimeException("Event is already recorded");
         }
 
@@ -97,8 +119,8 @@ public class DonationEventValidator {
     public void validateRegistrationEligibility(Account account, DonationEvent event, DonationTimeSlot timeSlot) {
         Profile profile = account.getProfile();
         // Check event status
-        if (event.getStatus() != Status.APPROVED) {
-            throw new RuntimeException("Cannot register for an event that is not approved");
+        if (event.getStatus() != DonationEventStatus.AVAILABLE) {
+            throw new RuntimeException("Cannot register for an event that is not available");
         }
 
         // Check registration deadline
@@ -140,7 +162,7 @@ public class DonationEventValidator {
         if (!registration.getAccount().getId().equals(member.getId())) {
             throw new RuntimeException("Registration does not belong to this user");
         }
-        if (registration.getStatus() == Status.CHECKED_IN) {
+        if (registration.getStatus() == DonationRegistrationStatus.CHECKED_IN) {
             throw new RuntimeException("User is already checked-in for this event");
         }
     }
@@ -162,7 +184,7 @@ public class DonationEventValidator {
 
     public EventRegistration validateAndGetExistingRegistration(Account member, DonationEvent event) {
         if (eventRegistrationRepository.existsByAccountAndEvent(member, event)) {
-            return eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, Status.PENDING)
+            return eventRegistrationRepository.findByAccountAndEventAndStatus(member, event, DonationRegistrationStatus.PENDING)
                     .orElseThrow(() -> new RuntimeException("Registration not found or already checkin for this event"));
         }
         return null;
@@ -170,7 +192,7 @@ public class DonationEventValidator {
 
     public void validateCancellation(DonationEvent event, EventRegistration registration) {
         // Can't cancel if already checked in or completed
-        if (registration.getStatus() == Status.CHECKED_IN || registration.getStatus() == Status.COMPLETED) {
+        if (registration.getStatus() == DonationRegistrationStatus.CHECKED_IN || registration.getStatus() == DonationRegistrationStatus.COMPLETED) {
             throw new RuntimeException("Cannot cancel registration after check-in or completion");
         }
 
@@ -181,7 +203,7 @@ public class DonationEventValidator {
         }
 
         // Can't cancel if event is completed or cancelled
-        if (event.getStatus() == Status.COMPLETED || event.getStatus() == Status.CANCELLED) {
+        if (event.getStatus() == DonationEventStatus.COMPLETED || event.getStatus() == DonationEventStatus.CANCELLED) {
             throw new RuntimeException("Cannot cancel registration for a completed or cancelled event");
         }
     }

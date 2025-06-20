@@ -4,7 +4,7 @@ import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Blog;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.BlogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class UserValidator {
         if (account == null || !passwordEncoder.matches(accountDto.getPassword(), account.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
-        if (account.getStatus() == Status.DISABLE) {
+        if (account.getStatus() == AccountStatus.DISABLE) {
             throw new RuntimeException("User has been deleted");
         }
     }

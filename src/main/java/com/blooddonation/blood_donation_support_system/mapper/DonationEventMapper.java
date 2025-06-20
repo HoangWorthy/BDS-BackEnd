@@ -5,8 +5,7 @@ import com.blooddonation.blood_donation_support_system.dto.DonationTimeSlotDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.DonationTimeSlot;
-import com.blooddonation.blood_donation_support_system.enums.Status;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -34,6 +33,7 @@ public class DonationEventMapper {
                 .ward(event.getWard())
                 .district(event.getDistrict())
                 .city(event.getCity())
+                .organizer(event.getOrganizer())
                 .donationDate(event.getDonationDate())
                 .registeredMemberCount(0) // Default value
                 .totalMemberCount(event.getTotalMemberCount())
@@ -57,6 +57,7 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
+                .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(0) // Default value
                 .totalMemberCount(dto.getTotalMemberCount())
@@ -78,10 +79,11 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
+                .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(0) // Default value
                 .totalMemberCount(dto.getTotalMemberCount())
-                .status(Status.APPROVED)
+                .status(DonationEventStatus.AVAILABLE)
                 .donationType(dto.getDonationType())
                 .account(account)
                 .createdDate(LocalDate.now())
@@ -99,10 +101,11 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
+                .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(0)
                 .totalMemberCount(dto.getTotalMemberCount())
-                .status(Status.APPROVED)
+                .status(DonationEventStatus.AVAILABLE)
                 .donationType(dto.getDonationType())
                 .account(account)
                 .createdDate(LocalDate.now())

@@ -29,7 +29,7 @@ public class UserDonationHistoryMapper {
         return UserDonationHistoryDto.builder()
                 .registrationId(eventRegistration.getId())
                 .registrationDate(eventRegistration.getRegistrationDate())
-                .registrationStatus(eventRegistration.getStatus())
+                .registrationDonationRegistrationStatus(eventRegistration.getStatus())
                 .donationDate(donationEvent.getDonationDate())
                 .donationType(eventRegistration.getDonationType())
                 .donationLocation(donationEvent.getAddress() + ", " +

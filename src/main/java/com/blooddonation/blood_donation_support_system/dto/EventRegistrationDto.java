@@ -2,7 +2,7 @@ package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.AllArgsConstructor;
@@ -31,5 +31,5 @@ public class EventRegistrationDto {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate registrationDate;
 
-    private Status status;
+    private DonationRegistrationStatus status;
 }

@@ -2,7 +2,7 @@ package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
 import com.blooddonation.blood_donation_support_system.enums.Gender;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.ProfileStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -55,7 +55,7 @@ public class ProfileDto {
     private LocalDate nextEligibleDonationDate;
 
     @NotNull(message = "Status is required")
-    private Status status;
+    private ProfileStatus status;
 
     @Pattern(regexp = "^[0-9]{12}$", message = "Personal ID must be 12 digits")
     private String personalId;

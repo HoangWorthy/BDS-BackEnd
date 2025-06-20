@@ -1,7 +1,7 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
+    import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
     import com.blooddonation.blood_donation_support_system.enums.Role;
-    import com.blooddonation.blood_donation_support_system.enums.Status;
     import jakarta.persistence.*;
     import jakarta.validation.constraints.NotBlank;
     import lombok.*;
@@ -39,5 +39,5 @@ package com.blooddonation.blood_donation_support_system.entity;
         private Role role;
 
         @Enumerated(EnumType.STRING)
-        private Status status = Status.ENABLE;
+        private AccountStatus status = AccountStatus.ENABLE;
     }

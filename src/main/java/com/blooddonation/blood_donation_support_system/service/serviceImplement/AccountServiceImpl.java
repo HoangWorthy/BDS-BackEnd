@@ -1,20 +1,12 @@
 package com.blooddonation.blood_donation_support_system.service.serviceImplement;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.DonationEventDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
+import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import com.blooddonation.blood_donation_support_system.enums.Role;
-import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
-import com.blooddonation.blood_donation_support_system.mapper.DonationEventMapper;
-import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
-import com.blooddonation.blood_donation_support_system.mapper.UserDonationHistoryMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
-import com.blooddonation.blood_donation_support_system.repository.EventRegistrationRepository;
-import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
 import com.blooddonation.blood_donation_support_system.service.AccountService;
-import com.blooddonation.blood_donation_support_system.service.EmailService;
-import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import com.blooddonation.blood_donation_support_system.validator.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,9 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -57,9 +46,9 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
         if (status.equals("DISABLE")) {
-            account.setStatus(Status.DISABLE);
+            account.setStatus(AccountStatus.DISABLE);
         } else if (status.equals("ENABLE")) {
-            account.setStatus(Status.ENABLE);
+            account.setStatus(AccountStatus.ENABLE);
         }
         Account savedAccount = accountRepository.save(account);
         return AccountMapper.toDto(savedAccount);

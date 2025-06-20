@@ -6,10 +6,7 @@ import com.blooddonation.blood_donation_support_system.dto.MedicalFacilityStockD
 import com.blooddonation.blood_donation_support_system.entity.BloodUnit;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.MedicalFacilityStock;
-import com.blooddonation.blood_donation_support_system.enums.BloodRequestStatus;
-import com.blooddonation.blood_donation_support_system.enums.BloodType;
-import com.blooddonation.blood_donation_support_system.enums.ComponentType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.*;
 import com.blooddonation.blood_donation_support_system.mapper.BloodRequestMapper;
 import com.blooddonation.blood_donation_support_system.mapper.MedicalFacilityStockMapper;
 import com.blooddonation.blood_donation_support_system.repository.BloodRequestRepository;
@@ -54,7 +51,7 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
             }
 
             // Update Blood Unit status to COMPLETED
-            bloodUnit.setStatus(Status.COMPLETED);
+            bloodUnit.setStatus(BloodUnitStatus.COMPLETED);
             bloodUnitRepository.save(bloodUnit);
         }
 

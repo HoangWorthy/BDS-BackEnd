@@ -3,8 +3,9 @@ package com.blooddonation.blood_donation_support_system.service.serviceImplement
 import com.blooddonation.blood_donation_support_system.dto.*;
 import com.blooddonation.blood_donation_support_system.entity.*;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import com.blooddonation.blood_donation_support_system.mapper.*;
 import com.blooddonation.blood_donation_support_system.repository.*;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
@@ -36,13 +37,7 @@ public class DonationEventServiceImpl implements DonationEventService {
     private BloodUnitRepository bloodUnitRepository;
 
     @Autowired
-    private DonationTimeSlotService donationTimeSlotService;
-
-    @Autowired
     private DonationEventValidator validator;
-
-    @Autowired
-    private AccountRepository accountRepository;
 
     @Autowired
     private ProfileRepository profileRepository;
@@ -116,7 +111,7 @@ public class DonationEventServiceImpl implements DonationEventService {
             recordSingleBloodDonation(record, event, profile);
         }
 
-        event.setStatus(Status.COMPLETED);
+        event.setStatus(DonationEventStatus.COMPLETED);
         donationEventRepository.save(event);
         return String.format("Successfully recorded %d blood donation(s)", records.size());
     }
@@ -125,7 +120,7 @@ public class DonationEventServiceImpl implements DonationEventService {
     public void recordSingleBloodDonation(@Valid SingleBloodUnitRecordDto record, DonationEvent event, Profile profile) {
         EventRegistration registration = eventRegistrationRepository.findByEventAndProfileId(event, profile)
                 .orElseThrow(() -> new RuntimeException(String.format("User profile %s is not registered for this event", profile.getId())));
-        if (registration.getStatus() != Status.CHECKED_IN) {
+        if (registration.getStatus() != DonationRegistrationStatus.CHECKED_IN) {
             throw new RuntimeException(String.format("User profile %s is not checked in for this event", profile.getId()));
         }
 
@@ -144,7 +139,7 @@ public class DonationEventServiceImpl implements DonationEventService {
         profileRepository.save(profile);
         bloodUnitRepository.save(bloodUnit);
 
-        registration.setStatus(Status.COMPLETED);
+        registration.setStatus(DonationRegistrationStatus.COMPLETED);
         eventRegistrationRepository.save(registration);
     }
 
@@ -168,7 +163,7 @@ public class DonationEventServiceImpl implements DonationEventService {
 
         // Use a custom repository method to exclude CANCELLED
         Page<EventRegistration> registrations = eventRegistrationRepository.findByEventIdAndStatusNot(
-                eventId, Status.CANCELLED, pageable
+                eventId, DonationRegistrationStatus.CANCELLED, pageable
         );
 
         return registrations.map(registration -> {
@@ -182,7 +177,7 @@ public class DonationEventServiceImpl implements DonationEventService {
 
     public List<ProfileDto> getEventDonorProfiles(Long eventId) {
         return eventRegistrationRepository.findByEventId(eventId).stream()
-                .filter(registration -> !Status.CANCELLED.equals(registration.getStatus()))
+                .filter(registration -> !DonationRegistrationStatus.CANCELLED.equals(registration.getStatus()))
                 .map(EventRegistration::getProfileId)
                 .map(profileId -> profileRepository.findById(profileId.getId())
                         .orElseThrow(() -> new RuntimeException("Profile not found: " + profileId)))

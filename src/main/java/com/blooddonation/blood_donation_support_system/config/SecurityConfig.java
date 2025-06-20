@@ -76,6 +76,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/donation-event/my-donations/**").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/**").permitAll()
                         .requestMatchers("/api/medical-facility-stock/**").hasRole("STAFF")
+                        .requestMatchers(("/api/blog/list-blogs/**")).hasRole("ADMIN")
+                        .requestMatchers(("/api/blog/my-blogs/**")).hasRole("STAFF")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

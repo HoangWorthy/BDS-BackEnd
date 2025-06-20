@@ -1,8 +1,8 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
+import com.blooddonation.blood_donation_support_system.enums.BloodUnitStatus;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,7 +44,7 @@ public class BloodUnit {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private BloodUnitStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blood_request_id", nullable = true)

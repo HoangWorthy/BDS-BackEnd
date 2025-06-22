@@ -6,6 +6,8 @@ import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.DonationTimeSlot;
 import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
+import com.blooddonation.blood_donation_support_system.entity.Organizer;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -13,8 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class DonationEventMapper {
-
+public class DonationEventMapper {    
     public static DonationEventDto toDto(DonationEvent event) {
         if (event == null) return null;
 
@@ -35,18 +36,22 @@ public class DonationEventMapper {
                 .city(event.getCity())
                 .organizer(event.getOrganizer())
                 .donationDate(event.getDonationDate())
-                .registeredMemberCount(0) // Default value
+                .registeredMemberCount(event.getRegisteredMemberCount()) // Use actual value from entity
                 .totalMemberCount(event.getTotalMemberCount())
                 .status(event.getStatus())
                 .donationType(event.getDonationType())
                 .accountId(event.getAccount() != null ? event.getAccount().getId() : null)
+                .organizer(event.getOrganizer() != null ? OrganizerMapper.toDto(event.getOrganizer()) : null)
                 .createdDate(LocalDate.now())
                 .timeSlotDtos(slots) // Set the timeSlotDtos here
                 .build();
     }
 
-
     public static DonationEvent toEntity(DonationEventDto dto, Account account) {
+        return toEntity(dto, account, null);
+    }
+
+    public static DonationEvent toEntity(DonationEventDto dto, Account account, Organizer organizer) {
         if (dto == null) return null;
 
         return DonationEvent.builder()
@@ -59,16 +64,15 @@ public class DonationEventMapper {
                 .city(dto.getCity())
                 .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
-                .registeredMemberCount(0) // Default value
+                .registeredMemberCount(dto.getRegisteredMemberCount() != null ? dto.getRegisteredMemberCount() : 0) // Use value from DTO or default to 0
                 .totalMemberCount(dto.getTotalMemberCount())
                 .status(dto.getStatus())
                 .donationType(dto.getDonationType())
                 .account(account)
+                .organizer(organizer)
                 .createdDate(LocalDate.now())
                 .build();
-    }
-
-    public static DonationEvent createDonation(DonationEventDto dto, Account account) {
+    }    public static DonationEvent createDonation(DonationEventDto dto, Account account) {
         if (dto == null) return null;
 
         return DonationEvent.builder()
@@ -81,19 +85,21 @@ public class DonationEventMapper {
                 .city(dto.getCity())
                 .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
-                .registeredMemberCount(0) // Default value
+                .registeredMemberCount(0) // Always 0 for new events
                 .totalMemberCount(dto.getTotalMemberCount())
                 .status(DonationEventStatus.AVAILABLE)
                 .donationType(dto.getDonationType())
                 .account(account)
+                .organizer(dto.getOrganizer() != null ? OrganizerMapper.toEntity(dto.getOrganizer(), account) : null)
                 .createdDate(LocalDate.now())
                 .build();
     }
-
     public static DonationEvent updateDonation(DonationEventDto dto, Account account, Long originalId) {
-        if (dto == null) return null;
+        return updateDonation(dto, account, originalId, null);
+    }
 
-        DonationEvent event = DonationEvent.builder()
+    public static DonationEvent updateDonation(DonationEventDto dto, Account account, Long originalId, Organizer organizer) {
+        if (dto == null) return null;        DonationEvent event = DonationEvent.builder()
                 .id(originalId)
                 .name(dto.getName())
                 .hospital(dto.getHospital())
@@ -103,11 +109,12 @@ public class DonationEventMapper {
                 .city(dto.getCity())
                 .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
-                .registeredMemberCount(0)
+                .registeredMemberCount(dto.getRegisteredMemberCount() != null ? dto.getRegisteredMemberCount() : 0) // Preserve existing count
                 .totalMemberCount(dto.getTotalMemberCount())
                 .status(DonationEventStatus.AVAILABLE)
                 .donationType(dto.getDonationType())
                 .account(account)
+                .organizer(organizer)
                 .createdDate(LocalDate.now())
                 .build();
 

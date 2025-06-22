@@ -78,12 +78,12 @@ public class DonationEventValidator {
 
         Account account = accountRepository.findById(profile.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found for personal ID: " + personalId));
-        return eventRegistrationRepository.findByAccountAndEventAndStatus(account, event, DonationRegistrationStatus.PENDING)
+        return eventRegistrationRepository.findByEventAndAccount(event, account)
                 .orElseThrow(() -> new RuntimeException("No pending registration found for personal ID: " + personalId));
     }
 
     public void validateEventVerification(String action) {
-        if (!action.equals("approve") && !action.equals("reject")) {
+        if (!action.equalsIgnoreCase("approve") && !action.equalsIgnoreCase("reject")) {
             throw new RuntimeException("Invalid action: " + action);
         }
     }
@@ -124,10 +124,10 @@ public class DonationEventValidator {
         }
 
         // Check registration deadline
-        if (event.getDonationDate().minusDays(1).isBefore(LocalDate.now()) ||
-                event.getDonationDate().minusDays(1).isEqual(LocalDate.now())) {
-            throw new RuntimeException("Registration is closed. You cannot register one day before the event.");
-        }
+//        if (event.getDonationDate().minusDays(1).isBefore(LocalDate.now()) ||
+//                event.getDonationDate().minusDays(1).isEqual(LocalDate.now())) {
+//            throw new RuntimeException("Registration is closed. You cannot register one day before the event.");
+//        }
 
         // Check event capacity
         if (event.getRegisteredMemberCount() >= event.getTotalMemberCount()) {

@@ -63,11 +63,13 @@ public class DonationEvent {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private DonationType donationType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    private DonationType donationType;    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private Account account;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizer_id", nullable = true)
+    private Organizer organizer;
 
     @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")

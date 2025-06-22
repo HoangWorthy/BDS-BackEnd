@@ -20,4 +20,5 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     Optional<EventRegistration> findByAccountAndEventAndStatus(Account account, DonationEvent event, DonationRegistrationStatus donationRegistrationStatus);
     Page<EventRegistration> findByAccount(Account account, Pageable pageable);
     Page<EventRegistration> findByEventIdAndStatusNot(Long eventId, DonationRegistrationStatus donationRegistrationStatus, Pageable pageable);
+    Optional<EventRegistration> findByAccountAndEvent(Account account, DonationEvent event);
 }

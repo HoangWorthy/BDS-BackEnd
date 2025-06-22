@@ -62,6 +62,7 @@ public class EventRegistration {
     @JoinColumn(name = "checkin_token_id")
     private CheckinToken checkinToken;
 
+    @Column(columnDefinition = "TEXT")
     private String jsonForm;
 
 

@@ -50,6 +50,8 @@ public class DonationEventDto {
     @NotNull(message = "Donation type is required")
     private DonationType donationType;
     private Long accountId;
+    private Long organizerId;
+    private OrganizerDto organizer;
     @Valid
     @NotEmpty(message = "At least one time slot is required")
     private List<DonationTimeSlotDto> timeSlotDtos;

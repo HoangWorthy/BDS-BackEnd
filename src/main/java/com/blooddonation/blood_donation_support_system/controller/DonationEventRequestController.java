@@ -87,4 +87,31 @@ public class DonationEventRequestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @PutMapping("/update/{eventId}")
+    public ResponseEntity<String> updateDonationRequest(
+            @CookieValue("jwt-token") String token,
+            @PathVariable Long eventId,
+            @RequestBody @Valid DonationEventDto donationEventDto) {
+        try {
+            AccountDto staff = jwtUtil.extractUser(token);
+            String response = donationEventRequestService.updateDonationRequest(staff.getId(), eventId, donationEventDto);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{eventId}")
+    public ResponseEntity<String> deleteDonationRequest(
+            @CookieValue("jwt-token") String token,
+            @PathVariable Long eventId) {
+        try {
+            AccountDto staff = jwtUtil.extractUser(token);
+            String response = donationEventRequestService.deleteDonationRequest(staff.getId(), eventId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

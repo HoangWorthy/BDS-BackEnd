@@ -60,10 +60,10 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         CheckinTokenDto tokenDto = checkinTokenService.generateTokenForProfile(profile, donationEvent);
 
         // Generate QR code URL and image
-        String qrUrl = String.format("http://localhost:8080/api/checkin/info/%d?checkinToken=%s", eventId, tokenDto.getToken());
+//        String qrUrl = String.format("http://localhost:8080/api/checkin/info/%d?checkinToken=%s", eventId, tokenDto.getToken());
         try {
-            byte[] qrCode = qrCodeService.generateQRCode(qrUrl);
-            registration.setQrCode(qrCode);
+//            byte[] qrCode = qrCodeService.generateQRCode(qrUrl);
+//            registration.setQrCode(qrCode);
             CheckinToken checkinToken = CheckinTokenMapper.toEntity(tokenDto);
             registration.setCheckinToken(checkinToken);
             eventRegistrationRepository.save(registration);
@@ -159,13 +159,12 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         validator.validateCheckinVerification(action);
         // Fetch Data
         DonationEvent event = validator.getEventOrThrow(eventId);
-        EventRegistration registration = validator.getRegistrationOrThrow(profileDto.getPersonalId(), event);
-
-        if (action.equals("approve")) {
+        EventRegistration registration = validator.getRegistrationOrThrow(profileDto.getPersonalId(), event);        if (action.equals("approve")) {
             registration.setStatus(Status.CHECKED_IN);
             eventRegistrationRepository.save(registration);
         } else if (action.equals("reject")) {
             registration.setStatus(Status.REJECTED);
+            eventRegistrationRepository.save(registration);
         }
         return "Checked-in " + action + " successfully";
     }

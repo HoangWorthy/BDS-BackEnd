@@ -1,10 +1,8 @@
 package com.blooddonation.blood_donation_support_system.controller;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.dto.ProfileWithFormResponseDto;
 import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
-import com.blooddonation.blood_donation_support_system.service.DonationEventService;
 import com.blooddonation.blood_donation_support_system.service.EventRegistrationService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/checkin")
@@ -23,9 +23,7 @@ public class CheckInController {
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private CheckinTokenService checkinTokenService;
-
-    @GetMapping("/{eventId}/qr-code")
+    private CheckinTokenService checkinTokenService;    @GetMapping("/{eventId}/qr-code")
     public ResponseEntity<Object> getUserQRCode(
             @PathVariable Long eventId,
             @CookieValue("jwt-token") String token) {
@@ -40,6 +38,22 @@ public class CheckInController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while retrieving QR Code");
+        }
+    }
+
+    @GetMapping("/{eventId}/checkin-token")
+    public ResponseEntity<Object> getCheckinToken(
+            @PathVariable Long eventId,
+            @CookieValue("jwt-token") String token) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(token);
+            String checkinToken = checkinTokenService.generateTokenForUser(eventId, accountDto.getEmail());
+            return ResponseEntity.ok().body(Map.of("checkinToken", checkinToken));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while generating checkin token");
         }
     }
 

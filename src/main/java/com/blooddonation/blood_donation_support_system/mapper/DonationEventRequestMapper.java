@@ -6,7 +6,7 @@ import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.DonationEventRequest;
 import com.blooddonation.blood_donation_support_system.enums.CRUDType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRequestStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -52,7 +52,7 @@ public class DonationEventRequestMapper {
                 .id(eventDto.getId())
                 .account(account)
                 .newDonationEventDto(eventDto)
-                .status(Status.PENDING)
+                .status(DonationRequestStatus.PENDING)
                 .crudType(CRUDType.CREATE)
                 .build();
     }
@@ -68,7 +68,7 @@ public class DonationEventRequestMapper {
                 .donationEvent(donationEvent)
                 .newDonationEventDto(eventDto)
                 .oldDonationEventDto(DonationEventMapper.toDto(donationEvent))
-                .status(Status.PENDING)
+                .status(DonationRequestStatus.PENDING)
                 .crudType(CRUDType.UPDATE)
                 .build();
     }
@@ -84,7 +84,7 @@ public class DonationEventRequestMapper {
                 .account(account)
                 .oldDonationEventDto(eventDto)
                 .newDonationEventDto(null)
-                .status(Status.PENDING)
+                .status(DonationRequestStatus.PENDING)
                 .crudType(CRUDType.DELETE)
                 .build();
     }

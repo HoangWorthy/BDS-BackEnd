@@ -1,10 +1,9 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.BloodUnitDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.dto.SingleBloodUnitRecordDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.BloodUnitStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -66,7 +65,7 @@ public class BloodUnitMapper {
                 .event(event)
                 .volume(dto.getVolume())
                 .bloodType(profile.getBloodType())
-                .status(Status.PENDING)
+                .status(BloodUnitStatus.PENDING)
                 .build();
     }
 

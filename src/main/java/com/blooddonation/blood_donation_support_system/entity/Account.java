@@ -1,10 +1,12 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
-import com.blooddonation.blood_donation_support_system.enums.Role;
-import com.blooddonation.blood_donation_support_system.enums.Status;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+
+    import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
+    import com.blooddonation.blood_donation_support_system.enums.Role;
+    import jakarta.persistence.*;
+    import jakarta.validation.constraints.NotBlank;
+    import lombok.*;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,7 @@ public class Account {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.ENABLE;
+    private AccountStatus status = AccountStatus.ENABLE;
 
     @Column(name = "avatar", columnDefinition = "TEXT")
     private String avatar;

@@ -1,7 +1,7 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +36,8 @@ public class DonationEvent {
 
     private String city;
 
+    private String organizer;
+
     @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate donationDate;
@@ -57,7 +59,7 @@ public class DonationEvent {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private DonationEventStatus status;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

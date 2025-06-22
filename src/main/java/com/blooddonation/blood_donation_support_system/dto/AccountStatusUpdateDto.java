@@ -1,6 +1,6 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -11,5 +11,5 @@ import lombok.*;
 @AllArgsConstructor
 public class AccountStatusUpdateDto {
     @NotNull(message = "Status is required")
-    private Status status;
+    private DonationRegistrationStatus donationRegistrationStatus;
 }

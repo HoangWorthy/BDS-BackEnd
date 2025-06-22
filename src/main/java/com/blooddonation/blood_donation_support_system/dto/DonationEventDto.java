@@ -1,7 +1,7 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import com.blooddonation.blood_donation_support_system.enums.DonationType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -39,12 +38,15 @@ public class DonationEventDto {
     @NotBlank(message = "City cannot be blank")
     private String city;
 
+    @NotBlank(message = "Organizer cannot be blank")
+    private String organizer;
+
     private Integer registeredMemberCount;
 
     @NotNull(message = "Total member count is required")
     @Min(value = 1, message = "Total member count must be at least 1")
     private Integer totalMemberCount;
-    private Status status;    
+    private DonationEventStatus status;
     @NotNull(message = "Donation type is required")
     private DonationType donationType;
     private Long accountId;

@@ -1,7 +1,7 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.CRUDType;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRequestStatus;
 import lombok.*;
 
 @Data
@@ -14,6 +14,6 @@ public class DonationEventRequestDto {
     private Long authorId;
     private DonationEventDto oldDonationEventDto;
     private DonationEventDto newDonationEventDto;
-    private Status status;
+    private DonationRequestStatus status;
     private CRUDType crudType;
 }

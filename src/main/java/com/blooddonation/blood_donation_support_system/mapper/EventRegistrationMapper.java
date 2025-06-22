@@ -2,7 +2,7 @@ package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.EventRegistrationDto;
 import com.blooddonation.blood_donation_support_system.entity.*;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -60,7 +60,7 @@ public class EventRegistrationMapper {
                 .profileId(profile)
                 .donationType(event.getDonationType())
                 .bloodType(profile.getBloodType())
-                .status(Status.CHECKED_IN)
+                .status(DonationRegistrationStatus.CHECKED_IN)
                 .jsonForm(jsonForm)
                 .build();
     }
@@ -74,7 +74,7 @@ public class EventRegistrationMapper {
                 .registrationDate(LocalDate.now())
                 .bloodType(member.getProfile().getBloodType())
                 .donationType(event.getDonationType())
-                .status(Status.CHECKED_IN)
+                .status(DonationRegistrationStatus.CHECKED_IN)
                 .profileId(member.getProfile())
                 .jsonForm(jsonForm)
                 .build();

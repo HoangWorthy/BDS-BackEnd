@@ -1,10 +1,9 @@
 package com.blooddonation.blood_donation_support_system.mapper;
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
+import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import com.blooddonation.blood_donation_support_system.enums.Role;
-import com.blooddonation.blood_donation_support_system.enums.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -35,7 +34,7 @@ public class    AccountMapper {
                 .email(accountDto.getEmail())
                 .password(accountDto.getPassword())
                 .role(Role.MEMBER)
-                .status(Status.ENABLE)
+                .status(AccountStatus.ENABLE)
                 .avatar(accountDto.getAvatar())
                 .build();
     }

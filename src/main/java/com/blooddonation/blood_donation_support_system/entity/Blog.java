@@ -1,6 +1,7 @@
 package com.blooddonation.blood_donation_support_system.entity;
 
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.BlogStatus;
+import com.blooddonation.blood_donation_support_system.enums.DonationRegistrationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +20,7 @@ public class Blog {
     private Long id;
     private String title;
 
-    @Lob
+//    @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
 
@@ -30,7 +31,7 @@ public class Blog {
     private Account author;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private BlogStatus status;
     private LocalDate creationDate;
     private LocalDate lastModifiedDate;
 
@@ -38,12 +39,11 @@ public class Blog {
     protected void onCreate() {
         creationDate = LocalDate.now();
         lastModifiedDate = LocalDate.now();
-        status = Status.PENDING;
+        status = BlogStatus.ACTIVE;
     }
 
     @PreUpdate
     protected void onUpdate() {
         lastModifiedDate = LocalDate.now();
-        status = Status.PENDING;
     }
 }

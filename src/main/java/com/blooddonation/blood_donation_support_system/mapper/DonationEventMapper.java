@@ -5,6 +5,7 @@ import com.blooddonation.blood_donation_support_system.dto.DonationTimeSlotDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.DonationTimeSlot;
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import com.blooddonation.blood_donation_support_system.entity.Organizer;
 import com.blooddonation.blood_donation_support_system.enums.Status;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public class DonationEventMapper {
                 .ward(event.getWard())
                 .district(event.getDistrict())
                 .city(event.getCity())
+                .organizer(event.getOrganizer())
                 .donationDate(event.getDonationDate())
                 .registeredMemberCount(event.getRegisteredMemberCount()) // Use actual value from entity
                 .totalMemberCount(event.getTotalMemberCount())
@@ -60,6 +62,7 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
+                .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(dto.getRegisteredMemberCount() != null ? dto.getRegisteredMemberCount() : 0) // Use value from DTO or default to 0
                 .totalMemberCount(dto.getTotalMemberCount())
@@ -80,10 +83,11 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
+                .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(0) // Always 0 for new events
                 .totalMemberCount(dto.getTotalMemberCount())
-                .status(Status.APPROVED)
+                .status(DonationEventStatus.AVAILABLE)
                 .donationType(dto.getDonationType())
                 .account(account)
                 .organizer(dto.getOrganizer() != null ? OrganizerMapper.toEntity(dto.getOrganizer(), account) : null)
@@ -103,10 +107,11 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
+                .organizer(dto.getOrganizer())
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(dto.getRegisteredMemberCount() != null ? dto.getRegisteredMemberCount() : 0) // Preserve existing count
                 .totalMemberCount(dto.getTotalMemberCount())
-                .status(Status.APPROVED)
+                .status(DonationEventStatus.AVAILABLE)
                 .donationType(dto.getDonationType())
                 .account(account)
                 .organizer(organizer)

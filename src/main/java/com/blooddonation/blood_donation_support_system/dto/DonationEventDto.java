@@ -44,10 +44,12 @@ public class DonationEventDto {
     @NotNull(message = "Total member count is required")
     @Min(value = 1, message = "Total member count must be at least 1")
     private Integer totalMemberCount;
-    private Status status;
+    private Status status;    
     @NotNull(message = "Donation type is required")
     private DonationType donationType;
     private Long accountId;
+    private Long organizerId;
+    private OrganizerDto organizer;
     @Valid
     @NotEmpty(message = "At least one time slot is required")
     private List<DonationTimeSlotDto> timeSlotDtos;

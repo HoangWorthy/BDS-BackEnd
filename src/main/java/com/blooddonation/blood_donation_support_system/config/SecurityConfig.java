@@ -32,15 +32,17 @@ public class SecurityConfig {
     @Autowired
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
+    public SecurityConfig(JwtUtil jwtUtil, JwtFilter jwtFilter, OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+        this.jwtUtil = jwtUtil;
+        this.jwtFilter = jwtFilter;
+        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
 
-    @Bean
-    public OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler() {
-        return new OAuth2LoginSuccessHandler(jwtUtil);
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
@@ -65,12 +67,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/account/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
                         .requestMatchers("/api/user/profile/list-profile/{accountId}", "/api/user/profile/list-profile", "/api/user/profile/list-profile/{accountId}/history").hasRole("ADMIN")
                         .requestMatchers("/api/user/profile/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
-                        .requestMatchers("/api/checkin/{eventId}/qr-code").hasRole("MEMBER")
+                        .requestMatchers("/api/checkin/{eventId}/qr-code").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/checkin/info/{eventId}","/api/checkin/action/{eventId}").hasRole("STAFF")
                         .requestMatchers("/api/event-registration/{eventId}/registerOffline", "/api/event-registration/{eventId}/register-guest").hasRole("STAFF")
                         .requestMatchers("/api/event-registration/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
                         .requestMatchers("/api/donation-event-request/pending/**").hasRole("ADMIN")
-                        .requestMatchers("/api/donation-event-request/**").hasRole("STAFF")
+                        .requestMatchers("/api/donation-event-request/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/api/donation-event/create", "/api/donation-event/list-donation/{eventId}/record-donations", "/api/donation-event/list-donation/{eventId}/time-slots/{timeSlotId}/donors", "/api/donation-event/list-donation/{eventId}/donors").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/list-donation/{eventId}/status").hasRole("ADMIN")
                         .requestMatchers("/api/donation-event/my-donations/**").hasRole("STAFF")
@@ -80,7 +82,7 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2LoginSuccessHandler())
+                        .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter().write("{\"error\":\"OAuth2 authentication failed\"}, " + exception.getMessage() + "}");

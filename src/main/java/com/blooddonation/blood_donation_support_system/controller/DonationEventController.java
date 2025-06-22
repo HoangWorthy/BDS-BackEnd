@@ -39,7 +39,7 @@ public class DonationEventController {
         }
     }
 
-    @GetMapping("my-donations")
+    @GetMapping("/my-donations")
     public ResponseEntity<Page<DonationEventDto>> getDonationByAccount(
             @CookieValue("jwt-token") String token,
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -51,7 +51,7 @@ public class DonationEventController {
         return ResponseEntity.ok(events);
     }
 
-    @GetMapping("my-donations/{eventId}")
+    @GetMapping("/my-donations/{eventId}")
     public ResponseEntity<Object> getEventDetailsByAccount(
             @CookieValue("jwt-token") String token,
             @PathVariable Long eventId) {
@@ -64,7 +64,7 @@ public class DonationEventController {
         }
     }
 
-    @PostMapping("my-donations/{eventId}/update")
+    @PostMapping("/my-donations/{eventId}/update")
     public ResponseEntity<String> updateDonationEvent(
             @CookieValue("jwt-token") String token,
             @PathVariable Long eventId,
@@ -80,7 +80,7 @@ public class DonationEventController {
         }
     }
 
-    @PostMapping("my-donations/{eventId}/delete")
+    @PostMapping("/my-donations/{eventId}/delete")
     public ResponseEntity<String> deleteDonationEvent(
             @CookieValue("jwt-token") String token,
             @PathVariable Long eventId) {

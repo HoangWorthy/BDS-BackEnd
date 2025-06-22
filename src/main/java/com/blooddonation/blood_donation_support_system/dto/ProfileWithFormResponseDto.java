@@ -1,6 +1,6 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
-import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.blooddonation.blood_donation_support_system.enums.Status;
 import lombok.*;
 
 @Builder
@@ -10,6 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 public class ProfileWithFormResponseDto {
     private ProfileDto profile;
-    @JsonRawValue
     private String jsonForm;
+    private Status status;
 }

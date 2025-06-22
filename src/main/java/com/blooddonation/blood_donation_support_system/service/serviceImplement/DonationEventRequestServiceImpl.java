@@ -79,7 +79,7 @@ public class DonationEventRequestServiceImpl implements DonationEventRequestServ
         }
         validator.validateEventVerification(action);
 
-        if (action.equals("reject")) {
+        if (action.equalsIgnoreCase("reject")) {
             request.setStatus(Status.REJECTED);
             donationEventRequestRepository.save(request);
             return "Donation request rejected";

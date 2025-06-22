@@ -7,7 +7,7 @@ import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.entity.DonationTimeSlot;
 import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import com.blooddonation.blood_donation_support_system.entity.Organizer;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import org.apache.catalina.mapper.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -34,7 +34,7 @@ public class DonationEventMapper {
                 .ward(event.getWard())
                 .district(event.getDistrict())
                 .city(event.getCity())
-                .organizer(event.getOrganizer())
+                .organizer(OrganizerMapper.toDto(event.getOrganizer()))
                 .donationDate(event.getDonationDate())
                 .registeredMemberCount(event.getRegisteredMemberCount()) // Use actual value from entity
                 .totalMemberCount(event.getTotalMemberCount())
@@ -62,7 +62,7 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
-                .organizer(dto.getOrganizer())
+                .organizer(OrganizerMapper.toEntity(dto.getOrganizer(), account))
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(dto.getRegisteredMemberCount() != null ? dto.getRegisteredMemberCount() : 0) // Use value from DTO or default to 0
                 .totalMemberCount(dto.getTotalMemberCount())
@@ -83,7 +83,7 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
-                .organizer(dto.getOrganizer())
+                .organizer(OrganizerMapper.toEntity(dto.getOrganizer(), account))
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(0) // Always 0 for new events
                 .totalMemberCount(dto.getTotalMemberCount())
@@ -107,7 +107,7 @@ public class DonationEventMapper {
                 .ward(dto.getWard())
                 .district(dto.getDistrict())
                 .city(dto.getCity())
-                .organizer(dto.getOrganizer())
+                .organizer(OrganizerMapper.toEntity(dto.getOrganizer(), account))
                 .donationDate(dto.getDonationDate())
                 .registeredMemberCount(dto.getRegisteredMemberCount() != null ? dto.getRegisteredMemberCount() : 0) // Preserve existing count
                 .totalMemberCount(dto.getTotalMemberCount())

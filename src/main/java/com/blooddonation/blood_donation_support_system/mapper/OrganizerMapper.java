@@ -3,7 +3,8 @@ package com.blooddonation.blood_donation_support_system.mapper;
 import com.blooddonation.blood_donation_support_system.dto.OrganizerDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Organizer;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
+import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -33,7 +34,7 @@ public class OrganizerMapper {
                 .totalEventsOrganized(organizer.getDonationEvents() != null ? organizer.getDonationEvents().size() : 0)
                 .activeEventsCount(organizer.getDonationEvents() != null ? 
                     (int) organizer.getDonationEvents().stream()
-                        .filter(event -> event.getStatus() == Status.ENABLE)
+                        .filter(event -> event.getStatus() == DonationEventStatus.AVAILABLE)
                         .count() : 0)
                 .build();
     }
@@ -53,7 +54,7 @@ public class OrganizerMapper {
                 .city(dto.getCity())
                 .description(dto.getDescription())
                 .websiteUrl(dto.getWebsiteUrl())
-                .status(dto.getStatus() != null ? dto.getStatus() : Status.ENABLE)
+                .status(dto.getStatus() != null ? dto.getStatus() : AccountStatus.ENABLE)
                 .createdBy(createdByAccount)
                 .createdDate(dto.getCreatedDate() != null ? dto.getCreatedDate() : LocalDateTime.now())
                 .updatedDate(dto.getUpdatedDate() != null ? dto.getUpdatedDate() : LocalDateTime.now())

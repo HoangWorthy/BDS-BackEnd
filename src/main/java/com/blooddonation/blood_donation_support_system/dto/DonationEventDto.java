@@ -38,9 +38,6 @@ public class DonationEventDto {
     @NotBlank(message = "City cannot be blank")
     private String city;
 
-    @NotBlank(message = "Organizer cannot be blank")
-    private String organizer;
-
     private Integer registeredMemberCount;
 
     @NotNull(message = "Total member count is required")

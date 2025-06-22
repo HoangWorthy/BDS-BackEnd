@@ -3,7 +3,7 @@ package com.blooddonation.blood_donation_support_system.service;
 import com.blooddonation.blood_donation_support_system.dto.OrganizerDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Organizer;
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import com.blooddonation.blood_donation_support_system.exception.ResourceNotFoundException;
 import com.blooddonation.blood_donation_support_system.mapper.OrganizerMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
@@ -40,14 +40,14 @@ public class OrganizerService {
 
     @Transactional(readOnly = true)
     public List<OrganizerDto> getActiveOrganizers() {
-        return organizerRepository.findByStatus(Status.ENABLE).stream()
+        return organizerRepository.findByStatus(AccountStatus.ENABLE).stream()
                 .map(OrganizerMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public Page<OrganizerDto> getActiveOrganizers(Pageable pageable) {
-        return organizerRepository.findByStatus(Status.ENABLE, pageable)
+        return organizerRepository.findByStatus(AccountStatus.ENABLE, pageable)
                 .map(OrganizerMapper::toDto);
     }
 
@@ -104,7 +104,7 @@ public class OrganizerService {
         long eventCount = organizerRepository.countEventsByOrganizerId(id);
         if (eventCount > 0) {
             // Soft delete by setting status to DISABLE
-            organizer.setStatus(Status.DISABLE);
+            organizer.setStatus(AccountStatus.DISABLE);
             organizerRepository.save(organizer);
         } else {
             // Hard delete if no associated events
@@ -116,7 +116,7 @@ public class OrganizerService {
         Organizer organizer = organizerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organizer not found with id: " + id));
         
-        organizer.setStatus(Status.ENABLE);
+        organizer.setStatus(AccountStatus.ENABLE);
         organizer = organizerRepository.save(organizer);
         
         return OrganizerMapper.toDto(organizer);
@@ -126,14 +126,14 @@ public class OrganizerService {
         Organizer organizer = organizerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organizer not found with id: " + id));
         
-        organizer.setStatus(Status.DISABLE);
+        organizer.setStatus(AccountStatus.DISABLE);
         organizer = organizerRepository.save(organizer);
         
         return OrganizerMapper.toDto(organizer);
     }
 
     @Transactional(readOnly = true)
-    public Page<OrganizerDto> searchOrganizers(String searchTerm, Status status, Pageable pageable) {
+    public Page<OrganizerDto> searchOrganizers(String searchTerm, AccountStatus status, Pageable pageable) {
         Page<Organizer> organizers;
         
         if (status != null && searchTerm != null && !searchTerm.trim().isEmpty()) {
@@ -151,14 +151,14 @@ public class OrganizerService {
 
     @Transactional(readOnly = true)
     public List<OrganizerDto> getOrganizersByCity(String city) {
-        return organizerRepository.findByCityAndStatus(city, Status.ENABLE).stream()
+        return organizerRepository.findByCityAndStatus(city, AccountStatus.ENABLE).stream()
                 .map(OrganizerMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<OrganizerDto> getOrganizersByCreatedBy(Long accountId) {
-        return organizerRepository.findByCreatedByAccountIdAndStatus(accountId, Status.ENABLE).stream()
+        return organizerRepository.findByCreatedByAccountIdAndStatus(accountId, AccountStatus.ENABLE).stream()
                 .map(OrganizerMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -175,6 +175,6 @@ public class OrganizerService {
 
     @Transactional(readOnly = true)
     public long getActiveOrganizersCount() {
-        return organizerRepository.countByStatus(Status.ENABLE);
+        return organizerRepository.countByStatus(AccountStatus.ENABLE);
     }
 }

@@ -1,6 +1,6 @@
 package com.blooddonation.blood_donation_support_system.dto;
 
-import com.blooddonation.blood_donation_support_system.enums.Status;
+import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public class OrganizerDto {
     private String city;
     private String description;
     private String websiteUrl;
-    private Status status;
+    private AccountStatus status;
     private Long createdBy;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;

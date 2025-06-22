@@ -36,8 +36,6 @@ public class DonationEvent {
 
     private String city;
 
-    private String organizer;
-
     @Column(nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate donationDate;

@@ -13,18 +13,29 @@ public class    AccountMapper {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public static AccountDto toDto(Account account) {
-        if (account == null) return null;
+//    public static AccountDto toDto(Account account) {
+//        if (account == null) return null;
+//
+//        return AccountDto.builder()
+//                .id(account.getId())
+//                .email(account.getEmail())
+//                .password(account.getPassword())
+//                .role(account.getRole())
+//                .status(account.getStatus())
+//                .avatar(account.getAvatar())
+//                .build();
+//    }
 
-        return AccountDto.builder()
-                .id(account.getId())
-                .email(account.getEmail())
-                .password(account.getPassword())
-                .role(account.getRole())
-                .status(account.getStatus())
-                .avatar(account.getAvatar())
-                .build();
-    }
+//    public static AccountDto toDto(Long id, String email, String password, Role role, AccountStatus status, String avatar) {
+//        return AccountDto.builder()
+//                .id(id)
+//                .email(email)
+//                .password(password)
+//                .role(role)
+//                .status(status)
+//                .avatar(avatar)
+//                .build();
+//    }
 
     public static Account toEntity(AccountDto accountDto) {
         if (accountDto == null) return null;

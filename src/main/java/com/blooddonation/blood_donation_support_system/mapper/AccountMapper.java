@@ -26,16 +26,16 @@ public class    AccountMapper {
 //                .build();
 //    }
 
-//    public static AccountDto toDto(Long id, String email, String password, Role role, AccountStatus status, String avatar) {
-//        return AccountDto.builder()
-//                .id(id)
-//                .email(email)
-//                .password(password)
-//                .role(role)
-//                .status(status)
-//                .avatar(avatar)
-//                .build();
-//    }
+    public static AccountDto toDto(Long id, String email, String password, Role role, AccountStatus status, String avatar) {
+        return AccountDto.builder()
+                .id(id)
+                .email(email)
+                .password(password)
+                .role(role)
+                .status(status)
+                .avatar(avatar)
+                .build();
+    }
 
     public static Account toEntity(AccountDto accountDto) {
         if (accountDto == null) return null;
